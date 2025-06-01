@@ -18,7 +18,8 @@ class AdService {
   }
 
   Future<List<AdModel>> fetchAdsByCategory(int categoryId) async {
-    final url = Uri.parse('${ApiRoutes.baseUrl}/ads/public-city/1/category/$categoryId');
+    final url = Uri.parse(
+        '${ApiRoutes.baseUrl}/ads/public-city/1/category/$categoryId');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -26,7 +27,8 @@ class AdService {
       print('fetchAdsByCategory($categoryId): ${data.length} объявлений');
       return data.map((json) => AdModel.fromJson(json)).toList();
     } else {
-      throw Exception('Ошибка при загрузке объявлений по категории: ${response.statusCode}');
+      throw Exception(
+          'Ошибка при загрузке объявлений по категории: ${response.statusCode}');
     }
   }
 
@@ -40,5 +42,24 @@ class AdService {
     } else {
       throw Exception('Ошибка при загрузке объявления: ${response.statusCode}');
     }
+  }
+
+  Future<List<AdModel>> fetchFavoriteAds(Set<String> favoriteIds) async {
+    if (favoriteIds.isEmpty) {
+      return [];
+    }
+
+    final List<AdModel> favoriteAds = [];
+    for (final id in favoriteIds) {
+      try {
+        final ad = await fetchAdById(int.parse(id));
+        favoriteAds.add(ad);
+      } catch (e) {
+        print('Ошибка при загрузке объявления $id: $e');
+        // Пропускаем ошибочные объявления
+        continue;
+      }
+    }
+    return favoriteAds;
   }
 }

@@ -18,10 +18,14 @@ class AdFeed extends StatefulWidget {
   State<AdFeed> createState() => _AdFeedState();
 }
 
-class _AdFeedState extends State<AdFeed> {
+class _AdFeedState extends State<AdFeed> with AutomaticKeepAliveClientMixin {
   List<AdModel> _ads = [];
   bool _isLoading = true;
-  final _refreshKey = GlobalKey<RefreshIndicatorState>();
+  bool _isError = false;
+  String _errorMessage = '';
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -38,7 +42,13 @@ class _AdFeedState extends State<AdFeed> {
   }
 
   Future<void> _loadAds() async {
-    setState(() => _isLoading = true);
+    if (!mounted) return;
+    
+    setState(() {
+      _isLoading = true;
+      _isError = false;
+      _errorMessage = '';
+    });
 
     final cityId = 1;
     final catId = widget.categoryId ?? 0;
@@ -48,6 +58,8 @@ class _AdFeedState extends State<AdFeed> {
 
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 10));
+
+      if (!mounted) return;
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
@@ -66,18 +78,27 @@ class _AdFeedState extends State<AdFeed> {
           _isLoading = false;
         });
       } else {
-        debugPrint('Ошибка сервера: ${response.statusCode}');
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _isError = true;
+          _errorMessage = 'Ошибка сервера: ${response.statusCode}';
+        });
+        debugPrint(_errorMessage);
       }
     } catch (e) {
-      debugPrint('‼ Ошибка при загрузке: $e');
-      setState(() => _isLoading = false);
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _isError = true;
+        _errorMessage = 'Ошибка при загрузке: $e';
+      });
+      debugPrint(_errorMessage);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).primaryColor;
+    super.build(context);
 
     if (_isLoading) {
       return const Expanded(
@@ -85,11 +106,27 @@ class _AdFeedState extends State<AdFeed> {
       );
     }
 
+    if (_isError) {
+      return Expanded(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_errorMessage, style: const TextStyle(color: Colors.red)),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadAds,
+                child: const Text('Повторить'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Expanded(
       child: RefreshIndicator(
-        key: _refreshKey,
         onRefresh: _loadAds,
-        color: primary,
         child: _ads.isEmpty
             ? ListView(
                 controller: widget.scrollController,

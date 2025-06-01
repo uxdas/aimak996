@@ -1,19 +1,21 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:projects/features/favorites/favorites_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:projects/core/widgets/theme_toggle_button.dart';
 
 class AppDrawer extends StatelessWidget {
   final bool isDark;
   final VoidCallback toggleTheme;
 
-  const AppDrawer({super.key, required this.isDark, required this.toggleTheme});
+  const AppDrawer({
+    super.key,
+    required this.isDark,
+    required this.toggleTheme,
+  });
 
   Future<void> _launchWhatsApp(String number) async {
     final uri = Uri.parse('https://wa.me/$number');
@@ -22,38 +24,41 @@ class AppDrawer extends StatelessWidget {
     }
   }
 
-  Widget _buildMenuButton({
+  Widget _buildDrawerItem({
+    required BuildContext context,
     required IconData icon,
-    required String labelKey,
+    required String title,
     required VoidCallback onTap,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Material(
-        color: isDark ? Colors.grey.shade800 : Colors.blue.shade100,
-        borderRadius: BorderRadius.circular(12),
+        color: isDarkMode
+            ? Colors.white.withOpacity(0.1)
+            : const Color(0xFFE8F0FE),
+        borderRadius: BorderRadius.circular(8),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           onTap: onTap,
           child: Container(
-            height: 52,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                FaIcon(icon,
-                    size: 20,
-                    color: isDark ? Colors.white : Colors.blue.shade900),
+                Icon(
+                  icon,
+                  size: 22,
+                  color: isDarkMode ? Colors.white : const Color(0xFF1E3A8A),
+                ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      labelKey.tr(),
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.blue.shade900,
-                        fontSize: 16,
-                      ),
-                    ),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: isDarkMode ? Colors.white : const Color(0xFF1E3A8A),
                   ),
                 ),
               ],
@@ -64,179 +69,172 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Future<void> _toggleLanguage(BuildContext context) async {
-    final currentLang = context.locale.languageCode;
-    final newLocale =
-        currentLang == 'ru' ? const Locale('ky') : const Locale('ru');
+  Widget _buildCircleButton(
+      BuildContext context, IconData icon, VoidCallback onTap) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    await context.setLocale(newLocale);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('locale', newLocale.languageCode);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      
-      child: Container(
-        color: isDark ? Colors.black : Colors.blue.shade50,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 286,
-              child: Stack(
-                children: [
-                  Image.asset(
-                    "assets/images/header_drawer.jpg",
-                    fit: BoxFit.fill,
-                    width: MediaQuery.sizeOf(context).width,
-                  ),
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: SizedBox(
-                        height: 25,
-                        width: 135,
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              side: const BorderSide(
-                                  color: Colors.white, width: 1),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18),
-                                  side: const BorderSide(color: Colors.white))),
-                          child: Stack(
-                            children: [
-                              SizedBox(
-                                height: 25,
-                                width: 135,
-                                child: Positioned.fill(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(18),
-                                    child: BackdropFilter(
-                                      filter: ImageFilter.blur(
-                                          sigmaX: 5, sigmaY: 5),
-                                      child: Container(
-                                        color: Colors.black.withOpacity(0.3),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Center(
-                                child: Text(
-                                  'Район жонундо',
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.0,
-                                    letterSpacing: 0.02,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Ноокат 996'.toUpperCase(),
-                style: GoogleFonts.jost(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  height: 1.0,
-                  letterSpacing: 0.02,
-                  textBaseline: TextBaseline.alphabetic,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Text(
-                '''Ноокат району үчүн 
-сатып алуу жана сатуу
-мобилдик тиркеме ''',
-                style: GoogleFonts.jost(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  height: 1.5,
-                  letterSpacing: 0,
-                  color: Colors.blueGrey,
-                ),
-              ),
-            ),
-            const Divider(color: Color(0xff7D7D7D), thickness: 0.5),
-            const SizedBox(height: 16),
-            _buildMenuButton(
-              icon: FontAwesomeIcons.circlePlus,
-              labelKey: 'drawer_add',
-              onTap: () => _launchWhatsApp('996999109190'),
-            ),
-            _buildMenuButton(
-              icon: Icons.favorite,
-              labelKey: 'drawer_fav',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const FavoritesScreen()),
-              ),
-            ),
-            _buildMenuButton(
-              icon: FontAwesomeIcons.users,
-              labelKey: 'drawer_about_us',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('soon_available'.tr())),
-                );
-              },
-            ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _CircleIconButton(icon: Icons.dark_mode, onTap: toggleTheme),
-                  _CircleIconButton(icon: Icons.share, onTap: () {}),
-                  _CircleIconButton(
-                    icon: Icons.language,
-                    onTap: () => _toggleLanguage(context),
-                  ),
-                  _CircleIconButton(icon: Icons.refresh, onTap: () {}),
-                ],
-              ),
-            ),
-          ],
+    return Material(
+      color:
+          isDarkMode ? Colors.white.withOpacity(0.1) : const Color(0xFFE8F0FE),
+      borderRadius: BorderRadius.circular(50),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(50),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          child: Icon(
+            icon,
+            size: 20,
+            color: isDarkMode ? Colors.white : const Color(0xFF1E3A8A),
+          ),
         ),
       ),
     );
   }
-}
-
-class _CircleIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _CircleIconButton({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      shape: const CircleBorder(),
-      color: Theme.of(context).primaryColor,
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white, size: 20),
-        onPressed: onTap,
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Drawer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Верхняя часть с изображением
+          SizedBox(
+            height: 286,
+            child: Stack(
+              children: [
+                // Фоновое изображение
+                Image.asset(
+                  "assets/images/header_drawer.jpg",
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: 286,
+                ),
+                // Прозрачная кнопка "Район жөнүндө"
+                Positioned(
+                  left: 16,
+                  bottom: 16,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        height: 36,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: Colors.white, width: 1),
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Район жөнүндө',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Заголовок и описание
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Text(
+              'НООКАТ 996',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                    color: isDarkMode
+                        ? Colors.white
+                        : Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text(
+              'Ноокат району үчүн\nсатып алуу жана сатуу\nмобилдик тиркеме',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    height: 1.5,
+                    color: isDarkMode
+                        ? Colors.white.withOpacity(0.7)
+                        : Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Кнопки меню
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.add_circle_outline,
+            title: 'Жарыя беруу',
+            onTap: () => _launchWhatsApp('996999109190'),
+          ),
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.favorite_border,
+            title: 'Жаккандар',
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+              );
+            },
+          ),
+          _buildDrawerItem(
+            context: context,
+            icon: Icons.group_outlined,
+            title: 'Биз жөнүндө',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('soon_available'.tr())),
+              );
+            },
+          ),
+          const Spacer(),
+          // Нижняя панель с кнопками
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.1)
+                      : Theme.of(context).dividerColor,
+                ),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ThemeToggleButton(isDark: isDark, toggleTheme: toggleTheme),
+                _buildCircleButton(context, Icons.share, () {}),
+                _buildCircleButton(
+                  context,
+                  Icons.language,
+                  () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    final currentLocale = context.locale.languageCode;
+                    final newLocale = currentLocale == 'ky' ? 'ru' : 'ky';
+                    await context.setLocale(Locale(newLocale));
+                    await prefs.setString('locale', newLocale);
+                  },
+                ),
+                _buildCircleButton(context, Icons.refresh, () {}),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

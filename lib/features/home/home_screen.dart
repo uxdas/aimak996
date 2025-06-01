@@ -9,6 +9,8 @@ import 'package:projects/core/widgets/app_drawer.dart';
 import 'package:projects/features/home/ad_feed.dart';
 import 'package:projects/features/home/category_list.dart';
 import 'package:projects/core/providers/search_provider.dart';
+import 'package:projects/core/providers/theme_provider.dart';
+import 'package:projects/features/favorites/favorites_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isDark;
@@ -24,13 +26,17 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin {
   int selectedCategoryId = 0;
   bool _isSearching = false;
   bool _showScrollToTop = false;
 
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -61,64 +67,55 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = Theme.of(context);
     final searchProvider = context.watch<SearchProvider>();
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       drawer: AppDrawer(
-        isDark: widget.isDark,
-        toggleTheme: widget.toggleTheme,
+        isDark: themeProvider.isDark,
+        toggleTheme: themeProvider.toggleTheme,
       ),
       appBar: AppBar(
         toolbarHeight: 110,
-
-        // backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: Stack(
-          children: [
-            // Image.asset(
-            //   'assets/images/header_pattern.png',
-            //   fit: BoxFit.cover,
-            //   width: double.infinity,
-            // ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: _isSearching
-                  ? SizedBox(
-                      // key: const ValueKey('search'),
-                      height: 40,
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'search_hint'.tr(),
-                          border: const OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
-                          ),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 12),
-                        ),
-                        onChanged: searchProvider.updateQuery,
+        title: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _isSearching
+              ? SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'search_hint'.tr(),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                       ),
-                    )
-                  : const Text(
-                      'Ноокат 996',
-                      // key: const ValueKey('title'),
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'Arsenal',
-                      ),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 12),
+                      fillColor: Colors.white,
+                      filled: true,
                     ),
-            ),
-          ],
+                    onChanged: searchProvider.updateQuery,
+                  ),
+                )
+              : const Text(
+                  'Ноокат 996',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'Arsenal',
+                  ),
+                ),
         ),
         actions: [
           IconButton(
             icon: !_isSearching
                 ? SvgPicture.asset('assets/icon/search.svg')
-                : FaIcon(
+                : const FaIcon(
                     FontAwesomeIcons.xmark,
                     color: Colors.white,
                   ),
@@ -134,19 +131,24 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          const SizedBox(height: 12),
-          CategoryList(
-            selectedCategoryId: selectedCategoryId,
-            onCategorySelected: (id) => setState(() => selectedCategoryId = id),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: AdFeed(
-              categoryId: selectedCategoryId,
-              scrollController: _scrollController,
-            ),
+          Column(
+            children: [
+              const SizedBox(height: 12),
+              CategoryList(
+                selectedCategoryId: selectedCategoryId,
+                onCategorySelected: (id) =>
+                    setState(() => selectedCategoryId = id),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: AdFeed(
+                  categoryId: selectedCategoryId,
+                  scrollController: _scrollController,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -168,7 +170,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // --- Plus --- //
                   SvgPicture.asset('assets/icon/add_rounded.svg'),
                   const SizedBox(width: 21),
                   Text(
@@ -188,7 +189,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-
                   const SizedBox(width: 21),
                   SvgPicture.asset('assets/icon/whatsapp.svg')
                 ],

@@ -12,6 +12,8 @@ class FavoritesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final favoritesProvider = context.watch<FavoritesProvider>();
     final favoriteIds = favoritesProvider.favorites;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -26,7 +28,8 @@ class FavoritesScreen extends StatelessWidget {
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: const Text('Очистить избранное?'),
-                    content: const Text('Вы уверены, что хотите удалить все избранные объявления?'),
+                    content: const Text(
+                        'Вы уверены, что хотите удалить все избранные объявления?'),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(ctx),
@@ -55,9 +58,36 @@ class FavoritesScreen extends StatelessWidget {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text(
-                'Ката чыкты: ${snapshot.error}',
-                style: const TextStyle(color: Colors.red),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 60,
+                    color: theme.colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Ката чыкты: ${snapshot.error}',
+                    style: TextStyle(
+                      color: theme.colorScheme.error,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      (context as Element).markNeedsBuild();
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Кайра жүктөө'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.onPrimary,
+                      backgroundColor: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
               ),
             );
           }
@@ -68,7 +98,25 @@ class FavoritesScreen extends StatelessWidget {
               .toList();
 
           if (favoriteAds.isEmpty) {
-            return const Center(child: Text('Пока нет избранных'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.favorite_border,
+                    size: 64,
+                    color: isDark ? Colors.white54 : Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Пока нет избранных',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: isDark ? Colors.white70 : Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
 
           return ListView.builder(
@@ -82,8 +130,11 @@ class FavoritesScreen extends StatelessWidget {
                 background: Container(
                   padding: const EdgeInsets.only(right: 20),
                   alignment: Alignment.centerRight,
-                  color: Colors.red.shade400,
-                  child: const Icon(Icons.delete, color: Colors.white),
+                  color: theme.colorScheme.error,
+                  child: Icon(
+                    Icons.delete,
+                    color: theme.colorScheme.onError,
+                  ),
                 ),
                 onDismissed: (_) {
                   favoritesProvider.toggleFavorite(ad.id.toString());

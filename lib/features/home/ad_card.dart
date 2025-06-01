@@ -1,19 +1,116 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:projects/constants/asset.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:projects/data/models/ad_model.dart';
 import 'package:projects/core/providers/favorites_provider.dart';
+import 'package:projects/widgets/telegram_refresh_indicator.dart';
 
 class AdCard extends StatelessWidget {
   final AdModel ad;
+  final Future<void> Function()? onRefresh;
 
-  const AdCard({super.key, required this.ad});
+  const AdCard({
+    super.key,
+    required this.ad,
+    this.onRefresh,
+  });
+
+  Widget _buildFavoriteButton(BuildContext context, bool isFavorite,
+      FavoritesProvider favoritesProvider) {
+    final theme = Theme.of(context);
+
+    return Material(
+      type: MaterialType.circle,
+      elevation: 2,
+      color: theme.colorScheme.surface.withOpacity(0.9),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: favoritesProvider.isLoading
+            ? null
+            : () async {
+                try {
+                  await favoritesProvider.toggleFavorite(ad.id.toString());
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Ошибка при обновлении избранного'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                }
+              },
+        child: SizedBox(
+          width: 36,
+          height: 36,
+          child: Center(
+            child: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_outline,
+              size: 20,
+              color: isFavorite ? Colors.red : theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageSlider(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (ad.images.isEmpty) {
+      return Container(
+        height: 200,
+        color: theme.colorScheme.surfaceVariant,
+        child: Center(
+          child: Icon(
+            Icons.image_not_supported,
+            color: theme.colorScheme.onSurfaceVariant,
+            size: 32,
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 200,
+      child: ListView.builder(
+        itemCount: ad.images.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+          return CachedNetworkImage(
+            imageUrl: ad.images[index],
+            width: MediaQuery.sizeOf(context).width,
+            height: 200,
+            fit: BoxFit.cover,
+            fadeInDuration: const Duration(milliseconds: 300),
+            placeholder: (context, url) => Container(
+              color: theme.colorScheme.surfaceVariant,
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+            errorWidget: (context, url, error) => Container(
+              color: theme.colorScheme.surfaceVariant,
+              child: Center(
+                child: Icon(
+                  Icons.broken_image,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,128 +122,75 @@ class AdCard extends StatelessWidget {
     final timeStr = DateFormat('HH:mm').format(dateTime);
     final dateStr = DateFormat('dd.MM.yyyy').format(dateTime);
 
-    return Card(
+    final Widget cardContent = Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      color: Colors.white,
+      elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: theme.colorScheme.outline.withOpacity(0.12),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Фото + лайк
           Stack(
             children: [
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width,
-                height: 200,
-                child: ad.images.isNotEmpty
-                    ? ListView.builder(
-                        itemCount: ad.images.length,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          return CachedNetworkImage(
-                            imageUrl: ad.images[index],
-                            width: MediaQuery.sizeOf(context).width,
-                            fit: BoxFit.cover,
-                            errorWidget: (_, __, ___) =>
-                                const Icon(Icons.broken_image),
-                          );
-                        })
-                    : Container(color: Colors.grey.shade300),
-              ),
+              _buildImageSlider(context),
               Positioned(
-                left: 12,
-                bottom: 12,
-                child: InkWell(
-                  onTap: () =>
-                      favoritesProvider.toggleFavorite(ad.id.toString()),
-                  borderRadius: BorderRadius.circular(24),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.85),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: Colors.redAccent,
-                      size: 20,
-                    ),
-                  ),
-                ),
+                right: 12,
+                top: 12,
+                child: _buildFavoriteButton(
+                    context, isFavorite, favoritesProvider),
               ),
             ],
           ),
-
-          /// Текстовая часть
           Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (ad.title.isNotEmpty)
+                if (ad.title.isNotEmpty) ...[
                   Text(
                     ad.title,
                     style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        height: 0,
-                        color: Colors.red),
+                      fontWeight: FontWeight.w500,
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
-                const SizedBox(height: 6),
+                  const SizedBox(height: 4),
+                ],
                 Text(
                   ad.description,
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.8),
+                  ),
                 ),
                 const SizedBox(height: 12),
-
-                /// Время, дата, звонок
                 Row(
                   children: [
                     Text(
                       '$timeStr\n$dateStr',
-                      style: GoogleFonts.roboto(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w400,
-                        height: 1.22,
-                        letterSpacing: 0,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        height: 1.2,
                       ),
                     ),
                     const Spacer(),
-                    ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor:
-                                const WidgetStatePropertyAll(Colors.white),
-                            shape: WidgetStatePropertyAll(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                            )),
-                        onPressed: () async {
-                          final uri = Uri.parse('tel:${ad.phone}');
-                          if (await canLaunchUrl(uri)) {
-                            await launchUrl(uri);
-                          }
-                        },
-                        child: Row(
-                          children: [
-                            SvgPicture.asset(Asset.phone),
-                            const SizedBox(width: 7),
-                            Text(
-                              ad.phone,
-                              style: GoogleFonts.roboto(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                letterSpacing: 0,
-                              ),
-                            ),
-                          ],
-                        )),
+                    FilledButton.icon(
+                      onPressed: () async {
+                        final uri = Uri.parse('tel:${ad.phone}');
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri);
+                        }
+                      },
+                      icon: const Icon(Icons.phone, size: 18),
+                      label: Text(ad.phone),
+                    ),
+                    const SizedBox(width: 8),
                     IconButton(
                       onPressed: () async {
                         final uri = Uri.parse('https://wa.me/${ad.phone}');
@@ -154,8 +198,15 @@ class AdCard extends StatelessWidget {
                           await launchUrl(uri);
                         }
                       },
-                      icon: const FaIcon(FontAwesomeIcons.whatsapp,
-                          color: Color(0xFF25D366)),
+                      style: IconButton.styleFrom(
+                        backgroundColor:
+                            const Color(0xFF25D366).withOpacity(0.1),
+                      ),
+                      icon: const FaIcon(
+                        FontAwesomeIcons.whatsapp,
+                        color: Color(0xFF25D366),
+                        size: 20,
+                      ),
                     ),
                   ],
                 ),
@@ -165,5 +216,14 @@ class AdCard extends StatelessWidget {
         ],
       ),
     );
+
+    if (onRefresh != null) {
+      return TelegramRefreshIndicator(
+        onRefresh: onRefresh!,
+        child: cardContent,
+      );
+    }
+
+    return cardContent;
   }
 }

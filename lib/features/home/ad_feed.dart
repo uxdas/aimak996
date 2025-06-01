@@ -3,6 +3,7 @@ import 'package:projects/data/models/ad_model.dart';
 import 'package:projects/data/services/ad_service.dart';
 import 'package:projects/features/home/ad_card.dart';
 import 'package:projects/features/home/ad_card_shimmer.dart';
+import 'package:projects/widgets/telegram_refresh_indicator.dart';
 
 class AdFeed extends StatefulWidget {
   final int? categoryId;
@@ -84,7 +85,7 @@ class _AdFeedState extends State<AdFeed> {
       return const Center(child: Text('Жарыялар табылган жок.'));
     }
 
-    return RefreshIndicator(
+    return TelegramRefreshIndicator(
       onRefresh: fetchAds,
       child: ListView.separated(
         padding: const EdgeInsets.only(top: 11, left: 12, right: 12),

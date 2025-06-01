@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     Timer(const Duration(seconds: 3), () {
-      if (context.mounted) {
+      if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => HomeScreen(
@@ -59,24 +59,20 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'assets/images/splash_bg.jpg',
-            fit: BoxFit.cover,
-          ),
-          Container(color: Colors.black.withOpacity(0.3)),
-          Center(
-            child: FadeTransition(
-              opacity: _opacity,
-              child: Image.asset(
-                'assets/logo.png',
-                height: 100,
-              ),
+      backgroundColor: widget.isDark ? Colors.black : Colors.white,
+      body: Center(
+        child: FadeTransition(
+          opacity: _opacity,
+          child: Text(
+            'Ноокат 996',
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: widget.isDark ? Colors.white : Colors.black,
+              fontFamily: 'Arsenal',
             ),
           ),
-        ],
+        ),
       ),
     );
   }
