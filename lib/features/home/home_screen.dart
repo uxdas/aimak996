@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
               duration: const Duration(milliseconds: 300),
               child: _isSearching
                   ? SizedBox(
-                      key: const ValueKey('searchField'),
+                      // key: const ValueKey('search'),
                       height: 40,
                       child: TextField(
                         controller: _searchController,
@@ -100,10 +100,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         onChanged: searchProvider.updateQuery,
                       ),
                     )
-                  : const Text(
+                  : Text(
                       'Ноокат 996',
-                      key: ValueKey('titleText'),
-                      style: TextStyle(
+                      // key: const ValueKey('title'),
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -150,62 +150,50 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: Container(
+        height: 48,
         color: theme.primaryColor,
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Wrap(
-          spacing: 8,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          alignment: WrapAlignment.spaceBetween,
-          children: [
-            InkWell(
-              onTap: _launchWhatsApp,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.add, color: Color(0xFF1E3A8A)),
-                    const SizedBox(width: 8),
-                    Text(
-                      'drawer_add'.tr(),
-                      style: const TextStyle(
-                        color: Color(0xFF1E3A8A),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+        child: Center(
+          child: InkWell(
+            onTap: _launchWhatsApp,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              height: 34,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(50),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // --- Plus --- //
+                  SvgPicture.asset('assets/icon/add_rounded.svg'),
+                  const SizedBox(width: 21),
+                  Text(
+                    'drawer_add'.tr(),
+                    style: const TextStyle(
+                      color: Color(0xFF1E3A8A),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'drawer_number'.tr(),
-                      style: const TextStyle(
-                        color: Color(0xFF1E3A8A),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'drawer_number'.tr(),
+                    style: const TextStyle(
+                      color: Color(0xFF1E3A8A),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
-                  ],
-                ),
+                  ),
+
+                  const SizedBox(width: 21),
+                  SvgPicture.asset('assets/icon/whatsapp.svg')
+                ],
               ),
             ),
-            Material(
-              color: Colors.white,
-              shape: const CircleBorder(),
-              child: IconButton(
-                icon: const FaIcon(FontAwesomeIcons.whatsapp,
-                    color: Color(0xFF25D366)),
-                onPressed: _launchWhatsApp,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
       floatingActionButton: _showScrollToTop

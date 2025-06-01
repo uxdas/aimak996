@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:projects/data/models/ad_model.dart';
 import 'package:projects/data/services/ad_service.dart';
-import 'ad_card.dart';
+import 'package:projects/features/home/ad_card.dart';
+import 'package:projects/features/home/ad_card_shimmer.dart';
 
 class AdFeed extends StatefulWidget {
   final int? categoryId;
@@ -41,6 +42,7 @@ class _AdFeedState extends State<AdFeed> {
 
   Future<void> fetchAds() async {
     setState(() => isLoading = true);
+
     try {
       if (widget.categoryId != null && widget.categoryId != 0) {
         print('[FETCH] категория: ${widget.categoryId}');
@@ -71,7 +73,11 @@ class _AdFeedState extends State<AdFeed> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return ListView.builder(
+          padding: const EdgeInsets.only(top: 11, left: 12, right: 12),
+          itemBuilder: (context, index) {
+            return const AdCardShimmer();
+          });
     }
 
     if (ads.isEmpty) {

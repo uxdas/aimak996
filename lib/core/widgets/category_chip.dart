@@ -27,7 +27,7 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFF1E3A8A);
+    const primaryColor = Color(0xFF1E3A8A);
     final backgroundColor = isSelected ? primaryColor : Colors.white;
     final iconColor = isSelected ? Colors.white : primaryColor;
     final textColor = isSelected ? Colors.white : primaryColor;

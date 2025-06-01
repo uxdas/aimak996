@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
+import 'package:projects/constants/app_colors.dart';
 
 class AppTheme {
   static const String appName = 'Ноокат 996';

@@ -127,7 +127,12 @@ class AdCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(50),
                               ),
                             )),
-                        onPressed: () {},
+                        onPressed: () async {
+                          final uri = Uri.parse('tel:${ad.phone}');
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri);
+                          }
+                        },
                         child: Row(
                           children: [
                             SvgPicture.asset(Asset.phone),
