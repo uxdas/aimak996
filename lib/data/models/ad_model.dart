@@ -23,7 +23,7 @@ class AdModel {
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       images: (json['images'] as List?)?.map((e) => e.toString()).toList() ?? [],
-      phone: json['phone'] ?? '',
+      phone: json['contact_phone'] ?? '',
       createdAt: json['created_at'] ?? '',
       categoryId: json['category_id'] ?? 0,
     );
@@ -35,7 +35,7 @@ class AdModel {
       'title': title,
       'description': description,
       'images': images,
-      'phone': phone,
+      'contact_phone': phone,
       'created_at': createdAt,
       'category_id': categoryId,
     };

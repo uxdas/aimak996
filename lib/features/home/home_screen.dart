@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -68,79 +69,69 @@ class _HomeScreenState extends State<HomeScreen> {
         isDark: widget.isDark,
         toggleTheme: widget.toggleTheme,
       ),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(110),
-        child: Stack(
+      appBar: AppBar(
+        toolbarHeight: 110,
+        // backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: Stack(
           children: [
-            Container(
-              height: 110 + MediaQuery.of(context).padding.top,
+            Image.asset(
+              'assets/images/header_pattern.png',
+              fit: BoxFit.cover,
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Color(0xFF1E3A8A),
-              ),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Image.asset(
-                  'assets/images/header_pattern.png',
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                ),
-              ),
             ),
-            AppBar(
-              toolbarHeight: 110,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: true,
-              title: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: _isSearching
-                    ? SizedBox(
-                  key: const ValueKey('searchField'),
-                  height: 40,
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'search_hint'.tr(),
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _isSearching
+                  ? SizedBox(
+                      key: const ValueKey('searchField'),
+                      height: 40,
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'search_hint'.tr(),
+                          border: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 12),
+                        ),
+                        onChanged: searchProvider.updateQuery,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    )
+                  : const Text(
+                      'Ноокат 996',
+                      key: ValueKey('titleText'),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: 'Arsenal',
+                      ),
                     ),
-                    onChanged: searchProvider.updateQuery,
-                  ),
-                )
-                    : Text(
-                  'Ноокат 996',
-                  key: const ValueKey('titleText'),
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontFamily: 'Arsenal',
-                  ),
-                ),
-              ),
-              actions: [
-                IconButton(
-                  icon: FaIcon(
-                    _isSearching ? FontAwesomeIcons.xmark : FontAwesomeIcons.magnifyingGlass,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isSearching = !_isSearching;
-                      if (!_isSearching) {
-                        _searchController.clear();
-                        searchProvider.clearQuery();
-                      }
-                    });
-                  },
-                ),
-              ],
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: FaIcon(
+              _isSearching
+                  ? FontAwesomeIcons.xmark
+                  : FontAwesomeIcons.magnifyingGlass,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  searchProvider.clearQuery();
+                }
+              });
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -160,6 +151,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: Container(
         color: theme.primaryColor,
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Wrap(
           spacing: 8,
@@ -206,7 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.white,
               shape: const CircleBorder(),
               child: IconButton(
-                icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366)),
+                icon: const FaIcon(FontAwesomeIcons.whatsapp,
+                    color: Color(0xFF25D366)),
                 onPressed: _launchWhatsApp,
               ),
             ),
@@ -214,17 +209,15 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: _showScrollToTop
-          ? FloatingActionButton(
-        backgroundColor: theme.primaryColor,
-        child: const Icon(Icons.keyboard_arrow_up),
-        onPressed: () {
-          _scrollController.animateTo(
-            0,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
-        },
-      )
+          ? IconButton(
+              onPressed: () {
+                _scrollController.animateTo(
+                  0,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                );
+              },
+              icon: SvgPicture.asset('assets/icon/arrow_top.svg'))
           : null,
     );
   }

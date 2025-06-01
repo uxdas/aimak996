@@ -33,7 +33,8 @@ class _AdFeedState extends State<AdFeed> {
   void didUpdateWidget(covariant AdFeed oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.categoryId != widget.categoryId) {
-      print('[WIDGET] категория изменилась: ${oldWidget.categoryId} → ${widget.categoryId}');
+      print(
+          '[WIDGET] категория изменилась: ${oldWidget.categoryId} → ${widget.categoryId}');
       fetchAds();
     }
   }
@@ -79,13 +80,19 @@ class _AdFeedState extends State<AdFeed> {
 
     return RefreshIndicator(
       onRefresh: fetchAds,
-      child: ListView.builder(
+      child: ListView.separated(
+        padding: const EdgeInsets.only(top: 11, left: 12, right: 12),
         controller: widget.scrollController,
         itemCount: ads.length,
         itemBuilder: (context, index) {
           return AdCard(ad: ads[index]);
         },
+        separatorBuilder: (context, index) {
+          return const SizedBox(height: 16);
+        },
       ),
     );
   }
 }
+
+// margin: const EdgeInsets.only(bottom: 16),

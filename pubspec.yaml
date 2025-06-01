@@ -23,6 +23,8 @@ dependencies:
     sdk: flutter
   easy_localization: ^3.0.3
   intl: ^0.19.0
+  google_fonts: ^4.0.4
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:
@@ -34,7 +36,8 @@ flutter:
 
   assets:
     - assets/images/             # ✅ ВСЯ папка с картинками
-    - assets/translations/       # Переводы
+    - assets/translations/    
+    - assets/icon/   # Переводы
     - assets/images/splash_bg.jpg
   fonts:
     - family: Roboto

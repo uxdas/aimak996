@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:projects/constants/asset.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:projects/data/models/ad_model.dart';
 import 'package:projects/core/providers/favorites_provider.dart';
 
@@ -24,10 +26,12 @@ class AdCard extends StatelessWidget {
     final dateStr = DateFormat('dd.MM.yyyy').format(dateTime);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
       clipBehavior: Clip.antiAlias,
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -35,21 +39,29 @@ class AdCard extends StatelessWidget {
           Stack(
             children: [
               SizedBox(
-                width: double.infinity,
+                width: MediaQuery.sizeOf(context).width,
                 height: 200,
                 child: ad.images.isNotEmpty
-                    ? CachedNetworkImage(
-                  imageUrl: ad.images.first,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
-                )
+                    ? ListView.builder(
+                        itemCount: ad.images.length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          return CachedNetworkImage(
+                            imageUrl: ad.images[index],
+                            width: MediaQuery.sizeOf(context).width,
+                            fit: BoxFit.cover,
+                            errorWidget: (_, __, ___) =>
+                                const Icon(Icons.broken_image),
+                          );
+                        })
                     : Container(color: Colors.grey.shade300),
               ),
               Positioned(
                 left: 12,
                 bottom: 12,
                 child: InkWell(
-                  onTap: () => favoritesProvider.toggleFavorite(ad.id.toString()),
+                  onTap: () =>
+                      favoritesProvider.toggleFavorite(ad.id.toString()),
                   borderRadius: BorderRadius.circular(24),
                   child: Container(
                     padding: const EdgeInsets.all(6),
@@ -72,12 +84,18 @@ class AdCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  ad.title,
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                ),
+                if (ad.title.isNotEmpty)
+                  Text(
+                    ad.title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        height: 0,
+                        color: Colors.red),
+                  ),
                 const SizedBox(height: 6),
                 Text(
                   ad.description,
@@ -90,24 +108,40 @@ class AdCard extends StatelessWidget {
                 /// Время, дата, звонок
                 Row(
                   children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text('$timeStr | $dateStr',
-                            style: theme.textTheme.labelSmall),
-                      ],
+                    Text(
+                      '$timeStr\n$dateStr',
+                      style: GoogleFonts.roboto(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w400,
+                        height: 1.22,
+                        letterSpacing: 0,
+                      ),
                     ),
                     const Spacer(),
-                    IconButton(
-                      onPressed: () async {
-                        final uri = Uri.parse('tel:${ad.phone}');
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri);
-                        }
-                      },
-                      icon: const Icon(Icons.phone, color: Colors.green),
-                    ),
+                    ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor:
+                                const WidgetStatePropertyAll(Colors.white),
+                            shape: WidgetStatePropertyAll(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                            )),
+                        onPressed: () {},
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(Asset.phone),
+                            const SizedBox(width: 7),
+                            Text(
+                              ad.phone,
+                              style: GoogleFonts.roboto(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: 0,
+                              ),
+                            ),
+                          ],
+                        )),
                     IconButton(
                       onPressed: () async {
                         final uri = Uri.parse('https://wa.me/${ad.phone}');
@@ -115,7 +149,8 @@ class AdCard extends StatelessWidget {
                           await launchUrl(uri);
                         }
                       },
-                      icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366)),
+                      icon: const FaIcon(FontAwesomeIcons.whatsapp,
+                          color: Color(0xFF25D366)),
                     ),
                   ],
                 ),
