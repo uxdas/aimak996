@@ -1,0 +1,17 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    avoid_print: true
+    always_use_package_imports: true
+    prefer_final_locals: true
+    unnecessary_this: true
+    use_key_in_widget_constructors: true
+    no_logic_in_create_state: true
+    library_private_types_in_public_api: true
+
+analyzer:
+  exclude:
+    - '**/*.g.dart'
