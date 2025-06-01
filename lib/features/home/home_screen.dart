@@ -71,16 +71,17 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       appBar: AppBar(
         toolbarHeight: 110,
+
         // backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         title: Stack(
           children: [
-            Image.asset(
-              'assets/images/header_pattern.png',
-              fit: BoxFit.cover,
-              width: double.infinity,
-            ),
+            // Image.asset(
+            //   'assets/images/header_pattern.png',
+            //   fit: BoxFit.cover,
+            //   width: double.infinity,
+            // ),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
               child: _isSearching
@@ -100,10 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         onChanged: searchProvider.updateQuery,
                       ),
                     )
-                  : Text(
+                  : const Text(
                       'Ноокат 996',
                       // key: const ValueKey('title'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -115,12 +116,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: FaIcon(
-              _isSearching
-                  ? FontAwesomeIcons.xmark
-                  : FontAwesomeIcons.magnifyingGlass,
-              color: Colors.white,
-            ),
+            icon: !_isSearching
+                ? SvgPicture.asset('assets/icon/search.svg')
+                : FaIcon(
+                    FontAwesomeIcons.xmark,
+                    color: Colors.white,
+                  ),
             onPressed: () {
               setState(() {
                 _isSearching = !_isSearching;

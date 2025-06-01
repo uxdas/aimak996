@@ -1,9 +1,13 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:projects/features/favorites/favorites_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppDrawer extends StatelessWidget {
   final bool isDark;
@@ -36,14 +40,19 @@ class AppDrawer extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                FaIcon(icon, size: 20, color: isDark ? Colors.white : Colors.blue.shade900),
+                FaIcon(icon,
+                    size: 20,
+                    color: isDark ? Colors.white : Colors.blue.shade900),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    labelKey.tr(),
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.blue.shade900,
-                      fontSize: 16,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      labelKey.tr(),
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.blue.shade900,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -57,7 +66,8 @@ class AppDrawer extends StatelessWidget {
 
   Future<void> _toggleLanguage(BuildContext context) async {
     final currentLang = context.locale.languageCode;
-    final newLocale = currentLang == 'ru' ? const Locale('ky') : const Locale('ru');
+    final newLocale =
+        currentLang == 'ru' ? const Locale('ky') : const Locale('ru');
 
     await context.setLocale(newLocale);
     final prefs = await SharedPreferences.getInstance();
@@ -67,55 +77,106 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      
       child: Container(
         color: isDark ? Colors.black : Colors.blue.shade50,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Stack(
-              children: [
-                Container(
-                  height: 220,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/drawer_bg.jpg'),
-                      fit: BoxFit.cover,
-                    ),
+            SizedBox(
+              height: 286,
+              child: Stack(
+                children: [
+                  Image.asset(
+                    "assets/images/header_drawer.jpg",
+                    fit: BoxFit.fill,
+                    width: MediaQuery.sizeOf(context).width,
                   ),
-                ),
-                Container(
-                  height: 220,
-                  alignment: Alignment.bottomLeft,
-                  padding: const EdgeInsets.all(16),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(24),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: SizedBox(
+                        height: 25,
+                        width: 135,
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              side: const BorderSide(
+                                  color: Colors.white, width: 1),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                  side: const BorderSide(color: Colors.white))),
+                          child: Stack(
+                            children: [
+                              SizedBox(
+                                height: 25,
+                                width: 135,
+                                child: Positioned.fill(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(18),
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                          sigmaX: 5, sigmaY: 5),
+                                      child: Container(
+                                        color: Colors.black.withOpacity(0.3),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Center(
+                                child: Text(
+                                  'Район жонундо',
+                                  style: GoogleFonts.roboto(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.0,
+                                    letterSpacing: 0.02,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: Text(
-                      'drawer_about'.tr(),
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-                    ),
-                  ),
-                ),
-              ],
+                  )
+                ],
+              ),
             ),
             const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'app_title'.tr(),
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
+                'Ноокат 996'.toUpperCase(),
+                style: GoogleFonts.jost(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  height: 1.0,
+                  letterSpacing: 0.02,
+                  textBaseline: TextBaseline.alphabetic,
+                ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Text(
-                'about'.tr(),
-                style: const TextStyle(fontSize: 14, color: Colors.blueGrey),
+                '''Ноокат району үчүн 
+сатып алуу жана сатуу
+мобилдик тиркеме ''',
+                style: GoogleFonts.jost(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  height: 1.5,
+                  letterSpacing: 0,
+                  color: Colors.blueGrey,
+                ),
               ),
             ),
+            const Divider(color: Color(0xff7D7D7D), thickness: 0.5),
             const SizedBox(height: 16),
             _buildMenuButton(
               icon: FontAwesomeIcons.circlePlus,
