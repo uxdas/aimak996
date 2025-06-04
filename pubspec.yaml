@@ -15,6 +15,7 @@ dependencies:
   url_launcher: ^6.2.5
   cached_network_image: ^3.3.1
   carousel_slider: 4.1.1
+  share_plus: ^7.0.0
   shared_preferences: ^2.2.2
   http: ^0.13.5
   shimmer: ^3.0.0

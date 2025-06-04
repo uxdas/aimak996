@@ -11,7 +11,7 @@ class AppTheme {
   static const lightSurface = Colors.white;
   static const lightError = Color(0xFFDC2626);
   static const lightTextPrimary = Color(0xFF1A1A1A);
-  static const lightTextSecondary = Color(0xFF6B7280);
+  static const lightTextSecondary = Color(0xFF64748B);
   static const lightBorder = Color(0xFFE5E7EB);
   static const lightCardShadow = Color(0x1A000000);
   static const drawerButtonBg = Color(0xFF2563EB);
@@ -22,14 +22,14 @@ class AppTheme {
   static const darkBackground = Color(0xFF0F172A);
   static const darkSurface = Color(0xFF1E293B);
   static const darkCard = Color(0xFF1E293B);
-  static const darkDrawer = Color(0xFF1E3A8A);
   static const darkError = Color(0xFFEF4444);
   static const darkTextPrimary = Color(0xFFF8FAFC);
-  static const darkTextSecondary = Color(0xFF94A3B8);
+  static const darkTextSecondary = Color(0xFF64748B);
+  static const darkBorder = Color(0xFF334155);
 
   static TextTheme _buildTextTheme(TextTheme base, bool isDark) {
     final color = isDark ? darkTextPrimary : lightTextPrimary;
-    
+
     return base.copyWith(
       displayLarge: GoogleFonts.jost(
         fontSize: 32,
@@ -177,14 +177,16 @@ class AppTheme {
         primary: darkPrimary,
         secondary: darkSecondary,
         surface: darkSurface,
+        background: darkBackground,
         error: darkError,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: darkTextPrimary,
+        onBackground: darkTextPrimary,
       ),
       scaffoldBackgroundColor: darkBackground,
       cardColor: darkCard,
-      dividerColor: darkTextSecondary.withOpacity(0.1),
+      dividerColor: darkBorder,
       primaryColor: darkPrimary,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
@@ -197,15 +199,21 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
       ),
-      drawerTheme: const DrawerThemeData(
-        backgroundColor: darkDrawer,
+      drawerTheme: DrawerThemeData(
+        backgroundColor: darkSurface,
         elevation: 0,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topRight: Radius.circular(16),
             bottomRight: Radius.circular(16),
           ),
         ),
+        scrimColor: Colors.black.withOpacity(0.4),
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: darkSurface,
+        selectedItemColor: darkPrimary,
+        unselectedItemColor: darkTextSecondary,
       ),
       listTileTheme: const ListTileThemeData(
         iconColor: Colors.white,
@@ -214,10 +222,21 @@ class AppTheme {
         minLeadingWidth: 20,
         dense: true,
       ),
-      dividerTheme: DividerThemeData(
-        color: Colors.white.withOpacity(0.1),
-        thickness: 1,
-        space: 32,
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkCard,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: darkBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: darkBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: darkPrimary),
+        ),
       ),
     );
   }

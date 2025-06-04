@@ -28,9 +28,6 @@ class CategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF1E3A8A);
-    final backgroundColor = isSelected ? primaryColor : Colors.white;
-    final iconColor = isSelected ? Colors.white : primaryColor;
-    final textColor = isSelected ? Colors.white : primaryColor;
 
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -38,11 +35,10 @@ class CategoryChip extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
           decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: primaryColor, width: 1.2),
+            color: isSelected ? Colors.white : Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(2),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -50,15 +46,15 @@ class CategoryChip extends StatelessWidget {
               FaIcon(
                 categoryIcons[category.id] ?? FontAwesomeIcons.circle,
                 size: 16,
-                color: iconColor,
+                color: isSelected ? primaryColor : Colors.white,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               Text(
                 category.title,
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected ? primaryColor : Colors.white,
                 ),
               ),
             ],

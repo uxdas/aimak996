@@ -3,10 +3,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:projects/features/favorites/favorites_screen.dart';
 import 'package:projects/features/about/about_screen.dart';
+import 'package:projects/features/district/district_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:projects/core/widgets/theme_toggle_button.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AppDrawer extends StatelessWidget {
   final bool isDark;
@@ -18,10 +20,14 @@ class AppDrawer extends StatelessWidget {
     required this.toggleTheme,
   });
 
-  Future<void> _launchWhatsApp(String number) async {
+  Future<void> _launchWhatsApp(BuildContext context, String number) async {
     final uri = Uri.parse('https://wa.me/$number');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось открыть WhatsApp')),
+      );
     }
   }
 
@@ -101,19 +107,16 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Верхняя часть с изображением
           SizedBox(
             height: 286,
             child: Stack(
               children: [
-                // Фоновое изображение
                 Image.asset(
                   "assets/images/header_drawer.jpg",
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: 286,
                 ),
-                // Прозрачная кнопка "Район жөнүндө"
                 Positioned(
                   left: 16,
                   bottom: 16,
@@ -121,21 +124,35 @@ class AppDrawer extends StatelessWidget {
                     borderRadius: BorderRadius.circular(18),
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        height: 36,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: Colors.white, width: 1),
-                          color: Colors.white.withOpacity(0.1),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'Район жөнүндө',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const DistrictScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            height: 36,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(color: Colors.white, width: 1),
+                              color: Colors.white.withOpacity(0.1),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Район жөнүндө',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -146,7 +163,6 @@ class AppDrawer extends StatelessWidget {
               ],
             ),
           ),
-          // Заголовок и описание
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Text(
@@ -154,6 +170,7 @@ class AppDrawer extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.5,
+                    fontSize: 24,
                     color: isDarkMode
                         ? Colors.white
                         : Theme.of(context).textTheme.bodyLarge?.color,
@@ -163,7 +180,7 @@ class AppDrawer extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Text(
-              'Ноокат району үчүн\nсатып алуу жана сатуу\nмобилдик тиркеме',
+              'app_description'.tr(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     height: 1.5,
                     color: isDarkMode
@@ -173,17 +190,20 @@ class AppDrawer extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          // Кнопки меню
           _buildDrawerItem(
             context: context,
             icon: Icons.add_circle_outline,
-            title: 'Жарыя беруу',
-            onTap: () => _launchWhatsApp('996999109190'),
+            title: 'add_ad'.tr(),
+            onTap: () async {
+              Navigator.pop(context);
+              await _launchWhatsApp(context, '996999109190');
+            },
           ),
+          const SizedBox(height: 4),
           _buildDrawerItem(
             context: context,
             icon: Icons.favorite_border,
-            title: 'Жаккандар',
+            title: 'favorites'.tr(),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -192,10 +212,11 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
+          const SizedBox(height: 4),
           _buildDrawerItem(
             context: context,
             icon: Icons.group_outlined,
-            title: 'Биз жөнүндө',
+            title: 'drawer_about_us'.tr(),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -205,7 +226,6 @@ class AppDrawer extends StatelessWidget {
             },
           ),
           const Spacer(),
-          // Нижняя панель с кнопками
           Container(
             decoration: BoxDecoration(
               border: Border(
@@ -221,7 +241,14 @@ class AppDrawer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ThemeToggleButton(isDark: isDark, toggleTheme: toggleTheme),
-                _buildCircleButton(context, Icons.share, () {}),
+                _buildCircleButton(
+                  context,
+                  Icons.share,
+                  () {
+                    Share.share(
+                        'Скачивай приложение для объявлений в Ноокате: https://aimak996.kg');
+                  },
+                ),
                 _buildCircleButton(
                   context,
                   Icons.language,
@@ -233,7 +260,6 @@ class AppDrawer extends StatelessWidget {
                     await prefs.setString('locale', newLocale);
                   },
                 ),
-                _buildCircleButton(context, Icons.refresh, () {}),
               ],
             ),
           ),

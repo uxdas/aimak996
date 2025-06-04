@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:projects/core/providers/favorites_provider.dart';
+import 'package:projects/core/providers/theme_provider.dart';
+import 'package:projects/core/widgets/app_drawer.dart';
 import 'package:projects/data/services/ad_service.dart';
 import 'package:projects/features/home/ad_card.dart';
 import 'package:projects/data/models/ad_model.dart';
@@ -11,13 +13,22 @@ class FavoritesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final favoritesProvider = context.watch<FavoritesProvider>();
+    final themeProvider = Provider.of<ThemeProvider>(context);
     final favoriteIds = favoritesProvider.favorites;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      drawer: AppDrawer(
+        isDark: themeProvider.isDark,
+        toggleTheme: themeProvider.toggleTheme,
+      ),
       appBar: AppBar(
         title: const Text('Жаккандар'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           if (favoriteIds.isNotEmpty)
             IconButton(

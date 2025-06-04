@@ -8,11 +8,13 @@ import 'package:projects/widgets/telegram_refresh_indicator.dart';
 class AdFeed extends StatefulWidget {
   final int? categoryId;
   final ScrollController? scrollController;
+  final List<AdModel>? externalAds;
 
   const AdFeed({
     Key? key,
     this.categoryId,
     this.scrollController,
+    this.externalAds,
   }) : super(key: key);
 
   @override
@@ -28,7 +30,9 @@ class _AdFeedState extends State<AdFeed> {
   @override
   void initState() {
     super.initState();
-    fetchAds();
+    if (widget.externalAds == null) {
+      fetchAds();
+    }
   }
 
   @override
@@ -62,8 +66,8 @@ class _AdFeedState extends State<AdFeed> {
       print('Загружено объявлений: ${ads.length}');
       print('ID категорий: ${ads.map((e) => e.categoryId).toSet()}');
     } catch (e) {
-      ads = [];
       debugPrint('Ошибка при загрузке объявлений: $e');
+      ads = []; // Очищаем список в случае ошибки
     }
 
     if (mounted) {
@@ -72,31 +76,29 @@ class _AdFeedState extends State<AdFeed> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
-    if (isLoading) {
+    final List<AdModel> displayAds = widget.externalAds ?? ads;
+
+    if (isLoading && widget.externalAds == null) {
       return ListView.builder(
-          padding: const EdgeInsets.only(top: 11, left: 12, right: 12),
-          itemBuilder: (context, index) {
-            return const AdCardShimmer();
-          });
+        padding: const EdgeInsets.only(top: 11, left: 12, right: 12),
+        itemBuilder: (context, index) => const AdCardShimmer(),
+      );
     }
 
-    if (ads.isEmpty) {
+    if (displayAds.isEmpty) {
       return const Center(child: Text('Жарыялар табылган жок.'));
     }
 
     return TelegramRefreshIndicator(
-      onRefresh: fetchAds,
+      onRefresh: widget.externalAds != null ? () async {} : fetchAds,
       child: ListView.separated(
         padding: const EdgeInsets.only(top: 11, left: 12, right: 12),
         controller: widget.scrollController,
-        itemCount: ads.length,
-        itemBuilder: (context, index) {
-          return AdCard(ad: ads[index]);
-        },
-        separatorBuilder: (context, index) {
-          return const SizedBox(height: 16);
-        },
+        itemCount: displayAds.length,
+        itemBuilder: (context, index) => AdCard(ad: displayAds[index]),
+        separatorBuilder: (context, index) => const SizedBox(height: 16),
       ),
     );
   }

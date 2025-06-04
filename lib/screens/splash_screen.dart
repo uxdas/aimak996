@@ -63,14 +63,11 @@ class _SplashScreenState extends State<SplashScreen>
       body: Center(
         child: FadeTransition(
           opacity: _opacity,
-          child: Text(
-            'Ноокат 996',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: widget.isDark ? Colors.white : Colors.black,
-              fontFamily: 'Arsenal',
-            ),
+          child: Image.asset(
+            'assets/images/splash.png', // путь к твоему изображению
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:projects/data/models/ad_model.dart';
 import 'package:projects/data/services/ad_service.dart';
 import 'package:projects/features/home/ad_buttons_row.dart';
@@ -32,7 +33,7 @@ class _AdDetailScreenState extends State<AdDetailScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Толук маалымат')),
+      appBar: AppBar(title: Text('full_info'.tr())),
       body: FutureBuilder<AdModel>(
         future: AdService().fetchAdById(widget.adId),
         builder: (context, snapshot) {
@@ -41,14 +42,14 @@ class _AdDetailScreenState extends State<AdDetailScreen> {
           }
 
           if (snapshot.hasError || !snapshot.hasData) {
-            return const Center(child: Text('Маалымат табылган жок'));
+            return Center(child: Text('error_no_data'.tr()));
           }
 
           final ad = snapshot.data!;
           final dateTime = DateTime.tryParse(ad.createdAt) ?? DateTime.now();
           final timeStr = DateFormat('HH:mm').format(dateTime);
           final dateStr = DateFormat('dd.MM.yyyy').format(dateTime);
-          final categoryName = categoryNames[ad.categoryId] ?? 'Белгисиз категория';
+          final categoryName = _getCategoryName(ad.categoryId);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -76,7 +77,7 @@ class _AdDetailScreenState extends State<AdDetailScreen> {
                               width: double.infinity,
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) =>
-                              const Icon(Icons.broken_image),
+                                  const Icon(Icons.broken_image),
                             ),
                           );
                         },
@@ -142,5 +143,22 @@ class _AdDetailScreenState extends State<AdDetailScreen> {
         },
       ),
     );
+  }
+
+  String _getCategoryName(int categoryId) {
+    switch (categoryId) {
+      case 1:
+        return 'category_real_estate'.tr();
+      case 2:
+        return 'category_auto'.tr();
+      case 3:
+        return 'category_animals'.tr();
+      case 4:
+        return 'category_home'.tr();
+      case 5:
+        return 'category_services'.tr();
+      default:
+        return 'unknown_category'.tr();
+    }
   }
 }
