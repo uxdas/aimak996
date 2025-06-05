@@ -12,6 +12,7 @@ import 'package:projects/core/widgets/app_drawer.dart';
 import 'package:projects/core/widgets/custom_app_bar.dart';
 import 'package:projects/features/home/ad_feed.dart';
 import 'package:projects/features/home/category_list.dart';
+import 'package:projects/features/home/category_pages_view.dart';
 import 'package:projects/core/providers/search_provider.dart';
 import 'package:projects/core/providers/theme_provider.dart';
 import 'package:projects/features/favorites/favorites_screen.dart';
@@ -37,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen>
   bool _isSearching = false;
   bool _showScrollToTop = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey _appBarKey = GlobalKey();
 
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
@@ -86,6 +88,14 @@ class _HomeScreenState extends State<HomeScreen>
     });
   }
 
+  void _onPageChanged(int pageIndex) {
+    // Scroll categories to show the current active category
+    final appBarState = _appBarKey.currentState;
+    if (appBarState != null) {
+      (appBarState as dynamic).scrollToCategory(pageIndex);
+    }
+  }
+
   @override
   void dispose() {
     _debounce?.cancel();
@@ -100,15 +110,15 @@ class _HomeScreenState extends State<HomeScreen>
     if (searchProvider.error != null) {
       return Center(
         child: Text(
-          'Ошибка: ${searchProvider.error}',
+          '${"error_occurred".tr()}: ${searchProvider.error}',
           style: const TextStyle(color: Colors.red),
         ),
       );
     }
 
     if (searchProvider.results.isEmpty) {
-      return const Center(
-        child: Text('Ничего не найдено'),
+      return Center(
+        child: Text('nothing_found'.tr()),
       );
     }
 
@@ -126,9 +136,8 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = Theme.of(context);
-    final searchProvider = context.watch<SearchProvider>();
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final categoryProvider = context.watch<CategoryProvider>();
+    final searchProvider = Provider.of<SearchProvider>(context);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -137,6 +146,7 @@ class _HomeScreenState extends State<HomeScreen>
         toggleTheme: themeProvider.toggleTheme,
       ),
       appBar: CustomAppBar(
+        key: _appBarKey,
         isSearching: _isSearching,
         onSearchToggle: () {
           setState(() {
@@ -160,63 +170,14 @@ class _HomeScreenState extends State<HomeScreen>
                         externalAds: searchProvider.results,
                         scrollController: _scrollController,
                       )
-                    : AdFeed(
-                        categoryId: categoryProvider.selectedCategoryId,
+                    : CategoryPagesView(
                         scrollController: _scrollController,
+                        onPageChanged: _onPageChanged,
                       ),
               ),
             ],
           ),
         ],
-      ),
-      bottomNavigationBar: Container(
-        height: 60,
-        color: theme.primaryColor,
-        child: Center(
-          child: InkWell(
-            onTap: _launchWhatsApp,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              height: 44,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(50),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SvgPicture.asset(
-                    'assets/icon/add_rounded.svg',
-                    width: 28, // ширина
-                    height: 28, // высота
-                  ),
-                  const SizedBox(width: 21),
-                  Text(
-                    'drawer_add'.tr(),
-                    style: const TextStyle(
-                      color: Color(0xFF1E3A8A),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'drawer_number'.tr(),
-                    style: const TextStyle(
-                      color: Color(0xFF1E3A8A),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 21),
-                  SvgPicture.asset('assets/icon/whatsapp.svg')
-                ],
-              ),
-            ),
-          ),
-        ),
       ),
       floatingActionButton: _showScrollToTop
           ? Container(
@@ -251,7 +212,6 @@ class _HomeScreenState extends State<HomeScreen>
                       'assets/icon/arrow_top.svg',
                       width: 28,
                       height: 28,
-                      // 👈 делаем стрелку белой
                     ),
                   ),
                 ),

@@ -9,6 +9,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:projects/data/models/ad_model.dart';
 import 'package:projects/core/providers/favorites_provider.dart';
 import 'package:projects/widgets/telegram_refresh_indicator.dart';
+import 'package:projects/features/details/ad_detail_screen.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AdCard extends StatefulWidget {
   final AdModel ad;
@@ -24,49 +26,84 @@ class AdCard extends StatefulWidget {
   State<AdCard> createState() => _AdCardState();
 }
 
-class _AdCardState extends State<AdCard> {
+class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
   bool _isExpanded = false;
   int _currentImageIndex = 0;
+  late AnimationController _heartAnimationController;
+  late Animation<double> _heartScaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _heartAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _heartScaleAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
+      CurvedAnimation(
+        parent: _heartAnimationController,
+        curve: Curves.elasticOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _heartAnimationController.dispose();
+    super.dispose();
+  }
 
   Widget _buildFavoriteButton(BuildContext context, bool isFavorite,
       FavoritesProvider favoritesProvider) {
     final theme = Theme.of(context);
 
-    return Material(
-      type: MaterialType.circle,
-      elevation: 2,
-      color: theme.colorScheme.surface.withOpacity(0.9),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: favoritesProvider.isLoading
-            ? null
-            : () async {
-                try {
-                  await favoritesProvider
-                      .toggleFavorite(widget.ad.id.toString());
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Ошибка при обновлении избранного'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                }
-              },
-        child: SizedBox(
-          width: 36,
-          height: 36,
-          child: Center(
-            child: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_outline,
-              size: 20,
-              color: isFavorite ? Colors.red : theme.colorScheme.onSurface,
+    return AnimatedBuilder(
+      animation: _heartScaleAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _heartScaleAnimation.value,
+          child: Material(
+            type: MaterialType.circle,
+            elevation: 2,
+            color: theme.colorScheme.surface.withOpacity(0.9),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: favoritesProvider.isLoading
+                  ? null
+                  : () async {
+                      try {
+                        _heartAnimationController.forward().then((_) {
+                          _heartAnimationController.reverse();
+                        });
+                        await favoritesProvider
+                            .toggleFavorite(widget.ad.id.toString());
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Ошибка при обновлении избранного'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      }
+                    },
+              child: SizedBox(
+                width: 36,
+                height: 36,
+                child: Center(
+                  child: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_outline,
+                    size: 20,
+                    color:
+                        isFavorite ? Colors.red : theme.colorScheme.onSurface,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -74,17 +111,7 @@ class _AdCardState extends State<AdCard> {
     final theme = Theme.of(context);
 
     if (widget.ad.images.isEmpty) {
-      return Container(
-        height: 200,
-        color: theme.colorScheme.surfaceVariant,
-        child: Center(
-          child: Icon(
-            Icons.image_not_supported,
-            color: theme.colorScheme.onSurfaceVariant,
-            size: 32,
-          ),
-        ),
-      );
+      return const SizedBox(height: 0);
     }
 
     return Stack(
@@ -258,30 +285,32 @@ class _AdCardState extends State<AdCard> {
           Stack(
             children: [
               _buildImageSlider(context),
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 80,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.4),
-                        Colors.transparent,
-                      ],
+              if (widget.ad.images.isNotEmpty) ...[
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 80,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.4),
+                          Colors.transparent,
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Positioned(
-                left: 12,
-                bottom: 12,
-                child: _buildFavoriteButton(
-                    context, isFavorite, favoritesProvider),
-              ),
+                Positioned(
+                  left: 12,
+                  bottom: 12,
+                  child: _buildFavoriteButton(
+                      context, isFavorite, favoritesProvider),
+                ),
+              ],
             ],
           ),
           Padding(
@@ -332,6 +361,28 @@ class _AdCardState extends State<AdCard> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
+                    // Share button
+                    IconButton(
+                      onPressed: () {
+                        final shareText = '''
+${widget.ad.title}
+
+${widget.ad.description}
+
+Телефон: ${widget.ad.phone}
+
+Скачай приложение Аймак 996: https://aimak996.kg
+                        ''';
+                        Share.share(shareText.trim());
+                      },
+                      icon: const Icon(Icons.share),
+                      tooltip: 'Поделиться',
+                      style: IconButton.styleFrom(
+                        backgroundColor: theme.colorScheme.surfaceVariant,
+                        foregroundColor: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -439,7 +490,17 @@ class _AdCardState extends State<AdCard> {
       );
     }
 
-    return cardContent;
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AdDetailScreen(ad: widget.ad),
+          ),
+        );
+      },
+      child: cardContent,
+    );
   }
 
   bool _needsExpansion(BuildContext context) {

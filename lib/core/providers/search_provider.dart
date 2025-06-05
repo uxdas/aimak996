@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:projects/data/models/ad_model.dart'; // путь к твоей модели
 
 class SearchProvider extends ChangeNotifier {
@@ -24,10 +25,10 @@ class SearchProvider extends ChangeNotifier {
         final List data = jsonDecode(response.body);
         results = data.map((item) => AdModel.fromJson(item)).toList();
       } else {
-        error = 'Ошибка сервера';
+        error = 'server_error'.tr();
       }
     } catch (e) {
-      error = 'Ошибка сети';
+      error = 'network_error'.tr();
     }
 
     isLoading = false;

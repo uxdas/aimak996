@@ -1,6 +1,7 @@
 // lib/data/services/category_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:projects/data/models/category_model.dart';
 
 class CategoryService {
@@ -12,7 +13,7 @@ class CategoryService {
       final List data = jsonDecode(response.body);
       return data.map((e) => CategoryModel.fromJson(e)).toList();
     } else {
-      throw Exception('Категорияларды жүктөө мүмкүн болбоду');
+      throw Exception('error_loading_categories'.tr());
     }
   }
 }

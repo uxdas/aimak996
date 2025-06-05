@@ -3,6 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:projects/features/favorites/favorites_screen.dart';
 import 'package:projects/features/about/about_screen.dart';
+import 'package:projects/features/about/about_company_screen.dart';
+import 'package:projects/features/about/feedback_screen.dart';
+import 'package:projects/features/about/developer_screen.dart';
 import 'package:projects/features/district/district_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -10,7 +13,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:projects/core/widgets/theme_toggle_button.dart';
 import 'package:share_plus/share_plus.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends StatefulWidget {
+  static const String _whatsappNumber = '996999109190';
+
   final bool isDark;
   final VoidCallback toggleTheme;
 
@@ -20,14 +25,55 @@ class AppDrawer extends StatelessWidget {
     required this.toggleTheme,
   });
 
+  @override
+  State<AppDrawer> createState() => _AppDrawerState();
+}
+
+class _AppDrawerState extends State<AppDrawer>
+    with SingleTickerProviderStateMixin {
+  bool _aboutMenuExpanded = false;
+  late AnimationController _animationController;
+  late Animation<double> _expandAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   Future<void> _launchWhatsApp(BuildContext context, String number) async {
     final uri = Uri.parse('https://wa.me/$number');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть WhatsApp')),
+        SnackBar(content: Text('whatsapp_error'.tr())),
       );
+    }
+  }
+
+  void _toggleAboutMenu() {
+    setState(() {
+      _aboutMenuExpanded = !_aboutMenuExpanded;
+    });
+
+    if (_aboutMenuExpanded) {
+      _animationController.forward();
+    } else {
+      _animationController.reverse();
     }
   }
 
@@ -36,6 +82,57 @@ class AppDrawer extends StatelessWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    bool isSubItem = false,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: isSubItem ? 32 : 16,
+        vertical: 4,
+      ),
+      child: Material(
+        color: isDarkMode
+            ? Colors.white.withOpacity(isSubItem ? 0.05 : 0.1)
+            : Color(isSubItem ? 0xFFF0F4FF : 0xFFE8F0FE),
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          child: Container(
+            height: 44,
+            padding: EdgeInsets.symmetric(horizontal: isSubItem ? 8 : 12),
+            child: Row(
+              children: [
+                if (isSubItem) const SizedBox(width: 8),
+                Icon(
+                  icon,
+                  size: isSubItem ? 20 : 22,
+                  color: isDarkMode ? Colors.white : const Color(0xFF1E3A8A),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: isSubItem ? 14 : 15,
+                    fontWeight: isSubItem ? FontWeight.w400 : FontWeight.w500,
+                    color: isDarkMode ? Colors.white : const Color(0xFF1E3A8A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandableDrawerItem({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    required bool isExpanded,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -60,11 +157,22 @@ class AppDrawer extends StatelessWidget {
                   color: isDarkMode ? Colors.white : const Color(0xFF1E3A8A),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color:
+                          isDarkMode ? Colors.white : const Color(0xFF1E3A8A),
+                    ),
+                  ),
+                ),
+                AnimatedRotation(
+                  turns: isExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
                     color: isDarkMode ? Colors.white : const Color(0xFF1E3A8A),
                   ),
                 ),
@@ -144,10 +252,10 @@ class AppDrawer extends StatelessWidget {
                               border: Border.all(color: Colors.white, width: 1),
                               color: Colors.white.withOpacity(0.1),
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Text(
-                                'Район жөнүндө',
-                                style: TextStyle(
+                                'drawer_district'.tr(),
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
@@ -166,7 +274,7 @@ class AppDrawer extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Text(
-              'НООКАТ 996',
+              'app_title'.tr(),
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.5,
@@ -196,7 +304,7 @@ class AppDrawer extends StatelessWidget {
             title: 'add_ad'.tr(),
             onTap: () async {
               Navigator.pop(context);
-              await _launchWhatsApp(context, '996999109190');
+              await _launchWhatsApp(context, AppDrawer._whatsappNumber);
             },
           ),
           const SizedBox(height: 4),
@@ -213,18 +321,65 @@ class AppDrawer extends StatelessWidget {
             },
           ),
           const SizedBox(height: 4),
-          _buildDrawerItem(
+
+          // Расширяемое меню "О нас"
+          _buildExpandableDrawerItem(
             context: context,
             icon: Icons.group_outlined,
             title: 'drawer_about_us'.tr(),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AboutScreen()),
-              );
-            },
+            onTap: _toggleAboutMenu,
+            isExpanded: _aboutMenuExpanded,
           ),
+
+          // Подменю "О нас"
+          SizeTransition(
+            sizeFactor: _expandAnimation,
+            child: Column(
+              children: [
+                _buildDrawerItem(
+                  context: context,
+                  icon: Icons.info_outline,
+                  title: 'about_title'.tr(),
+                  isSubItem: true,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AboutScreen()),
+                    );
+                  },
+                ),
+                _buildDrawerItem(
+                  context: context,
+                  icon: Icons.feedback_outlined,
+                  title: 'feedback_menu'.tr(),
+                  isSubItem: true,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const FeedbackScreen()),
+                    );
+                  },
+                ),
+                _buildDrawerItem(
+                  context: context,
+                  icon: Icons.code,
+                  title: 'developer_menu'.tr(),
+                  isSubItem: true,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const DeveloperScreen()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+
           const Spacer(),
           Container(
             decoration: BoxDecoration(
@@ -240,13 +395,13 @@ class AppDrawer extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ThemeToggleButton(isDark: isDark, toggleTheme: toggleTheme),
+                ThemeToggleButton(
+                    isDark: widget.isDark, toggleTheme: widget.toggleTheme),
                 _buildCircleButton(
                   context,
                   Icons.share,
                   () {
-                    Share.share(
-                        'Скачивай приложение для объявлений в Ноокате: https://aimak996.kg');
+                    Share.share('share_text'.tr());
                   },
                 ),
                 _buildCircleButton(
