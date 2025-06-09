@@ -295,29 +295,15 @@ class _CustomAppBarState extends State<CustomAppBar>
 
                             return Padding(
                               padding: EdgeInsets.only(
-                                right: isLast ? 12 : 6,
+                                right: isLast ? 12 : 3,
                               ),
-                              child: TweenAnimationBuilder<double>(
-                                tween: Tween(
-                                  begin: 0.0,
-                                  end: isActive ? 1.0 : 0.0,
-                                ),
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOutCubic,
-                                builder: (context, animationValue, child) {
-                                  return Transform.scale(
-                                    scale: 0.9 + (animationValue * 0.1),
-                                    child: CategoryButton(
-                                      icon: category.iconData,
-                                      label: category.name,
-                                      isActive: isActive,
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        categoryProvider
-                                            .selectCategory(category.id);
-                                      },
-                                    ),
-                                  );
+                              child: CategoryButton(
+                                icon: category.iconData,
+                                label: category.name,
+                                isActive: isActive,
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  categoryProvider.selectCategory(category.id);
                                 },
                               ),
                             );
@@ -329,6 +315,7 @@ class _CustomAppBarState extends State<CustomAppBar>
                 },
               ),
             ),
+            const SizedBox(height: 5),
           ],
         ),
       ),

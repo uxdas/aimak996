@@ -11,6 +11,7 @@ import 'package:projects/core/providers/favorites_provider.dart';
 import 'package:projects/widgets/telegram_refresh_indicator.dart';
 import 'package:projects/features/details/ad_detail_screen.dart';
 import 'package:share_plus/share_plus.dart';
+import 'dart:math';
 
 class AdCard extends StatefulWidget {
   final AdModel ad;
@@ -31,6 +32,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
   int _currentImageIndex = 0;
   late AnimationController _heartAnimationController;
   late Animation<double> _heartScaleAnimation;
+  final List<Widget> _floatingHearts = [];
 
   @override
   void initState() {
@@ -39,12 +41,73 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _heartScaleAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(
-        parent: _heartAnimationController,
-        curve: Curves.elasticOut,
-      ),
-    );
+    _heartScaleAnimation = Tween<double>(begin: 1.0, end: 1.5)
+        .chain(CurveTween(curve: Curves.elasticOut))
+        .animate(_heartAnimationController);
+  }
+
+  void _onLike(FavoritesProvider favoritesProvider, bool isFavorite) async {
+    _heartAnimationController.forward(from: 0.0);
+    final colors = [
+      Colors.red,
+      Colors.pinkAccent,
+      Colors.purpleAccent,
+      Colors.orangeAccent,
+      Colors.deepPurple,
+      Colors.pink,
+      Colors.redAccent
+    ];
+    final random = Random();
+    for (int i = 0; i < 12; i++) {
+      // Угол от 70° до 110° (в радианах)
+      final angle =
+          (pi / 2) + (random.nextDouble() - 0.5) * (pi / 9); // pi/2 ± pi/18
+      final distance = 80 + random.nextDouble() * 40;
+      final dx = cos(angle) * distance;
+      final dy = -sin(angle) * distance;
+      final color = colors[random.nextInt(colors.length)];
+      final size = 18.0 + random.nextDouble() * 14;
+      final opacity = 0.7 + random.nextDouble() * 0.3;
+      final rotation = (random.nextDouble() - 0.5) * 0.8;
+      Future.delayed(Duration(milliseconds: i * 30), () {
+        _addFloatingHeart(
+          dx: dx,
+          dy: dy,
+          opacity: opacity,
+          color: color,
+          rotation: rotation,
+          size: size,
+        );
+      });
+    }
+    await favoritesProvider.toggleFavorite(widget.ad);
+  }
+
+  void _addFloatingHeart({
+    double dx = 0,
+    double dy = -80,
+    double opacity = 1,
+    required Color color,
+    double rotation = 0,
+    double size = 24,
+  }) {
+    final key = UniqueKey();
+    setState(() {
+      _floatingHearts.add(_FloatingHeart(
+        key: key,
+        dx: dx,
+        dy: dy,
+        opacity: opacity,
+        color: color,
+        rotation: rotation,
+        size: size,
+        onEnd: () {
+          setState(() {
+            _floatingHearts.removeWhere((w) => w.key == key);
+          });
+        },
+      ));
+    });
   }
 
   @override
@@ -57,53 +120,43 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
       FavoritesProvider favoritesProvider) {
     final theme = Theme.of(context);
 
-    return AnimatedBuilder(
-      animation: _heartScaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _heartScaleAnimation.value,
-          child: Material(
-            type: MaterialType.circle,
-            elevation: 2,
-            color: theme.colorScheme.surface.withOpacity(0.9),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: favoritesProvider.isLoading
-                  ? null
-                  : () async {
-                      try {
-                        _heartAnimationController.forward().then((_) {
-                          _heartAnimationController.reverse();
-                        });
-                        await favoritesProvider
-                            .toggleFavorite(widget.ad.id.toString());
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Ошибка при обновлении избранного'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        }
-                      }
-                    },
-              child: SizedBox(
-                width: 36,
-                height: 36,
-                child: Center(
-                  child: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_outline,
-                    size: 20,
-                    color:
-                        isFavorite ? Colors.red : theme.colorScheme.onSurface,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ..._floatingHearts,
+        AnimatedBuilder(
+          animation: _heartScaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _heartScaleAnimation.value,
+              child: Material(
+                type: MaterialType.circle,
+                elevation: 2,
+                color: theme.colorScheme.surface.withOpacity(0.9),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: favoritesProvider.isLoading
+                      ? null
+                      : () => _onLike(favoritesProvider, isFavorite),
+                  child: SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: Center(
+                      child: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_outline,
+                        size: 24,
+                        color: isFavorite
+                            ? Colors.red
+                            : theme.colorScheme.onSurface,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -176,62 +229,6 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
           },
         ),
         if (widget.ad.images.length > 1) ...[
-          // Navigation arrows
-          Positioned.fill(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerRight,
-                      end: Alignment.centerLeft,
-                      colors: [
-                        Colors.black.withOpacity(0),
-                        Colors.black.withOpacity(0.3),
-                      ],
-                    ),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                    color: Colors.white,
-                    onPressed: () {
-                      if (_currentImageIndex > 0) {
-                        setState(() {
-                          _currentImageIndex--;
-                        });
-                      }
-                    },
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.black.withOpacity(0),
-                        Colors.black.withOpacity(0.3),
-                      ],
-                    ),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios_rounded),
-                    color: Colors.white,
-                    onPressed: () {
-                      if (_currentImageIndex < widget.ad.images.length - 1) {
-                        setState(() {
-                          _currentImageIndex++;
-                        });
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
           // Bullets indicator
           Positioned(
             left: 0,
@@ -263,7 +260,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final favoritesProvider = context.watch<FavoritesProvider>();
-    final isFavorite = favoritesProvider.isFavorite(widget.ad.id.toString());
+    final isFavorite = favoritesProvider.isFavorite(widget.ad.id);
 
     final dateTime = DateTime.tryParse(widget.ad.createdAt) ?? DateTime.now();
     final timeStr = DateFormat('HH:mm').format(dateTime);
@@ -361,28 +358,6 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    // Share button
-                    IconButton(
-                      onPressed: () {
-                        final shareText = '''
-${widget.ad.title}
-
-${widget.ad.description}
-
-Телефон: ${widget.ad.phone}
-
-Скачай приложение Аймак 996: https://aimak996.kg
-                        ''';
-                        Share.share(shareText.trim());
-                      },
-                      icon: const Icon(Icons.share),
-                      tooltip: 'Поделиться',
-                      style: IconButton.styleFrom(
-                        backgroundColor: theme.colorScheme.surfaceVariant,
-                        foregroundColor: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -440,7 +415,6 @@ ${widget.ad.description}
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
-                    const SizedBox(width: 8),
                     Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFF008B85),
@@ -474,6 +448,7 @@ ${widget.ad.description}
                         ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                   ],
                 ),
               ],
@@ -518,5 +493,92 @@ ${widget.ad.description}
         maxWidth: MediaQuery.of(context).size.width - 32); // 32 = padding * 2
 
     return textPainter.didExceedMaxLines;
+  }
+}
+
+class _FloatingHeart extends StatefulWidget {
+  final VoidCallback onEnd;
+  final double dx;
+  final double dy;
+  final double opacity;
+  final Color color;
+  final double rotation;
+  final double size;
+  const _FloatingHeart({
+    super.key,
+    required this.onEnd,
+    this.dx = 0,
+    this.dy = -80,
+    this.opacity = 1,
+    required this.color,
+    this.rotation = 0,
+    this.size = 24,
+  });
+
+  @override
+  State<_FloatingHeart> createState() => _FloatingHeartState();
+}
+
+class _FloatingHeartState extends State<_FloatingHeart>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _move;
+  late Animation<double> _fadeOut;
+  late Animation<double> _scale;
+  late Animation<double> _rotation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _move = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _fadeOut = Tween<double>(begin: widget.opacity, end: 0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
+    _scale = Tween<double>(begin: 1.3, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    );
+    _rotation =
+        Tween<double>(begin: 0, end: widget.rotation).animate(_controller);
+    _controller.forward();
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        widget.onEnd();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, child) => Positioned(
+        bottom: 0,
+        left: widget.dx * _move.value,
+        child: Opacity(
+          opacity: _fadeOut.value,
+          child: Transform.translate(
+            offset: Offset(0, widget.dy * _move.value),
+            child: Transform.rotate(
+              angle: _rotation.value,
+              child: Transform.scale(
+                scale: _scale.value,
+                child: Icon(Icons.favorite,
+                    color: widget.color, size: widget.size),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

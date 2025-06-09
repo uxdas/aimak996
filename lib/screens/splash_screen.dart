@@ -36,16 +36,25 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Timer(const Duration(seconds: 1), () {
+    Timer(const Duration(seconds: 2), () {
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => HomeScreen(
-              isDark: widget.isDark,
-              toggleTheme: widget.toggleTheme,
+        try {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => HomeScreen(
+                isDark: widget.isDark,
+                toggleTheme: widget.toggleTheme,
+              ),
             ),
-          ),
-        );
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Ошибка при запуске приложения: $e'),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
       }
     });
   }

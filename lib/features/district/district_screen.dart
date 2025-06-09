@@ -63,146 +63,188 @@ class DistrictScreen extends StatelessWidget {
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.white,
+      backgroundColor: isDarkMode ? theme.colorScheme.background : Colors.white,
       appBar: AppBar(
-        title: Text('about'.tr()),
+        title: Text('about'.tr() + ' 🏞️'),
         centerTitle: true,
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Ноокат району',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+            // Историческая справка
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 18),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withOpacity(0.07),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('📜', style: TextStyle(fontSize: 26)),
+                      const SizedBox(width: 10),
+                      Text(
+                        'district_history_title'.tr(),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.primaryColor,
+                        ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'district_history'.tr(),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                      height: 1.5,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Ош областынын түштүк-батышында жайгашкан',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        fontSize: 22,
-                        fontWeight: FontWeight.w500,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 22),
+            // Общая информация
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 18),
+              decoration: BoxDecoration(
+                color: isDarkMode ? theme.colorScheme.surface : Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  if (!isDarkMode)
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.location_city, color: theme.primaryColor),
+                      const SizedBox(width: 10),
+                      Text(
+                        '${'district_center'.tr()}: ',
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
-                    ),
-                  ],
-                ),
+                      Text(
+                        'district_center_value'.tr(),
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(Icons.people_outline, color: theme.primaryColor),
+                      const SizedBox(width: 10),
+                      Text('${'district_population'.tr()}: ',
+                          style: theme.textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600)),
+                      Text('district_population_value'.tr(),
+                          style: theme.textTheme.bodyMedium),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(Icons.landscape, color: theme.primaryColor),
+                      const SizedBox(width: 10),
+                      Text('${'district_area'.tr()}: ',
+                          style: theme.textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600)),
+                      Text('district_area_value'.tr(),
+                          style: theme.textTheme.bodyMedium),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(Icons.height, color: theme.primaryColor),
+                      const SizedBox(width: 10),
+                      Text('${'district_elevation'.tr()}: ',
+                          style: theme.textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600)),
+                      Text('district_elevation_value'.tr(),
+                          style: theme.textTheme.bodyMedium),
+                    ],
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'district_info'.tr(),
-                      style: theme.textTheme.titleLarge,
+            const SizedBox(height: 22),
+            // Интересные факты
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 18),
+              decoration: BoxDecoration(
+                color: theme.primaryColor.withOpacity(0.07),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('🌄', style: TextStyle(fontSize: 26)),
+                      const SizedBox(width: 10),
+                      Text(
+                        'district_facts_title'.tr(),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'district_facts'.tr(),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                      height: 1.5,
                     ),
-                    const SizedBox(height: 16),
-                    _buildInfoItem(
-                      context,
-                      Icons.location_city,
-                      'district_center'.tr(),
-                      'district_center_value'.tr(),
-                    ),
-                    _buildInfoItem(
-                      context,
-                      Icons.people_outline,
-                      'district_population'.tr(),
-                      'district_population_value'.tr(),
-                    ),
-                    _buildInfoItem(
-                      context,
-                      Icons.landscape,
-                      'district_area'.tr(),
-                      'district_area_value'.tr(),
-                    ),
-                    _buildInfoItem(
-                      context,
-                      Icons.height,
-                      'district_elevation'.tr(),
-                      'district_elevation_value'.tr(),
-                    ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Өнөр жайы',
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Ноокат району айыл чарба өнүктүрүлгөн аймак. '
-                      'Негизги тармактары: дыйканчылык, мал чарбачылыk, '
-                      'тоо-кен өнөр жайы.',
-                    ),
-                    const SizedBox(height: 16),
-                    OutlinedButton.icon(
-                      onPressed: _launchMap,
-                      icon: const FaIcon(FontAwesomeIcons.locationDot),
-                      label: const Text('Картадан көрүү'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Байланыш',
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    ListTile(
-                      leading: const Icon(Icons.phone),
-                      title: const Text('Акимчилик'),
-                      subtitle: const Text('+996 3230 5-11-11'),
-                      onTap: () async {
-                        final uri = Uri.parse('tel:+996322051111');
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri);
-                        }
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.email),
-                      title: const Text('Электрондук почта'),
-                      subtitle: const Text('nookat@osh.gov.kg'),
-                      onTap: () async {
-                        final uri = Uri.parse('mailto:nookat@osh.gov.kg');
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri);
-                        }
-                      },
-                    ),
-                  ],
+            const SizedBox(height: 28),
+            // Кнопка карта
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _launchMap,
+                icon: const FaIcon(FontAwesomeIcons.locationDot),
+                label: const Text('Картадан көрүү'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
                 ),
               ),
             ),

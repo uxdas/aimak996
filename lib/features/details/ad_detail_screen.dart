@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:projects/data/models/ad_model.dart';
-import 'package:projects/data/services/ad_service.dart';
-import 'package:projects/features/home/ad_buttons_row.dart';
-import 'package:projects/core/providers/favorites_provider.dart';
 import 'package:projects/screens/full_image_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:projects/data/models/ad_model.dart';
+import 'package:projects/core/providers/favorites_provider.dart';
+import 'package:projects/core/providers/theme_provider.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:projects/features/home/ad_buttons_row.dart';
+import 'dart:math';
 
 class AdDetailScreen extends StatefulWidget {
   final AdModel ad;
@@ -25,10 +26,9 @@ class _AdDetailScreenState extends State<AdDetailScreen>
   int _currentSlide = 0;
   late AnimationController _heartAnimationController;
   late Animation<double> _heartScaleAnimation;
-  late AnimationController _errorShakeController;
-  late Animation<double> _errorShakeAnimation;
   late AnimationController _imageBounceController;
   late Animation<double> _imageBounceAnimation;
+  final List<Widget> _floatingHearts = [];
 
   @override
   void initState() {
@@ -39,68 +39,102 @@ class _AdDetailScreenState extends State<AdDetailScreen>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _heartScaleAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(
-        parent: _heartAnimationController,
-        curve: Curves.elasticOut,
-      ),
-    );
-
-    // Error shake animation controller
-    _errorShakeController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _errorShakeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _errorShakeController,
-        curve: Curves.elasticOut,
-      ),
-    );
+    _heartScaleAnimation = Tween<double>(begin: 1.0, end: 1.5)
+        .chain(CurveTween(curve: Curves.elasticOut))
+        .animate(_heartAnimationController);
 
     // Image bounce animation controller
     _imageBounceController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _imageBounceAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _imageBounceController,
-        curve: Curves.bounceOut,
-      ),
-    );
+    _imageBounceAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _imageBounceController,
+      curve: Curves.elasticOut,
+    ));
+  }
+
+  void _onLike(FavoritesProvider favoritesProvider, AdModel ad) async {
+    _heartAnimationController.forward(from: 0.0);
+    final colors = [
+      Colors.red,
+      Colors.pinkAccent,
+      Colors.purpleAccent,
+      Colors.orangeAccent,
+      Colors.deepPurple,
+      Colors.pink,
+      Colors.redAccent
+    ];
+    final random =
+        Random(DateTime.now().millisecondsSinceEpoch + _floatingHearts.length);
+    for (int i = 0; i < 12; i++) {
+      // Угол от 70° до 110° (в радианах)
+      final angle =
+          (pi / 2) + (random.nextDouble() - 0.5) * (pi / 9); // pi/2 ± pi/18
+      final distance = 80 + random.nextDouble() * 40;
+      final dx = cos(angle) * distance;
+      final dy = -sin(angle) * distance;
+      final color = colors[random.nextInt(colors.length)];
+      final size = 18.0 + random.nextDouble() * 14;
+      final opacity = 0.7 + random.nextDouble() * 0.3;
+      final rotation = (random.nextDouble() - 0.5) * 0.8;
+      Future.delayed(Duration(milliseconds: i * 30), () {
+        _addFloatingHeart(
+          dx: dx,
+          dy: dy,
+          opacity: opacity,
+          color: color,
+          rotation: rotation,
+          size: size,
+        );
+      });
+    }
+    await favoritesProvider.toggleFavorite(ad);
+  }
+
+  void _addFloatingHeart({
+    double dx = 0,
+    double dy = -80,
+    double opacity = 1,
+    required Color color,
+    double rotation = 0,
+    double size = 24,
+  }) {
+    final key = UniqueKey();
+    setState(() {
+      _floatingHearts.add(_FloatingHeart(
+        key: key,
+        dx: dx,
+        dy: dy,
+        opacity: opacity,
+        color: color,
+        rotation: rotation,
+        size: size,
+        onEnd: () {
+          setState(() {
+            _floatingHearts.removeWhere((w) => w.key == key);
+          });
+        },
+      ));
+    });
   }
 
   @override
   void dispose() {
     _heartAnimationController.dispose();
-    _errorShakeController.dispose();
     _imageBounceController.dispose();
     super.dispose();
-  }
-
-  Widget _buildShakeWidget(Widget child) {
-    return AnimatedBuilder(
-      animation: _errorShakeAnimation,
-      builder: (context, child) {
-        final shakeValue = _errorShakeAnimation.value;
-        final dx =
-            (shakeValue * 10) * (1 - shakeValue) * (shakeValue < 0.5 ? 1 : -1);
-        return Transform.translate(
-          offset: Offset(dx, 0),
-          child: child,
-        );
-      },
-      child: child,
-    );
   }
 
   Widget _buildBounceWidget(Widget child) {
     return AnimatedBuilder(
       animation: _imageBounceAnimation,
       builder: (context, child) {
-        return Transform.scale(
-          scale: 0.7 + (_imageBounceAnimation.value * 0.3),
+        return Transform.translate(
+          offset: Offset(_imageBounceAnimation.value * 10, 0),
           child: child,
         );
       },
@@ -110,29 +144,30 @@ class _AdDetailScreenState extends State<AdDetailScreen>
 
   Widget _buildFavoriteButton(
       bool isFavorite, FavoritesProvider favoritesProvider, AdModel ad) {
-    return AnimatedBuilder(
-      animation: _heartScaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _heartScaleAnimation.value,
-          child: FloatingActionButton(
-            heroTag: "fav_btn",
-            mini: true,
-            backgroundColor: Colors.white,
-            onPressed: () async {
-              _heartAnimationController.forward().then((_) {
-                _heartAnimationController.reverse();
-              });
-              await favoritesProvider.toggleFavorite(ad.id.toString());
-            },
-            child: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_outline,
-              color: isFavorite ? Colors.red : Colors.grey[600],
-              size: 20,
-            ),
-          ),
-        );
-      },
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ..._floatingHearts,
+        AnimatedBuilder(
+          animation: _heartScaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _heartScaleAnimation.value,
+              child: FloatingActionButton(
+                heroTag: "fav_btn",
+                mini: true,
+                backgroundColor: Colors.white,
+                onPressed: () => _onLike(favoritesProvider, ad),
+                child: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_outline,
+                  color: isFavorite ? Colors.red : Colors.grey[600],
+                  size: 24,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -169,7 +204,7 @@ ${ad.description}
     final dateTime = DateTime.tryParse(ad.createdAt) ?? DateTime.now();
     final timeStr = DateFormat('HH:mm').format(dateTime);
     final dateStr = DateFormat('dd.MM.yyyy').format(dateTime);
-    final categoryName = _getCategoryName(ad.categoryId);
+    final categoryName = ad.category;
     final isFavorite = favoritesProvider.isFavorite(ad.id.toString());
 
     return Scaffold(
@@ -251,29 +286,16 @@ ${ad.description}
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            TweenAnimationBuilder<double>(
-                                              duration: const Duration(
-                                                  milliseconds: 800),
-                                              tween:
-                                                  Tween(begin: 0.0, end: 1.0),
-                                              builder: (context, value, child) {
-                                                return Transform.scale(
-                                                  scale: value,
-                                                  child: Icon(
-                                                    Icons.broken_image,
-                                                    size: 48,
-                                                    color: Colors.grey[400],
-                                                  ),
-                                                );
-                                              },
+                                            Icon(
+                                              Icons.error_outline,
+                                              size: 48,
+                                              color: theme.colorScheme.error
+                                                  .withOpacity(0.8),
                                             ),
                                             const SizedBox(height: 8),
                                             Text(
-                                              'Фото жүктөлгөн жок',
-                                              style: TextStyle(
-                                                color: Colors.grey[600],
-                                                fontSize: 12,
-                                              ),
+                                              'error_loading_image'.tr(),
+                                              style: theme.textTheme.bodyMedium,
                                             ),
                                           ],
                                         ),
@@ -285,32 +307,31 @@ ${ad.description}
                             );
                           },
                         ),
-                        if (ad.images.length > 1) ...[
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: ad.images.asMap().entries.map((entry) {
-                              final isActive = entry.key == _currentSlide;
-                              return Container(
-                                width: isActive ? 12 : 8,
-                                height: isActive ? 12 : 8,
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 4),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: isActive
-                                      ? theme.primaryColor
-                                      : Colors.grey.shade300,
+                        if (ad.images.length > 1)
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                ad.images.length,
+                                (index) => Container(
+                                  width: 8,
+                                  height: 8,
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 4),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: _currentSlide == index
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.surfaceVariant,
+                                  ),
                                 ),
-                              );
-                            }).toList(),
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                        ],
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
 
                 // Content card
@@ -411,25 +432,91 @@ ${ad.description}
       ),
     );
   }
+}
 
-  String _getCategoryName(int categoryId) {
-    switch (categoryId) {
-      case 1:
-        return 'category_real_estate'.tr();
-      case 2:
-        return 'category_auto'.tr();
-      case 3:
-        return 'category_animals'.tr();
-      case 4:
-        return 'category_home'.tr();
-      case 5:
-        return 'category_services'.tr();
-      case 7:
-        return 'category_transport'.tr();
-      case 9:
-        return 'Жаңылыктар';
-      default:
-        return 'unknown_category'.tr();
-    }
+class _FloatingHeart extends StatefulWidget {
+  final VoidCallback onEnd;
+  final double dx;
+  final double dy;
+  final double opacity;
+  final Color color;
+  final double rotation;
+  final double size;
+  const _FloatingHeart({
+    super.key,
+    required this.onEnd,
+    this.dx = 0,
+    this.dy = -80,
+    this.opacity = 1,
+    required this.color,
+    this.rotation = 0,
+    this.size = 24,
+  });
+
+  @override
+  State<_FloatingHeart> createState() => _FloatingHeartState();
+}
+
+class _FloatingHeartState extends State<_FloatingHeart>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _move;
+  late Animation<double> _fadeOut;
+  late Animation<double> _scale;
+  late Animation<double> _rotation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _move = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _fadeOut = Tween<double>(begin: widget.opacity, end: 0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
+    _scale = Tween<double>(begin: 1.3, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    );
+    _rotation =
+        Tween<double>(begin: 0, end: widget.rotation).animate(_controller);
+    _controller.forward();
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        widget.onEnd();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, child) => Positioned(
+        bottom: 0,
+        left: widget.dx * _move.value,
+        child: Opacity(
+          opacity: _fadeOut.value,
+          child: Transform.translate(
+            offset: Offset(0, widget.dy * _move.value),
+            child: Transform.rotate(
+              angle: _rotation.value,
+              child: Transform.scale(
+                scale: _scale.value,
+                child: Icon(Icons.favorite,
+                    color: widget.color, size: widget.size),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

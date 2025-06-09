@@ -8,14 +8,19 @@ import 'package:projects/data/services/ad_service.dart';
 import 'package:projects/features/home/ad_card.dart';
 import 'package:projects/data/models/ad_model.dart';
 
-class FavoritesScreen extends StatelessWidget {
+class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
 
+  @override
+  State<FavoritesScreen> createState() => _FavoritesScreenState();
+}
+
+class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     final favoritesProvider = context.watch<FavoritesProvider>();
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final favoriteIds = favoritesProvider.favorites;
+    final favoriteAds = favoritesProvider.favoritesList;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -31,7 +36,7 @@ class FavoritesScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          if (favoriteIds.isNotEmpty)
+          if (favoriteAds.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_forever),
               tooltip: 'clear_all'.tr(),
@@ -60,7 +65,7 @@ class FavoritesScreen extends StatelessWidget {
             ),
         ],
       ),
-      body: favoriteIds.isEmpty
+      body: favoriteAds.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -80,110 +85,40 @@ class FavoritesScreen extends StatelessWidget {
                 ],
               ),
             )
-          : FutureBuilder<List<AdModel>>(
-              future: AdService().fetchFavoriteAds(favoriteIds),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: favoriteAds.length,
+              itemBuilder: (_, i) {
+                final ad = favoriteAds[i];
+                return Dismissible(
+                  key: ValueKey(ad.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    padding: const EdgeInsets.only(right: 20),
+                    alignment: Alignment.centerRight,
+                    color: theme.colorScheme.error,
+                    child: Icon(
+                      Icons.delete,
+                      color: theme.colorScheme.onError,
+                    ),
+                  ),
+                  onDismissed: (_) {
+                    favoritesProvider.toggleFavorite(ad);
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 60,
-                          color: theme.colorScheme.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '${"error_occurred".tr()}: ${snapshot.error}',
-                          style: TextStyle(
-                            color: theme.colorScheme.error,
-                            fontSize: 16,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('removed_from_favorites'.tr()),
+                        action: SnackBarAction(
+                          label: 'undo'.tr(),
                           onPressed: () {
-                            (context as Element).markNeedsBuild();
+                            favoritesProvider.toggleFavorite(ad);
                           },
-                          icon: const Icon(Icons.refresh),
-                          label: Text('reload_again'.tr()),
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: theme.colorScheme.onPrimary,
-                            backgroundColor: theme.colorScheme.primary,
-                          ),
                         ),
-                      ],
-                    ),
-                  );
-                }
-
-                final favoriteAds = snapshot.data ?? [];
-
-                if (favoriteAds.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.favorite_border,
-                          size: 64,
-                          color: isDark ? Colors.white54 : Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'no_favorites'.tr(),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: isDark ? Colors.white70 : Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: favoriteAds.length,
-                  itemBuilder: (_, i) {
-                    final ad = favoriteAds[i];
-                    return Dismissible(
-                      key: ValueKey(ad.id),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        padding: const EdgeInsets.only(right: 20),
-                        alignment: Alignment.centerRight,
-                        color: theme.colorScheme.error,
-                        child: Icon(
-                          Icons.delete,
-                          color: theme.colorScheme.onError,
-                        ),
+                        duration: const Duration(seconds: 3),
                       ),
-                      onDismissed: (_) {
-                        favoritesProvider.toggleFavorite(ad.id.toString());
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('removed_from_favorites'.tr()),
-                            action: SnackBarAction(
-                              label: 'undo'.tr(),
-                              onPressed: () {
-                                favoritesProvider
-                                    .toggleFavorite(ad.id.toString());
-                              },
-                            ),
-                            duration: const Duration(seconds: 3),
-                          ),
-                        );
-                      },
-                      child: AdCard(ad: ad),
                     );
                   },
+                  child: AdCard(ad: ad),
                 );
               },
             ),
