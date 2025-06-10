@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 class ThemeToggleButton extends StatefulWidget {
   final bool isDark;
@@ -17,71 +16,43 @@ class ThemeToggleButton extends StatefulWidget {
 
 class _ThemeToggleButtonState extends State<ThemeToggleButton>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _rotationAnimation;
-  late final Animation<double> _scaleAnimation;
-  late final Animation<double> _moveAnimation;
-  late final Animation<double> _morphAnimation;
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _slideAnimation;
   bool _isAnimating = false;
 
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 750),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     )..addStatusListener(_handleAnimationStatus);
 
-    _setupAnimations();
-
-    if (widget.isDark) {
-      _controller.value = 1;
-    }
-  }
-
-  void _setupAnimations() {
-    _moveAnimation = TweenSequence([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0, end: 15)
-            .chain(CurveTween(curve: Curves.easeInOutBack)),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 15, end: 0)
-            .chain(CurveTween(curve: Curves.bounceOut)),
-        weight: 1,
-      ),
-    ]).animate(_controller);
-
-    _rotationAnimation = TweenSequence([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0, end: 360)
-            .chain(CurveTween(curve: Curves.easeInOutBack)),
-        weight: 1,
-      ),
-    ]).animate(_controller);
-
     _scaleAnimation = TweenSequence([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1, end: 0.5)
-            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        tween: Tween<double>(begin: 1.0, end: 0.8)
+            .chain(CurveTween(curve: Curves.easeInOut)),
         weight: 1,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.5, end: 1)
+        tween: Tween<double>(begin: 0.8, end: 1.0)
             .chain(CurveTween(curve: Curves.elasticOut)),
         weight: 1,
       ),
     ]).animate(_controller);
 
-    _morphAnimation = TweenSequence([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0, end: 1)
-            .chain(CurveTween(curve: Curves.easeInOutCubic)),
-        weight: 1,
-      ),
-    ]).animate(_controller);
+    _slideAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    if (widget.isDark) {
+      _controller.value = 1;
+    }
   }
 
   void _handleAnimationStatus(AnimationStatus status) {
@@ -94,16 +65,20 @@ class _ThemeToggleButtonState extends State<ThemeToggleButton>
   void _handleTap() {
     if (_isAnimating) return;
 
-    setState(() {
-      _isAnimating = true;
-      if (_controller.status == AnimationStatus.completed) {
-        _controller.reverse();
-      } else {
-        _controller.forward();
+    widget.toggleTheme();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _isAnimating = true;
+          if (_controller.status == AnimationStatus.completed) {
+            _controller.reverse();
+          } else {
+            _controller.forward();
+          }
+        });
       }
     });
-
-    widget.toggleTheme();
   }
 
   @override
@@ -117,151 +92,85 @@ class _ThemeToggleButtonState extends State<ThemeToggleButton>
   void didUpdateWidget(ThemeToggleButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isDark != oldWidget.isDark && !_isAnimating) {
-      _isAnimating = true;
-      if (widget.isDark) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _isAnimating = true;
+            if (widget.isDark) {
+              _controller.forward();
+            } else {
+              _controller.reverse();
+            }
+          });
+        }
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      shape: const CircleBorder(),
-      color: Theme.of(context).primaryColor,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: _handleTap,
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Container(
-              width: 40,
-              height: 40,
-              padding: const EdgeInsets.all(8),
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: _handleTap,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              width: 50,
+              height: 28,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                color: isDark ? Colors.grey[800] : Colors.grey[300],
+              ),
               child: Stack(
-                alignment: Alignment.center,
                 children: [
-                  // Sun
-                  if (!widget.isDark || _controller.value < 1)
-                    Opacity(
-                      opacity: 1 - _controller.value,
-                      child: Transform.translate(
-                        offset: Offset(_moveAnimation.value, 0),
-                        child: Transform.rotate(
-                          angle: _rotationAnimation.value * math.pi / 180,
-                          child: Transform.scale(
-                            scale: _scaleAnimation.value,
-                            child: ShaderMask(
-                              shaderCallback: (bounds) => RadialGradient(
-                                colors: [
-                                  Colors.amber.shade300,
-                                  Colors.orange.shade600,
-                                ],
-                                center: Alignment.center,
-                                radius: 0.5,
-                              ).createShader(bounds),
-                              child: const Icon(
-                                Icons.wb_sunny_rounded,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
+                  // Icons
+                  Positioned.fill(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Icon(
+                          Icons.wb_sunny_rounded,
+                          size: 16,
+                          color: isDark ? Colors.grey[600] : Colors.amber,
                         ),
+                        Icon(
+                          Icons.nightlight_round,
+                          size: 16,
+                          color: isDark ? Colors.blue[200] : Colors.grey[600],
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Thumb
+                  Positioned(
+                    left: _slideAnimation.value * 22,
+                    top: 2,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark ? Colors.blue[200] : Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                     ),
-                  // Eclipse effect
-                  if (_controller.value > 0 && _controller.value < 1)
-                    Positioned(
-                      child: Transform.scale(
-                        scale: 0.8 + (_morphAnimation.value * 0.2),
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: RadialGradient(
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withValues(
-                                  alpha: (255 * _morphAnimation.value * 0.8)
-                                      .toDouble(),
-                                  red: 0,
-                                  green: 0,
-                                  blue: 0,
-                                ),
-                              ],
-                              stops: const [0.6, 1.0],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  // Moon
-                  if (widget.isDark || _controller.value > 0)
-                    Opacity(
-                      opacity: _controller.value,
-                      child: Transform.translate(
-                        offset: Offset(-_moveAnimation.value, 0),
-                        child: Transform.rotate(
-                          angle:
-                              (_rotationAnimation.value - 360) * math.pi / 180,
-                          child: Transform.scale(
-                            scale: _scaleAnimation.value,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                ShaderMask(
-                                  shaderCallback: (bounds) => LinearGradient(
-                                    colors: [
-                                      Colors.grey.shade300,
-                                      Colors.grey.shade500,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ).createShader(bounds),
-                                  child: const Icon(
-                                    Icons.nightlight_round,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                ),
-                                // Moon craters
-                                ...List.generate(3, (index) {
-                                  final angle = index * (2 * math.pi / 3);
-                                  const radius = 6.0;
-                                  return Positioned(
-                                    left: 12 + radius * math.cos(angle),
-                                    top: 12 + radius * math.sin(angle),
-                                    child: Container(
-                                      width: 4,
-                                      height: 4,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.grey.shade400.withValues(
-                                          alpha: 255,
-                                          red: 192,
-                                          green: 192,
-                                          blue: 192,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                  ),
                 ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

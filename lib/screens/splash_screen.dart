@@ -20,6 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacity;
+  bool _isNavigating = false;
 
   @override
   void initState() {
@@ -34,29 +35,41 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _controller, curve: Curves.easeIn),
     );
 
-    _controller.forward();
-
-    Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        try {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => HomeScreen(
-                isDark: widget.isDark,
-                toggleTheme: widget.toggleTheme,
-              ),
-            ),
-          );
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Ошибка при запуске приложения: $e'),
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
-      }
+    _controller.forward().then((_) {
+      _navigateToHome();
     });
+  }
+
+  Future<void> _navigateToHome() async {
+    if (_isNavigating || !mounted) return;
+
+    _isNavigating = true;
+
+    try {
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (!mounted) return;
+
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => HomeScreen(
+            isDark: widget.isDark,
+            toggleTheme: widget.toggleTheme,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка при запуске приложения: $e'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } finally {
+      _isNavigating = false;
+    }
   }
 
   @override
@@ -73,10 +86,21 @@ class _SplashScreenState extends State<SplashScreen>
         child: FadeTransition(
           opacity: _opacity,
           child: Image.asset(
-            'assets/images/splash.png', // путь к твоему изображению
+            'assets/images/splash.png',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
+            errorBuilder: (context, error, stackTrace) {
+              return const Center(
+                child: Text(
+                  'Аймак 996',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

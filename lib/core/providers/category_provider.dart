@@ -9,12 +9,11 @@ class CategoryProvider extends ChangeNotifier {
   List<Category> _categories = [];
   bool _isLoading = false;
   String? _error;
+  int _selectedCategoryId = 0;
 
   List<Category> get categories => _categories;
   bool get isLoading => _isLoading;
   String? get error => _error;
-
-  int _selectedCategoryId = 0;
   int get selectedCategoryId => _selectedCategoryId;
 
   Future<void> loadCategories() async {
@@ -28,7 +27,6 @@ class CategoryProvider extends ChangeNotifier {
       developer.log('CategoryProvider: Starting to load categories');
       final categories = await _categoryService.getCategories();
 
-      // Add "All" category at the beginning if it doesn't exist
       if (!categories.any((c) => c.id == 0)) {
         categories.insert(0, Categories.all);
       }
@@ -36,8 +34,7 @@ class CategoryProvider extends ChangeNotifier {
       _categories = categories;
       _error = null;
       developer.log('CategoryProvider: Categories loaded successfully');
-      developer
-          .log('CategoryProvider: Number of categories: ${_categories.length}');
+      developer.log('CategoryProvider: Number of categories: ${_categories.length}');
       for (var category in _categories) {
         developer.log('CategoryProvider: Category: ${category.toString()}');
       }
@@ -45,9 +42,7 @@ class CategoryProvider extends ChangeNotifier {
       developer.log('CategoryProvider: Error loading categories',
           error: e, stackTrace: stackTrace);
       _error = e.toString();
-      _categories = [
-        Categories.all
-      ]; // Fallback to at least showing "All" category
+      _categories = [Categories.all];
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -55,7 +50,6 @@ class CategoryProvider extends ChangeNotifier {
   }
 
   void selectCategory(int id) {
-    developer.log('CategoryProvider: Selecting category with id: $id');
     _selectedCategoryId = id;
     notifyListeners();
   }

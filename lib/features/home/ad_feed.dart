@@ -125,10 +125,12 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
       if (newAds.isEmpty) {
         hasMorePages = false;
       } else {
-        setState(() {
-          ads.addAll(newAds);
-          hasMorePages = newAds.length >= pageSize;
-        });
+        if (mounted) {
+          setState(() {
+            ads.addAll(newAds);
+            hasMorePages = newAds.length >= pageSize;
+          });
+        }
       }
     } catch (e) {
       debugPrint('Ошибка при загрузке дополнительных объявлений: $e');

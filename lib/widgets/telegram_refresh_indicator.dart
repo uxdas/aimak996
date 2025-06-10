@@ -13,10 +13,12 @@ class TelegramRefreshIndicator extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<TelegramRefreshIndicator> createState() => _TelegramRefreshIndicatorState();
+  State<TelegramRefreshIndicator> createState() =>
+      _TelegramRefreshIndicatorState();
 }
 
-class _TelegramRefreshIndicatorState extends State<TelegramRefreshIndicator> with SingleTickerProviderStateMixin {
+class _TelegramRefreshIndicatorState extends State<TelegramRefreshIndicator>
+    with SingleTickerProviderStateMixin {
   late AnimationController _rotationController;
 
   @override
@@ -77,7 +79,9 @@ class _TelegramRefreshIndicatorState extends State<TelegramRefreshIndicator> wit
                                 size: const Size.square(_indicatorSize),
                                 painter: _TelegramLoadingPainter(
                                   color: Theme.of(context).primaryColor,
-                                  value: loading ? null : controller.value.clamp(0.0, 1.0),
+                                  value: loading
+                                      ? null
+                                      : controller.value.clamp(0.0, 1.0),
                                   strokeWidth: _indicatorStrokeWidth,
                                 ),
                               ),
@@ -141,4 +145,4 @@ class _TelegramLoadingPainter extends CustomPainter {
         oldDelegate.value != value ||
         oldDelegate.strokeWidth != strokeWidth;
   }
-} 
+}
