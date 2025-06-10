@@ -120,11 +120,25 @@ class _ThemeToggleButtonState extends State<ThemeToggleButton>
           return Transform.scale(
             scale: _scaleAnimation.value,
             child: Container(
-              width: 50,
-              height: 28,
+              width: 68,
+              height: 40,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                color: isDark ? Colors.grey[800] : Colors.grey[300],
+                borderRadius: BorderRadius.circular(20),
+                color:
+                    isDark ? const Color(0xFF223A7A) : const Color(0xFF1E3A8A),
+                boxShadow: [
+                  if (isDark)
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.25),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                    ),
+                ],
+                border: Border.all(
+                  color:
+                      isDark ? Colors.white24 : Colors.white.withOpacity(0.2),
+                  width: 1.5,
+                ),
               ),
               child: Stack(
                 children: [
@@ -135,27 +149,27 @@ class _ThemeToggleButtonState extends State<ThemeToggleButton>
                       children: [
                         Icon(
                           Icons.wb_sunny_rounded,
-                          size: 16,
-                          color: isDark ? Colors.grey[600] : Colors.amber,
+                          size: 26,
+                          color: Colors.white,
                         ),
                         Icon(
                           Icons.nightlight_round,
-                          size: 16,
-                          color: isDark ? Colors.blue[200] : Colors.grey[600],
+                          size: 26,
+                          color: Colors.white,
                         ),
                       ],
                     ),
                   ),
                   // Thumb
                   Positioned(
-                    left: _slideAnimation.value * 22,
-                    top: 2,
+                    left: _slideAnimation.value * 32,
+                    top: 4,
                     child: Container(
-                      width: 24,
-                      height: 24,
+                      width: 32,
+                      height: 32,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isDark ? Colors.blue[200] : Colors.white,
+                        color: Colors.white,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),

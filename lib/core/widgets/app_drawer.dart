@@ -61,12 +61,20 @@ class _AppDrawerState extends State<AppDrawer> {
                         child: InkWell(
                           onTap: () {
                             Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const DistrictScreen(),
-                              ),
-                            );
+                            try {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const DistrictScreen(),
+                                ),
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Ошибка перехода в "О районе": $e')),
+                              );
+                            }
                           },
                           child: Container(
                             height: 36,
@@ -135,7 +143,13 @@ class _AppDrawerState extends State<AppDrawer> {
             title: 'add_ad'.tr(),
             onTap: () async {
               Navigator.pop(context);
-              await _launchWhatsApp(context, AppDrawer._whatsappNumber);
+              try {
+                await _launchWhatsApp(context, AppDrawer._whatsappNumber);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Ошибка открытия WhatsApp: $e')),
+                );
+              }
             },
           ),
           const SizedBox(height: 4),
@@ -145,10 +159,16 @@ class _AppDrawerState extends State<AppDrawer> {
             title: 'favorites'.tr(),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const FavoritesScreen()),
-              );
+              try {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Ошибка перехода в избранное: $e')),
+                );
+              }
             },
           ),
           const SizedBox(height: 4),
@@ -158,10 +178,16 @@ class _AppDrawerState extends State<AppDrawer> {
             title: 'drawer_about_us'.tr(),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AboutScreen()),
-              );
+              try {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AboutScreen()),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Ошибка перехода в "О нас": $e')),
+                );
+              }
             },
           ),
           const Spacer(),
@@ -249,9 +275,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 Icon(
                   icon,
                   size: isSubItem ? 20 : 22,
-                  color: isDarkMode
-                      ? theme.colorScheme.primary.withOpacity(0.85)
-                      : const Color(0xFF1E3A8A),
+                  color: isDarkMode ? Colors.white : const Color(0xFF1E3A8A),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -447,52 +471,32 @@ class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
             scale: _scaleAnimation.value,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              width: 85,
-              height: 36,
-              padding: const EdgeInsets.all(3),
+              width: 90,
+              height: 40,
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isKyrgyz
-                      ? [
-                          (isDarkMode
-                              ? Colors.white.withOpacity(0.15)
-                              : const Color(0xFFE8F0FE)),
-                          (isDarkMode
-                              ? Colors.white.withOpacity(0.1)
-                              : const Color(0xFFD1E3FA)),
-                        ]
-                      : [
-                          (isDarkMode
-                              ? Colors.white.withOpacity(0.1)
-                              : const Color(0xFFD1E3FA)),
-                          (isDarkMode
-                              ? Colors.white.withOpacity(0.15)
-                              : const Color(0xFFE8F0FE)),
-                        ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
+                color: isDarkMode
+                    ? const Color(0xFF223A7A)
+                    : const Color(0xFF1E3A8A),
                 borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  if (isDarkMode)
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.25),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                    ),
+                ],
                 border: Border.all(
                   color: isDarkMode
-                      ? Colors.white
-                          .withOpacity(0.2 + (_glowAnimation.value * 0.3))
-                      : const Color(0xFF1E3A8A)
-                          .withOpacity(0.2 + (_glowAnimation.value * 0.3)),
-                  width: 1 + (_glowAnimation.value * 0.5),
+                      ? Colors.white24
+                      : Colors.white.withOpacity(0.2),
+                  width: 1.5,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: (isDarkMode ? Colors.white : const Color(0xFF1E3A8A))
-                        .withOpacity(0.2 * _glowAnimation.value),
-                    blurRadius: 8 + (4 * _glowAnimation.value),
-                    spreadRadius: _glowAnimation.value * 2,
-                  ),
-                ],
               ),
               child: Stack(
                 children: [
-                  // Sliding background
+                  // Thumb
                   AnimatedBuilder(
                     animation: _slideAnimation,
                     builder: (context, child) {
@@ -503,13 +507,11 @@ class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
                           _slideAnimation.value,
                         )!,
                         child: Container(
-                          width: 38,
-                          height: 30,
+                          width: 36,
+                          height: 32,
                           decoration: BoxDecoration(
-                            color: isDarkMode
-                                ? Colors.white
-                                : const Color(0xFF1E3A8A),
-                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.15),
@@ -523,55 +525,33 @@ class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
                       );
                     },
                   ),
-                  // Text labels with fade effect
+                  // Text labels
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
                         child: Center(
-                          child: AnimatedOpacity(
+                          child: AnimatedDefaultTextStyle(
                             duration: const Duration(milliseconds: 200),
-                            opacity: isKyrgyz ? 1.0 : 0.6,
-                            child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 200),
-                              style: TextStyle(
-                                fontSize: isKyrgyz ? 13 : 12,
-                                fontWeight: FontWeight.bold,
-                                color: isKyrgyz
-                                    ? (isDarkMode
-                                        ? const Color(0xFF1E3A8A)
-                                        : Colors.white)
-                                    : (isDarkMode
-                                        ? Colors.white60
-                                        : const Color(0xFF1E3A8A)
-                                            .withOpacity(0.6)),
-                              ),
-                              child: const Text('KY'),
+                            style: TextStyle(
+                              fontSize: isKyrgyz ? 16 : 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
+                            child: const Text('KY'),
                           ),
                         ),
                       ),
                       Expanded(
                         child: Center(
-                          child: AnimatedOpacity(
+                          child: AnimatedDefaultTextStyle(
                             duration: const Duration(milliseconds: 200),
-                            opacity: !isKyrgyz ? 1.0 : 0.6,
-                            child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 200),
-                              style: TextStyle(
-                                fontSize: !isKyrgyz ? 13 : 12,
-                                fontWeight: FontWeight.bold,
-                                color: !isKyrgyz
-                                    ? (isDarkMode
-                                        ? const Color(0xFF1E3A8A)
-                                        : Colors.white)
-                                    : (isDarkMode
-                                        ? Colors.white60
-                                        : const Color(0xFF1E3A8A)
-                                            .withOpacity(0.6)),
-                              ),
-                              child: const Text('RU'),
+                            style: TextStyle(
+                              fontSize: !isKyrgyz ? 16 : 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
+                            child: const Text('RU'),
                           ),
                         ),
                       ),

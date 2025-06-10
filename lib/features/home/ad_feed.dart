@@ -4,7 +4,6 @@ import 'package:projects/data/models/ad_model.dart';
 import 'package:projects/data/services/ad_service.dart';
 import 'package:projects/features/home/ad_card.dart';
 import 'package:projects/features/home/ad_card_shimmer.dart';
-import 'package:projects/widgets/telegram_refresh_indicator.dart';
 
 class AdFeed extends StatefulWidget {
   final int? categoryId;
@@ -34,6 +33,9 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   late AnimationController _loadingController;
   late Animation<double> _loadingAnimation;
+  bool _isRefreshing = false;
+
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
   @override
   void initState() {
@@ -89,10 +91,15 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
 
       if (mounted) {
         setState(() {
-          ads = newAds;
+          ads = [];
           hasMorePages = newAds.length >= pageSize;
           isLoading = false;
         });
+        for (int i = 0; i < newAds.length; i++) {
+          ads.add(newAds[i]);
+          _listKey.currentState
+              ?.insertItem(i, duration: const Duration(milliseconds: 350));
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -126,10 +133,15 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
         hasMorePages = false;
       } else {
         if (mounted) {
+          final startIndex = ads.length;
           setState(() {
             ads.addAll(newAds);
             hasMorePages = newAds.length >= pageSize;
           });
+          for (int i = 0; i < newAds.length; i++) {
+            _listKey.currentState?.insertItem(startIndex + i,
+                duration: const Duration(milliseconds: 350));
+          }
         }
       }
     } catch (e) {
@@ -139,6 +151,12 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
         setState(() => isLoadingMore = false);
       }
     }
+  }
+
+  Future<void> _handleRefresh() async {
+    setState(() => _isRefreshing = true);
+    await fetchAds();
+    setState(() => _isRefreshing = false);
   }
 
   @override
@@ -156,41 +174,37 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
       return Center(child: Text('no_ads_found'.tr()));
     }
 
-    return TelegramRefreshIndicator(
-      onRefresh: widget.externalAds != null ? () async {} : fetchAds,
-      child: ListView.separated(
-        padding: const EdgeInsets.only(top: 11, left: 12, right: 12),
+    return RefreshIndicator(
+      onRefresh: _handleRefresh,
+      child: AnimatedList(
+        key: _listKey,
+        padding: const EdgeInsets.only(left: 12, right: 12),
         controller: widget.scrollController ?? _scrollController,
-        itemCount: displayAds.length + (hasMorePages ? 1 : 0),
-        itemBuilder: (context, index) {
+        initialItemCount: displayAds.length + (hasMorePages ? 1 : 0),
+        itemBuilder: (context, index, animation) {
           if (index == displayAds.length) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                child: AnimatedBuilder(
-                  animation: _loadingAnimation,
-                  builder: (context, child) {
-                    return Transform.rotate(
-                      angle: _loadingAnimation.value * 2 * 3.14159,
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Theme.of(context).primaryColor.withOpacity(0.7),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+            if (isLoadingMore) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor.withOpacity(0.7),
+                    ),
+                  ),
                 ),
-              ),
-            );
+              );
+            } else {
+              return const SizedBox(height: 32);
+            }
           }
-          return AdCard(ad: displayAds[index]);
+          return SizeTransition(
+            sizeFactor: animation,
+            axisAlignment: 0.0,
+            child: AdCard(ad: displayAds[index]),
+          );
         },
-        separatorBuilder: (context, index) => const SizedBox(height: 16),
       ),
     );
   }

@@ -70,11 +70,19 @@ class _AboutScreenState extends State<AboutScreen>
         'Салам! Мен Аймак 996 колдонмосу жөнүндө пикир билдиргим келет.';
     final whatsappUrl =
         'https://wa.me/$phone?text=${Uri.encodeComponent(message)}';
-    final uri = Uri.parse(whatsappUrl);
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
+    try {
+      final uri = Uri.parse(whatsappUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('whatsapp_error'.tr())),
+          );
+        }
+      }
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('whatsapp_error'.tr())),
@@ -141,7 +149,7 @@ class _AboutScreenState extends State<AboutScreen>
                             begin: const Offset(0, 0.2), end: Offset.zero)
                         .animate(_logoController),
                     child: Image.asset(
-                      'assets/images/logo.png',
+                      'assets/images/splash.png',
                       width: 96,
                       height: 96,
                     ),
@@ -515,77 +523,63 @@ class _AboutScreenState extends State<AboutScreen>
                   ),
                 ),
                 const SizedBox(height: 32),
-                FadeTransition(
-                  opacity: _ctaController,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                            begin: const Offset(0, 0.08), end: Offset.zero)
-                        .animate(_ctaController),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('📱', style: TextStyle(fontSize: 22)),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Муляжи приложений',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.primaryColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                            ),
-                            itemCount: 40,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    index == 0
-                                        ? 'Кара-Суу'
-                                        : index == 1
-                                            ? 'Ош'
-                                            : index == 2
-                                                ? 'Баткен'
-                                                : 'App ${index + 1}',
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _AboutListItem(
+                      icon: Icons.info_outline,
+                      title: 'О нас',
+                      subtitle:
+                          'Аймак 996 — современные мобильные приложения для каждого района Кыргызстана.',
                     ),
-                  ),
+                    Divider(),
+                    _AboutListItem(
+                      icon: Icons.phone_android,
+                      title: 'О приложении',
+                      subtitle:
+                          'Это приложение только для Ноокатского района. Скоро — для других регионов.',
+                    ),
+                    Divider(),
+                    _AboutListItem(
+                      icon: Icons.group,
+                      title: 'Наша миссия',
+                      subtitle:
+                          'Объединять людей и делать жизнь в районе удобнее.',
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 32),
+                // Минималистичный список будущих приложений
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Будущие приложения для других районов:',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    ...[
+                      'Ош 996',
+                      'Баткен 996',
+                      'Чуй 996',
+                      'Талас 996',
+                      'Нарын 996',
+                      'Ысык-Көл 996',
+                      'Жалал-Абад 996',
+                    ].map((name) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.phone_android,
+                                  size: 22, color: Colors.grey),
+                              const SizedBox(width: 12),
+                              Text(name,
+                                  style: Theme.of(context).textTheme.bodyLarge),
+                            ],
+                          ),
+                        )),
+                  ],
+                ),
               ],
             ),
           ),
@@ -631,12 +625,12 @@ class _AnimatedButtonState extends State<_AnimatedButton>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 120),
+      duration: const Duration(milliseconds: 80),
       lowerBound: 0.0,
-      upperBound: 0.08,
+      upperBound: 0.04,
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _scale = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
   }
 
@@ -647,15 +641,18 @@ class _AnimatedButtonState extends State<_AnimatedButton>
   }
 
   void _onTapDown(TapDownDetails details) {
+    if (!mounted) return;
     _controller.forward();
   }
 
   void _onTapUp(TapUpDetails details) {
+    if (!mounted) return;
     _controller.reverse();
     widget.onTap();
   }
 
   void _onTapCancel() {
+    if (!mounted) return;
     _controller.reverse();
   }
 
@@ -677,9 +674,9 @@ class _AnimatedButtonState extends State<_AnimatedButton>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: widget.color.withOpacity(0.18),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    color: widget.color.withOpacity(0.12),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -728,12 +725,12 @@ class _ActionButtonState extends State<_ActionButton>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 120),
+      duration: const Duration(milliseconds: 80),
       lowerBound: 0.0,
-      upperBound: 0.08,
+      upperBound: 0.04,
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _scale = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
   }
 
@@ -744,15 +741,18 @@ class _ActionButtonState extends State<_ActionButton>
   }
 
   void _onTapDown(TapDownDetails details) {
+    if (!mounted) return;
     _controller.forward();
   }
 
   void _onTapUp(TapUpDetails details) {
+    if (!mounted) return;
     _controller.reverse();
     widget.onTap();
   }
 
   void _onTapCancel() {
+    if (!mounted) return;
     _controller.reverse();
   }
 
@@ -774,9 +774,9 @@ class _ActionButtonState extends State<_ActionButton>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: widget.color.withOpacity(0.18),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    color: widget.color.withOpacity(0.12),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -793,6 +793,45 @@ class _ActionButtonState extends State<_ActionButton>
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _AboutListItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _AboutListItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 28, color: theme.primaryColor),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(subtitle, style: theme.textTheme.bodyMedium),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
