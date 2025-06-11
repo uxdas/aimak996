@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:projects/core/widgets/theme_toggle_button.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../../utils/sound_helper.dart';
 
 class AppDrawer extends StatefulWidget {
   static const String _whatsappNumber = '996999109190';
@@ -30,15 +31,32 @@ class AppDrawer extends StatefulWidget {
 }
 
 class _AppDrawerState extends State<AppDrawer> {
+  bool _soundEnabled = true;
+
   @override
   void initState() {
     super.initState();
+    _loadSoundSetting();
     _playDrawerSound();
   }
 
+  Future<void> _loadSoundSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _soundEnabled = prefs.getBool('sound_enabled') ?? true;
+    });
+  }
+
+  Future<void> _toggleSound() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _soundEnabled = !_soundEnabled;
+    });
+    await prefs.setBool('sound_enabled', _soundEnabled);
+  }
+
   Future<void> _playDrawerSound() async {
-    final player = AudioPlayer();
-    await player.play(AssetSource('sounds/drawer_open.wav'), volume: 1.0);
+    await SoundHelper.playIfEnabled('sounds/drawer_open.wav');
   }
 
   @override
@@ -135,7 +153,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 ),
                 const SizedBox(height: 18),
                 Text(
-                  'Ноокат району үчүн\nсатып алуу жана сатуу\nмобилдик тиркемеси',
+                  'drawer_subtitle'.tr(),
                   style: TextStyle(
                     fontSize: 18,
                     color: isDarkMode
@@ -223,6 +241,10 @@ class _AppDrawerState extends State<AppDrawer> {
               children: [
                 ThemeToggleButton(
                     isDark: widget.isDark, toggleTheme: widget.toggleTheme),
+                SoundToggleButton(
+                  soundEnabled: _soundEnabled,
+                  onToggle: _toggleSound,
+                ),
                 _buildCircleButton(
                   context,
                   Icons.share,
@@ -347,53 +369,258 @@ class LanguageToggleSwitch extends StatefulWidget {
   State<LanguageToggleSwitch> createState() => _LanguageToggleSwitchState();
 }
 
-class _LanguageToggleSwitchState extends State<LanguageToggleSwitch> {
+class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
+    with TickerProviderStateMixin {
+  bool _pressed = false;
+  late AnimationController _iconController;
+  late AnimationController _swapController;
+
+  @override
+  void initState() {
+    super.initState();
+    _iconController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+    _swapController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+  }
+
+  @override
+  void dispose() {
+    _iconController.dispose();
+    _swapController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isKyrgyz = context.locale.languageCode == 'ky';
+    final theme = Theme.of(context);
+    final bgColor = _pressed
+        ? theme.colorScheme.primary.withOpacity(0.15)
+        : theme.colorScheme.surface;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
         onTap: () async {
+          setState(() => _pressed = true);
+          _iconController.forward(from: 0);
+          _swapController.forward(from: 0);
           final newLocale = isKyrgyz ? const Locale('ru') : const Locale('ky');
           await context.setLocale(newLocale);
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('locale', newLocale.languageCode);
-          setState(() {});
+          await Future.delayed(const Duration(milliseconds: 200));
+          setState(() => _pressed = false);
         },
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeInOutCubic,
           height: 36,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: bgColor,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: Theme.of(context).dividerColor,
+              color: theme.dividerColor,
               width: 1.2,
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ClipOval(
-                child: Image.asset(
-                  'assets/images/kg_flag.png',
-                  width: 22,
-                  height: 22,
-                  fit: BoxFit.cover,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                transitionBuilder: (child, anim) => FadeTransition(
+                  opacity: anim,
+                  child: child,
+                ),
+                child: ClipOval(
+                  key: ValueKey(isKyrgyz ? 'kg' : 'ru'),
+                  child: Image.asset(
+                    isKyrgyz
+                        ? 'assets/images/kg_flag.png'
+                        : 'assets/images/ru_flag.png',
+                    width: 22,
+                    height: 22,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(width: 6),
-              const Icon(Icons.sync_alt, size: 18, color: Colors.blueAccent),
+              RotationTransition(
+                turns: Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
+                  parent: _iconController,
+                  curve: Curves.easeOutCubic,
+                )),
+                child: const Icon(Icons.sync_alt,
+                    size: 18, color: Colors.blueAccent),
+              ),
               const SizedBox(width: 6),
-              ClipOval(
-                child: Image.asset(
-                  'assets/images/ru_flag.png',
-                  width: 22,
-                  height: 22,
-                  fit: BoxFit.cover,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                transitionBuilder: (child, anim) => FadeTransition(
+                  opacity: anim,
+                  child: child,
                 ),
+                child: ClipOval(
+                  key: ValueKey(isKyrgyz ? 'ru' : 'kg'),
+                  child: Image.asset(
+                    isKyrgyz
+                        ? 'assets/images/ru_flag.png'
+                        : 'assets/images/kg_flag.png',
+                    width: 22,
+                    height: 22,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SoundToggleButton extends StatefulWidget {
+  final bool soundEnabled;
+  final VoidCallback onToggle;
+  const SoundToggleButton(
+      {super.key, required this.soundEnabled, required this.onToggle});
+
+  @override
+  State<SoundToggleButton> createState() => _SoundToggleButtonState();
+}
+
+class _SoundToggleButtonState extends State<SoundToggleButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _thumbPosition;
+  late bool _soundEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    _soundEnabled = widget.soundEnabled;
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+      value: _soundEnabled ? 1.0 : 0.0,
+    );
+    _thumbPosition = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant SoundToggleButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.soundEnabled != _soundEnabled) {
+      _soundEnabled = widget.soundEnabled;
+      if (_soundEnabled) {
+        _controller.animateTo(1.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubic);
+      } else {
+        _controller.animateTo(0.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubic);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: widget.onToggle,
+        child: Container(
+          height: 36,
+          width: 64,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: theme.dividerColor,
+              width: 1.2,
+            ),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Иконка выключения
+              Positioned(
+                left: 12,
+                child: Icon(
+                  Icons.volume_off,
+                  size: 20,
+                  color: !_soundEnabled
+                      ? theme.colorScheme.primary
+                      : Colors.grey[400],
+                ),
+              ),
+              // Иконка включения
+              Positioned(
+                right: 10,
+                child: Icon(
+                  Icons.volume_up,
+                  size: 20,
+                  color: _soundEnabled
+                      ? theme.colorScheme.primary
+                      : Colors.grey[400],
+                ),
+              ),
+              // Бегунок
+              AnimatedBuilder(
+                animation: _thumbPosition,
+                builder: (context, child) {
+                  return Positioned(
+                    left: 4 + 28 * _thumbPosition.value,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.10),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: theme.dividerColor.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          _soundEnabled ? Icons.volume_up : Icons.volume_off,
+                          color: theme.primaryColor,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),

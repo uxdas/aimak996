@@ -100,7 +100,7 @@ class DistrictScreen extends StatelessWidget {
                         'district_history_title'.tr(),
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: theme.primaryColor,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -212,7 +212,7 @@ class DistrictScreen extends StatelessWidget {
                         'district_facts_title'.tr(),
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: theme.primaryColor,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -229,24 +229,14 @@ class DistrictScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 28),
-            // Кнопка карта
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _launchMap,
-                icon: const FaIcon(FontAwesomeIcons.locationDot),
-                label: const Text('Картадан көрүү'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
+            const SizedBox(height: 14),
+            Text(
+              'district_facts'.tr(),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: isDarkMode ? Colors.white70 : Colors.black87,
+                height: 1.5,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

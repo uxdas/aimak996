@@ -14,6 +14,7 @@ import '../details/ad_detail_screen.dart';
 import '../../widgets/telegram_refresh_indicator.dart';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
+import '../../utils/sound_helper.dart';
 
 class AdCard extends StatefulWidget {
   final AdModel ad;
@@ -55,8 +56,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
   }
 
   void _onLike(FavoritesProvider favoritesProvider) async {
-    final player = AudioPlayer();
-    await player.play(AssetSource('sounds/like.wav'), volume: 1.0);
+    await SoundHelper.playIfEnabled('sounds/like.wav');
     _heartAnimationController.forward(from: 0.0);
     final colors = [
       Colors.red,
@@ -536,8 +536,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
 
     return GestureDetector(
       onTap: () async {
-        final player = AudioPlayer();
-        await player.play(AssetSource('sounds/open_full_ad.mp3'), volume: 1.0);
+        await SoundHelper.playIfEnabled('sounds/open_full_ad.mp3');
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -567,8 +566,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
   }
 
   Future<void> _playTapSound() async {
-    final player = AudioPlayer();
-    await player.play(AssetSource('sounds/call_tap.wav'), volume: 1.0);
+    await SoundHelper.playIfEnabled('sounds/call_tap.wav');
   }
 }
 

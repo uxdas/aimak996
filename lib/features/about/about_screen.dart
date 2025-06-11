@@ -166,10 +166,10 @@ class _AboutScreenState extends State<AboutScreen>
                     child: Column(
                       children: [
                         Text(
-                          'company_name'.tr() + '  🤝',
+                          'company_name'.tr(),
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: theme.primaryColor,
+                            color: Colors.white,
                             letterSpacing: 1.2,
                           ),
                           textAlign: TextAlign.center,
@@ -178,7 +178,7 @@ class _AboutScreenState extends State<AboutScreen>
                         Text(
                           'company_slogan'.tr(),
                           style: theme.textTheme.bodyLarge?.copyWith(
-                            color: isDarkMode ? Colors.white70 : Colors.black87,
+                            color: Colors.white,
                             fontWeight: FontWeight.w500,
                           ),
                           textAlign: TextAlign.center,
@@ -197,7 +197,7 @@ class _AboutScreenState extends State<AboutScreen>
                     child: Text(
                       'company_description'.tr(),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDarkMode ? Colors.white60 : Colors.black54,
+                        color: Colors.white,
                         height: 1.5,
                       ),
                       textAlign: TextAlign.center,
@@ -205,41 +205,6 @@ class _AboutScreenState extends State<AboutScreen>
                   ),
                 ),
                 const SizedBox(height: 28),
-                FadeTransition(
-                  opacity: _missionController,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                            begin: const Offset(0, 0.12), end: Offset.zero)
-                        .animate(_missionController),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('🌱', style: TextStyle(fontSize: 22)),
-                          const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              'mission_description'.tr(),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: isDarkMode
-                                    ? Colors.white70
-                                    : Colors.black87,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 32),
                 FadeTransition(
                   opacity: _buttonsController,
@@ -250,45 +215,18 @@ class _AboutScreenState extends State<AboutScreen>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: _AnimatedButton(
-                            color: theme.primaryColor,
-                            text: 'drawer_number'.tr(),
-                            onTap: () async {
-                              final uri = Uri.parse('tel:0999109190');
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri);
-                              }
-                            },
-                          ),
+                        _AnimatedButton(
+                          text: 'feedback_button'.tr(),
+                          color: theme.primaryColor,
+                          onTap: () => _showFeedbackDialog(context),
                         ),
                         const SizedBox(width: 16),
-                        Expanded(
-                          child: _AnimatedButton(
-                            color: const Color(0xFF25D366),
-                            text: 'WhatsApp',
-                            onTap: () async {
-                              final uri =
-                                  Uri.parse('https://wa.me/996999109190');
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri,
-                                    mode: LaunchMode.externalApplication);
-                              }
-                            },
-                          ),
+                        _AnimatedButton(
+                          text: 'whatsapp_button'.tr(),
+                          color: const Color(0xFF25D366),
+                          onTap: () => _launchWhatsApp(context),
                         ),
                       ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                FadeTransition(
-                  opacity: _buttonsController,
-                  child: Text(
-                    '10 000+ пользователей',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDarkMode ? Colors.white38 : Colors.black38,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -309,23 +247,17 @@ class _AboutScreenState extends State<AboutScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('🌟', style: TextStyle(fontSize: 22)),
-                              const SizedBox(width: 10),
-                              Text(
-                                'О нас (аймАк996)',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.primaryColor,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'about_section_title'.tr(),
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Аймак 996 — это компания, создающая современные мобильные приложения для каждого региона Кыргызстана. Для каждого района мы разрабатываем отдельное приложение, чтобы жители могли удобно общаться, размещать объявления и быть в курсе событий своего региона.',
+                            'about_section_text'.tr(),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color:
                                   isDarkMode ? Colors.white70 : Colors.black87,
@@ -355,29 +287,21 @@ class _AboutScreenState extends State<AboutScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('📱', style: TextStyle(fontSize: 22)),
-                              const SizedBox(width: 10),
-                              Text(
-                                'О приложении',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.primaryColor,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'about_app'.tr(),
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Это приложение предназначено только для Ноокатского района. В будущем мы запустим аналогичные приложения для других регионов, каждое с уникальным названием под свой район.',
+                            'about_app_text'.tr(),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color:
                                   isDarkMode ? Colors.white70 : Colors.black87,
                               height: 1.5,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -401,29 +325,21 @@ class _AboutScreenState extends State<AboutScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('💬', style: TextStyle(fontSize: 22)),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Для отзывов',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.primaryColor,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'about_feedback_title'.tr(),
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Оставьте свой отзыв о приложении, чтобы помочь нам стать лучше.',
+                            'about_feedback_text'.tr(),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color:
                                   isDarkMode ? Colors.white70 : Colors.black87,
                               height: 1.5,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -447,30 +363,21 @@ class _AboutScreenState extends State<AboutScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('👨‍💻',
-                                  style: TextStyle(fontSize: 22)),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Разработчик',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.primaryColor,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'about_developer_title'.tr(),
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Наша команда разработчиков работает над созданием качественных приложений.',
+                            'about_developer_text'.tr(),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color:
                                   isDarkMode ? Colors.white70 : Colors.black87,
                               height: 1.5,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -494,29 +401,21 @@ class _AboutScreenState extends State<AboutScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('🚀', style: TextStyle(fontSize: 22)),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Следующие шаги',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.primaryColor,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'about_next_title'.tr(),
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Мы планируем запустить новые приложения для других районов Кыргызстана, а также улучшить текущее приложение, добавив новые функции и улучшив пользовательский опыт.',
+                            'about_next_text'.tr(),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color:
                                   isDarkMode ? Colors.white70 : Colors.black87,
                               height: 1.5,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -529,23 +428,20 @@ class _AboutScreenState extends State<AboutScreen>
                   children: [
                     _AboutListItem(
                       icon: Icons.info_outline,
-                      title: 'О нас',
-                      subtitle:
-                          'Аймак 996 — современные мобильные приложения для каждого района Кыргызстана.',
+                      title: 'about_list_about_title'.tr(),
+                      subtitle: 'about_list_about_subtitle'.tr(),
                     ),
                     Divider(),
                     _AboutListItem(
                       icon: Icons.phone_android,
-                      title: 'О приложении',
-                      subtitle:
-                          'Это приложение только для Ноокатского района. Скоро — для других регионов.',
+                      title: 'about_list_app_title'.tr(),
+                      subtitle: 'about_list_app_subtitle'.tr(),
                     ),
                     Divider(),
                     _AboutListItem(
                       icon: Icons.group,
-                      title: 'Наша миссия',
-                      subtitle:
-                          'Объединять людей и делать жизнь в районе удобнее.',
+                      title: 'about_list_mission_title'.tr(),
+                      subtitle: 'about_list_mission_subtitle'.tr(),
                     ),
                   ],
                 ),
@@ -557,7 +453,7 @@ class _AboutScreenState extends State<AboutScreen>
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.apps),
-                    label: const Text('Мы в других районах'),
+                    label: Text('other_regions_button'.tr()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.primaryColor,
                       foregroundColor: Colors.white,

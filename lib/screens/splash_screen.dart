@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:projects/features/home/home_screen.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../utils/sound_helper.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool isDark;
@@ -76,8 +77,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _playOpenAppSound() async {
-    final player = AudioPlayer();
-    await player.play(AssetSource('sounds/open_app.wav'), volume: 1.0);
+    await SoundHelper.playIfEnabled('sounds/open_app.wav');
   }
 
   @override
