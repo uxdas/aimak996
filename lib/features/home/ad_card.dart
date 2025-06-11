@@ -535,7 +535,9 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
     }
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        final player = AudioPlayer();
+        await player.play(AssetSource('sounds/open_full_ad.mp3'), volume: 1.0);
         Navigator.push(
           context,
           MaterialPageRoute(
