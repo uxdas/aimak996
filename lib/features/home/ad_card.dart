@@ -13,6 +13,7 @@ import '../../screens/full_image_screen.dart';
 import '../details/ad_detail_screen.dart';
 import '../../widgets/telegram_refresh_indicator.dart';
 import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
 
 class AdCard extends StatefulWidget {
   final AdModel ad;
@@ -54,6 +55,8 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
   }
 
   void _onLike(FavoritesProvider favoritesProvider) async {
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/like.wav'), volume: 1.0);
     _heartAnimationController.forward(from: 0.0);
     final colors = [
       Colors.red,
@@ -285,6 +288,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
             IconButton(
               icon: const Icon(Icons.phone, color: Colors.green),
               onPressed: () async {
+                await _playTapSound();
                 final uri = Uri.parse('tel:${widget.ad.phone}');
                 if (await canLaunchUrl(uri)) {
                   await launchUrl(uri);
@@ -442,6 +446,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                     const Spacer(),
                     FilledButton.icon(
                       onPressed: () async {
+                        await _playTapSound();
                         final phone = widget.ad.phone.replaceAll(' ', '');
                         final uri = Uri.parse('tel:$phone');
 
@@ -477,6 +482,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
+                    const SizedBox(width: 10),
                     Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFF008B85),
@@ -494,6 +500,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                       ),
                       child: IconButton(
                         onPressed: () async {
+                          await _playTapSound();
                           final uri =
                               Uri.parse('https://wa.me/${widget.ad.phone}');
                           if (await canLaunchUrl(uri)) {
@@ -555,6 +562,11 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
         maxWidth: MediaQuery.of(context).size.width - 32); // 32 = padding * 2
 
     return textPainter.didExceedMaxLines;
+  }
+
+  Future<void> _playTapSound() async {
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/call_tap.wav'), volume: 1.0);
   }
 }
 

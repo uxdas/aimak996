@@ -33,11 +33,13 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   path_provider: ^2.1.2
   sqflite: ^2.3.2
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -50,6 +52,7 @@ flutter:
     - assets/animations/
     - assets/images/kg_flag.png
     - assets/images/ru_flag.png
+    - assets/sounds/
   fonts:
     - family: Roboto
       fonts:
@@ -61,3 +64,10 @@ flutter:
         - asset: assets/fonts/Arsenal-Regular.ttf
         - asset: assets/fonts/Arsenal-Bold.ttf
           weight: 700
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/nookat996logo.png"
+  adaptive_icon_background: "#1E3A8A"
+  adaptive_icon_foreground: "assets/images/nookat996logo.png"

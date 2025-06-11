@@ -4,6 +4,7 @@ import 'package:projects/data/models/ad_model.dart';
 import 'package:projects/data/services/ad_service.dart';
 import 'package:projects/features/home/ad_card.dart';
 import 'package:projects/features/home/ad_card_shimmer.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class AdFeed extends StatefulWidget {
   final int? categoryId;
@@ -154,6 +155,8 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _handleRefresh() async {
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/refresh.mp3'), volume: 1.0);
     setState(() => _isRefreshing = true);
     await fetchAds();
     setState(() => _isRefreshing = false);

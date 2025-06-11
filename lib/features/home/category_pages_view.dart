@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:projects/core/providers/category_provider.dart';
 import 'package:projects/features/home/ad_feed.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 // Custom scroll physics for Telegram-like smooth swiping
 class TelegramPageScrollPhysics extends ScrollPhysics {
@@ -80,9 +81,11 @@ class _CategoryPagesViewState extends State<CategoryPagesView> {
     }
   }
 
-  void _onPageChanged(int pageIndex, CategoryProvider categoryProvider) {
+  void _onPageChanged(int pageIndex, CategoryProvider categoryProvider) async {
     if (pageIndex != _currentPageIndex) {
       HapticFeedback.selectionClick();
+      final player = AudioPlayer();
+      await player.play(AssetSource('sounds/cat_swipe.wav'), volume: 1.0);
       setState(() {
         _currentPageIndex = pageIndex;
       });

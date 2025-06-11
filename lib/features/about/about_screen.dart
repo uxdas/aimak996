@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'feedback_screen.dart';
 import 'dart:async';
+import 'city_boards_screen.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -149,7 +150,7 @@ class _AboutScreenState extends State<AboutScreen>
                             begin: const Offset(0, 0.2), end: Offset.zero)
                         .animate(_logoController),
                     child: Image.asset(
-                      'assets/images/splash.png',
+                      'assets/images/nookat996logo.png',
                       width: 96,
                       height: 96,
                     ),
@@ -550,35 +551,29 @@ class _AboutScreenState extends State<AboutScreen>
                 ),
                 const SizedBox(height: 32),
                 // Минималистичный список будущих приложений
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Будущие приложения для других районов:',
-                      style: Theme.of(context).textTheme.titleMedium,
+                // Заменяю на кнопку
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.apps),
+                    label: const Text('Мы в других районах'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    ...[
-                      'Ош 996',
-                      'Баткен 996',
-                      'Чуй 996',
-                      'Талас 996',
-                      'Нарын 996',
-                      'Ысык-Көл 996',
-                      'Жалал-Абад 996',
-                    ].map((name) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.phone_android,
-                                  size: 22, color: Colors.grey),
-                              const SizedBox(width: 12),
-                              Text(name,
-                                  style: Theme.of(context).textTheme.bodyLarge),
-                            ],
-                          ),
-                        )),
-                  ],
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const CityBoardsScreen(),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),

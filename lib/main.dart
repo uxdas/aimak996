@@ -7,6 +7,8 @@ import 'package:projects/core/providers/favorites_provider.dart';
 import 'package:projects/core/providers/search_provider.dart';
 import 'package:projects/core/providers/theme_provider.dart';
 import 'package:projects/core/providers/category_provider.dart';
+import 'package:projects/core/providers/pinned_message_provider.dart';
+import 'package:projects/core/providers/city_board_provider.dart';
 import 'package:projects/constants/app_theme.dart';
 import 'package:projects/screens/splash_screen.dart';
 
@@ -41,6 +43,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
+        ChangeNotifierProvider(create: (_) => PinnedMessageProvider()),
+        ChangeNotifierProvider(create: (_) => CityBoardProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) => MaterialApp(

@@ -19,6 +19,8 @@ import 'package:projects/core/providers/theme_provider.dart';
 import 'package:projects/features/favorites/favorites_screen.dart';
 import 'package:projects/core/providers/category_provider.dart';
 import 'package:projects/core/providers/search_provider.dart';
+import 'package:projects/core/providers/pinned_message_provider.dart';
+import 'package:projects/core/widgets/pinned_message_box.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isDark;
@@ -55,6 +57,8 @@ class _HomeScreenState extends State<HomeScreen>
     _scrollController.addListener(_handleScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
+      // Загрузка закреплённого сообщения (city_id = 1)
+      context.read<PinnedMessageProvider>().load(1);
     });
   }
 
@@ -159,6 +163,9 @@ class _HomeScreenState extends State<HomeScreen>
     final theme = Theme.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
     final searchProvider = Provider.of<SearchProvider>(context);
+    final pinnedProvider = Provider.of<PinnedMessageProvider>(context);
+    final bool showPinned = pinnedProvider.message != null;
+    final double pinnedBoxHeight = showPinned ? 84.0 : 0.0;
 
     if (_isInitializing) {
       return Scaffold(
@@ -226,35 +233,48 @@ class _HomeScreenState extends State<HomeScreen>
       appBar: CustomAppBar(
         key: _appBarKey,
         isSearching: _isSearching,
-        onSearchToggle: () {
-          setState(() {
-            _isSearching = !_isSearching;
-            _searchController.clear();
-          });
-        },
+        onSearchToggle: _toggleSearch,
         searchController: _searchController,
         onSearchChanged: _onSearchChanged,
-        onMenuPressed: () {
-          _scaffoldKey.currentState?.openDrawer();
-        },
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onCategoryScrollNeeded: _onPageChanged,
       ),
       body: Stack(
         children: [
           Column(
             children: [
               Expanded(
-                child: _isSearching
-                    ? AdFeed(
-                        externalAds: searchProvider.results,
-                        scrollController: _scrollController,
-                      )
-                    : CategoryPagesView(
-                        scrollController: _scrollController,
-                        onPageChanged: _onPageChanged,
-                      ),
+                child: Padding(
+                  padding: EdgeInsets.only(top: pinnedBoxHeight),
+                  child: _isSearching
+                      ? AdFeed(
+                          externalAds: searchProvider.results,
+                          scrollController: _scrollController,
+                        )
+                      : CategoryPagesView(
+                          scrollController: _scrollController,
+                          onPageChanged: _onPageChanged,
+                        ),
+                ),
               ),
             ],
           ),
+          if (showPinned)
+            Consumer<PinnedMessageProvider>(
+              builder: (context, pinnedProvider, _) {
+                final msg = pinnedProvider.message;
+                if (msg == null) return const SizedBox.shrink();
+                return Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: PinnedMessageBox(
+                    text: msg.text,
+                    onClose: () => pinnedProvider.hide(),
+                  ),
+                );
+              },
+            ),
           if (_showScrollToTop)
             Positioned(
               right: 16,

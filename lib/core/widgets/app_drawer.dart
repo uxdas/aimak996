@@ -11,6 +11,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:projects/core/widgets/theme_toggle_button.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class AppDrawer extends StatefulWidget {
   static const String _whatsappNumber = '996999109190';
@@ -29,6 +30,17 @@ class AppDrawer extends StatefulWidget {
 }
 
 class _AppDrawerState extends State<AppDrawer> {
+  @override
+  void initState() {
+    super.initState();
+    _playDrawerSound();
+  }
+
+  Future<void> _playDrawerSound() async {
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/drawer_open.wav'), volume: 1.0);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -75,6 +87,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                         'Ошибка перехода в "О районе": $e')),
                               );
                             }
+                            _playDrawerSound();
                           },
                           child: Container(
                             height: 36,
@@ -109,7 +122,7 @@ class _AppDrawerState extends State<AppDrawer> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'HOOKAT 990',
+                  'HOOKAT 996',
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     fontFamily: 'Arsenal',
@@ -143,6 +156,7 @@ class _AppDrawerState extends State<AppDrawer> {
             title: 'add_ad'.tr(),
             onTap: () async {
               Navigator.pop(context);
+              await _playDrawerSound();
               try {
                 await _launchWhatsApp(context, AppDrawer._whatsappNumber);
               } catch (e) {
@@ -157,8 +171,9 @@ class _AppDrawerState extends State<AppDrawer> {
             context: context,
             icon: Icons.favorite_border,
             title: 'favorites'.tr(),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
+              await _playDrawerSound();
               try {
                 Navigator.push(
                   context,
@@ -176,8 +191,9 @@ class _AppDrawerState extends State<AppDrawer> {
             context: context,
             icon: Icons.info_outline,
             title: 'drawer_about_us'.tr(),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
+              await _playDrawerSound();
               try {
                 Navigator.push(
                   context,
