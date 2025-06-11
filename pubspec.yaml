@@ -48,6 +48,8 @@ flutter:
     - assets/icon/   # Переводы
     - assets/images/splash_bg.jpg
     - assets/animations/
+    - assets/images/kg_flag.png
+    - assets/images/ru_flag.png
   fonts:
     - family: Roboto
       fonts:

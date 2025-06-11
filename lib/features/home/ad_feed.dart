@@ -178,7 +178,7 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
       onRefresh: _handleRefresh,
       child: AnimatedList(
         key: _listKey,
-        padding: const EdgeInsets.only(left: 12, right: 12),
+        padding: const EdgeInsets.only(left: 12, right: 12, top: 10),
         controller: widget.scrollController ?? _scrollController,
         initialItemCount: displayAds.length + (hasMorePages ? 1 : 0),
         itemBuilder: (context, index, animation) {
@@ -195,6 +195,23 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
                   ),
                 ),
               );
+            } else if (hasMorePages) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: TextButton(
+                    onPressed: loadMoreAds,
+                    child: Text(
+                      'load_more'.tr(),
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              );
             } else {
               return const SizedBox(height: 32);
             }
@@ -202,7 +219,10 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
           return SizeTransition(
             sizeFactor: animation,
             axisAlignment: 0.0,
-            child: AdCard(ad: displayAds[index]),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: AdCard(ad: displayAds[index]),
+            ),
           );
         },
       ),

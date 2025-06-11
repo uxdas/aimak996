@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:projects/screens/full_image_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:projects/data/models/ad_model.dart';
-import 'package:projects/core/providers/favorites_provider.dart';
-import 'package:projects/widgets/telegram_refresh_indicator.dart';
-import 'package:projects/features/details/ad_detail_screen.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../data/models/ad_model.dart';
+import '../../core/providers/favorites_provider.dart';
+import '../../screens/full_image_screen.dart';
+import '../details/ad_detail_screen.dart';
+import '../../widgets/telegram_refresh_indicator.dart';
 import 'dart:math';
 
 class AdCard extends StatefulWidget {
@@ -46,7 +47,13 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
         .animate(_heartAnimationController);
   }
 
-  void _onLike(FavoritesProvider favoritesProvider, bool isFavorite) async {
+  @override
+  void dispose() {
+    _heartAnimationController.dispose();
+    super.dispose();
+  }
+
+  void _onLike(FavoritesProvider favoritesProvider) async {
     _heartAnimationController.forward(from: 0.0);
     final colors = [
       Colors.red,
@@ -110,12 +117,6 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
     });
   }
 
-  @override
-  void dispose() {
-    _heartAnimationController.dispose();
-    super.dispose();
-  }
-
   Widget _buildFavoriteButton(BuildContext context, bool isFavorite,
       FavoritesProvider favoritesProvider) {
     final theme = Theme.of(context);
@@ -137,7 +138,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                 child: InkWell(
                   onTap: favoritesProvider.isLoading
                       ? null
-                      : () => _onLike(favoritesProvider, isFavorite),
+                      : () => _onLike(favoritesProvider),
                   child: SizedBox(
                     width: 36,
                     height: 36,
@@ -229,7 +230,6 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
           },
         ),
         if (widget.ad.images.length > 1) ...[
-          // Bullets indicator
           Positioned(
             left: 0,
             right: 0,
@@ -252,6 +252,53 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
             ),
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Consumer<FavoritesProvider>(
+              builder: (context, favoritesProvider, _) {
+                final isFavorite = favoritesProvider.isFavorite(widget.ad.id);
+                return AnimatedBuilder(
+                  animation: _heartScaleAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _heartScaleAnimation.value,
+                      child: IconButton(
+                        icon: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : Colors.grey,
+                        ),
+                        onPressed: () => _onLike(favoritesProvider),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.phone, color: Colors.green),
+              onPressed: () async {
+                final uri = Uri.parse('tel:${widget.ad.phone}');
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri);
+                }
+              },
+            ),
+          ],
+        ),
+        IconButton(
+          icon: const Icon(Icons.share, color: Colors.blue),
+          onPressed: () {
+            Share.share('${widget.ad.title}\n${widget.ad.description}');
+          },
+        ),
       ],
     );
   }
@@ -320,8 +367,8 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                   Text(
                     widget.ad.title,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
                       fontSize: 18,
+                      fontWeight: FontWeight.w600,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
@@ -345,7 +392,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                       GestureDetector(
                         onTap: () => setState(() => _isExpanded = !_isExpanded),
                         child: Text(
-                          _isExpanded ? 'Свернуть' : 'Ещё',
+                          _isExpanded ? 'collapse'.tr() : 'load_more'.tr(),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w500,
@@ -356,6 +403,21 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                   ],
                 ),
                 const SizedBox(height: 16),
+                if (widget.ad.images.isEmpty) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.share, color: Colors.blue),
+                        onPressed: () {
+                          Share.share(
+                              '${widget.ad.title}\n${widget.ad.description}');
+                        },
+                      ),
+                    ],
+                  ),
+                ],
                 Row(
                   children: [
                     Column(

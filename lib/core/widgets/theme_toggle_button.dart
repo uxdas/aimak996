@@ -17,174 +17,139 @@ class ThemeToggleButton extends StatefulWidget {
 class _ThemeToggleButtonState extends State<ThemeToggleButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _slideAnimation;
-  bool _isAnimating = false;
+  late Animation<double> _thumbPosition;
+  late bool _isDark;
 
   @override
   void initState() {
     super.initState();
+    _isDark = widget.isDark;
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 220),
       vsync: this,
-    )..addStatusListener(_handleAnimationStatus);
-
-    _scaleAnimation = TweenSequence([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 0.8)
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0.8, end: 1.0)
-            .chain(CurveTween(curve: Curves.elasticOut)),
-        weight: 1,
-      ),
-    ]).animate(_controller);
-
-    _slideAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
+      value: _isDark ? 1.0 : 0.0,
+    );
+    _thumbPosition = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-
-    if (widget.isDark) {
-      _controller.value = 1;
-    }
-  }
-
-  void _handleAnimationStatus(AnimationStatus status) {
-    if (status == AnimationStatus.completed ||
-        status == AnimationStatus.dismissed) {
-      _isAnimating = false;
-    }
-  }
-
-  void _handleTap() {
-    if (_isAnimating) return;
-
-    widget.toggleTheme();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {
-          _isAnimating = true;
-          if (_controller.status == AnimationStatus.completed) {
-            _controller.reverse();
-          } else {
-            _controller.forward();
-          }
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.removeStatusListener(_handleAnimationStatus);
-    _controller.dispose();
-    super.dispose();
+      curve: Curves.easeInOutCubic,
+    );
   }
 
   @override
   void didUpdateWidget(ThemeToggleButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isDark != oldWidget.isDark && !_isAnimating) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _isAnimating = true;
-            if (widget.isDark) {
-              _controller.forward();
-            } else {
-              _controller.reverse();
-            }
-          });
-        }
-      });
+    if (widget.isDark != _isDark) {
+      _isDark = widget.isDark;
+      if (_isDark) {
+        _controller.animateTo(1.0,
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOutCubic);
+      } else {
+        _controller.animateTo(0.0,
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOutCubic);
+      }
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
-    return GestureDetector(
-      onTap: _handleTap,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Container(
-              width: 68,
-              height: 40,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color:
-                    isDark ? const Color(0xFF223A7A) : const Color(0xFF1E3A8A),
-                boxShadow: [
-                  if (isDark)
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.25),
-                      blurRadius: 12,
-                      spreadRadius: 1,
-                    ),
-                ],
-                border: Border.all(
-                  color:
-                      isDark ? Colors.white24 : Colors.white.withOpacity(0.2),
-                  width: 1.5,
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: widget.toggleTheme,
+        child: Container(
+          height: 36,
+          width: 64,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: Theme.of(context).dividerColor,
+              width: 1.2,
+            ),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Солнце (3 лучика)
+              Positioned(
+                left: 12,
+                child: Row(
+                  children: [
+                    _SunDot(offset: 0),
+                    const SizedBox(width: 2),
+                    _SunDot(offset: 1),
+                    const SizedBox(width: 2),
+                    _SunDot(offset: 2),
+                  ],
                 ),
               ),
-              child: Stack(
-                children: [
-                  // Icons
-                  Positioned.fill(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Icon(
-                          Icons.wb_sunny_rounded,
-                          size: 26,
-                          color: Colors.white,
-                        ),
-                        Icon(
-                          Icons.nightlight_round,
-                          size: 26,
-                          color: Colors.white,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Thumb
-                  Positioned(
-                    left: _slideAnimation.value * 32,
-                    top: 4,
+              // Луна
+              Positioned(
+                right: 10,
+                child: Icon(
+                  Icons.nightlight_round,
+                  size: 20,
+                  color: const Color(0xFF1E3A8A),
+                ),
+              ),
+              // Бегунок
+              AnimatedBuilder(
+                animation: _thumbPosition,
+                builder: (context, child) {
+                  return Positioned(
+                    left: 4 + 28 * _thumbPosition.value,
                     child: Container(
-                      width: 32,
-                      height: 32,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
                         color: Colors.white,
+                        shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withOpacity(0.10),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
                         ],
+                        border: Border.all(
+                          color:
+                              Theme.of(context).dividerColor.withOpacity(0.2),
+                          width: 1,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SunDot extends StatelessWidget {
+  final int offset;
+  const _SunDot({required this.offset});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 4,
+      height: 4,
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFA726),
+        shape: BoxShape.circle,
       ),
     );
   }

@@ -331,237 +331,57 @@ class LanguageToggleSwitch extends StatefulWidget {
   State<LanguageToggleSwitch> createState() => _LanguageToggleSwitchState();
 }
 
-class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
-    with TickerProviderStateMixin {
-  late AnimationController _slideController;
-  late AnimationController _scaleController;
-  late AnimationController _glowController;
-  late Animation<double> _slideAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _glowAnimation;
-
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Slide animation with spring effect
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-
-    _slideAnimation = CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.elasticOut,
-    );
-
-    // Scale animation for press effect
-    _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 150),
-      vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.easeInOut,
-    ));
-
-    // Glow animation
-    _glowController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    _glowAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _glowController,
-      curve: Curves.easeOut,
-    ));
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    // Initialize position based on current language
-    if (!_isInitialized && mounted) {
-      if (context.locale.languageCode == 'ky') {
-        _slideController.value = 0.0;
-      } else {
-        _slideController.value = 1.0;
-      }
-      _isInitialized = true;
-    }
-  }
-
-  @override
-  void dispose() {
-    _slideController.dispose();
-    _scaleController.dispose();
-    _glowController.dispose();
-    super.dispose();
-  }
-
-  void _handleTap() async {
-    if (!mounted) return;
-
-    // Trigger animations
-    _glowController.forward().then((_) {
-      if (mounted) {
-        _glowController.reverse();
-      }
-    });
-
-    final isKyrgyz = context.locale.languageCode == 'ky';
-    final prefs = await SharedPreferences.getInstance();
-    final newLocale = isKyrgyz ? const Locale('ru') : const Locale('ky');
-
-    // Animate slide
-    if (mounted) {
-      if (isKyrgyz) {
-        _slideController.animateTo(1.0);
-      } else {
-        _slideController.animateTo(0.0);
-      }
-    }
-
-    if (mounted) {
-      await context.setLocale(newLocale);
-      await prefs.setString('locale', newLocale.languageCode);
-    }
-  }
-
+class _LanguageToggleSwitchState extends State<LanguageToggleSwitch> {
   @override
   Widget build(BuildContext context) {
     final isKyrgyz = context.locale.languageCode == 'ky';
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final theme = Theme.of(context);
-
-    return GestureDetector(
-      onTapDown: (_) {
-        if (mounted) {
-          _scaleController.forward();
-        }
-      },
-      onTapUp: (_) {
-        if (mounted) {
-          _scaleController.reverse();
-          _handleTap();
-        }
-      },
-      onTapCancel: () {
-        if (mounted) {
-          _scaleController.reverse();
-        }
-      },
-      child: AnimatedBuilder(
-        animation: Listenable.merge(
-            [_slideAnimation, _scaleAnimation, _glowAnimation]),
-        builder: (context, child) {
-          if (!mounted) return const SizedBox.shrink();
-
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: 90,
-              height: 40,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: isDarkMode
-                    ? const Color(0xFF223A7A)
-                    : const Color(0xFF1E3A8A),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  if (isDarkMode)
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.25),
-                      blurRadius: 12,
-                      spreadRadius: 1,
-                    ),
-                ],
-                border: Border.all(
-                  color: isDarkMode
-                      ? Colors.white24
-                      : Colors.white.withOpacity(0.2),
-                  width: 1.5,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () async {
+          final newLocale = isKyrgyz ? const Locale('ru') : const Locale('ky');
+          await context.setLocale(newLocale);
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('locale', newLocale.languageCode);
+          setState(() {});
+        },
+        child: Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: Theme.of(context).dividerColor,
+              width: 1.2,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipOval(
+                child: Image.asset(
+                  'assets/images/kg_flag.png',
+                  width: 22,
+                  height: 22,
+                  fit: BoxFit.cover,
                 ),
               ),
-              child: Stack(
-                children: [
-                  // Thumb
-                  AnimatedBuilder(
-                    animation: _slideAnimation,
-                    builder: (context, child) {
-                      return Align(
-                        alignment: Alignment.lerp(
-                          Alignment.centerLeft,
-                          Alignment.centerRight,
-                          _slideAnimation.value,
-                        )!,
-                        child: Container(
-                          width: 36,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
-                                blurRadius: 4,
-                                offset: Offset(
-                                    2 * (_slideAnimation.value - 0.5), 2),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  // Text labels
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Center(
-                          child: AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 200),
-                            style: TextStyle(
-                              fontSize: isKyrgyz ? 16 : 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            child: const Text('KY'),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 200),
-                            style: TextStyle(
-                              fontSize: !isKyrgyz ? 16 : 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            child: const Text('RU'),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              const SizedBox(width: 6),
+              const Icon(Icons.sync_alt, size: 18, color: Colors.blueAccent),
+              const SizedBox(width: 6),
+              ClipOval(
+                child: Image.asset(
+                  'assets/images/ru_flag.png',
+                  width: 22,
+                  height: 22,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       ),
     );
   }
