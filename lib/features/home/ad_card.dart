@@ -34,7 +34,11 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
   bool _isExpanded = false;
   int _currentImageIndex = 0;
   late AnimationController _heartAnimationController;
-  late Animation<double> _heartScaleAnimation;
+  late AnimationController _fireAnimationController;
+  Animation<double> _heartScaleAnimation = const AlwaysStoppedAnimation(1.0);
+  Animation<double> _fireScale = const AlwaysStoppedAnimation(1.0);
+  Animation<double> _fireFade = const AlwaysStoppedAnimation(1.0);
+  bool _showFire = false;
   final List<Widget> _floatingHearts = [];
 
   @override
@@ -44,80 +48,38 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
+    _fireAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
+
     _heartScaleAnimation = Tween<double>(begin: 1.0, end: 1.5)
         .chain(CurveTween(curve: Curves.elasticOut))
         .animate(_heartAnimationController);
+
+    _fireScale = Tween<double>(begin: 0.7, end: 2.2).animate(
+      CurvedAnimation(
+          parent: _fireAnimationController, curve: Curves.elasticOut),
+    );
+    _fireFade = Tween<double>(begin: 0.8, end: 0.0).animate(
+      CurvedAnimation(parent: _fireAnimationController, curve: Curves.easeOut),
+    );
   }
 
   @override
   void dispose() {
     _heartAnimationController.dispose();
+    _fireAnimationController.dispose();
     super.dispose();
   }
 
   void _onLike(FavoritesProvider favoritesProvider) async {
     await SoundHelper.playIfEnabled('sounds/like.wav');
-    _heartAnimationController.forward(from: 0.0);
-    final colors = [
-      Colors.red,
-      Colors.pinkAccent,
-      Colors.purpleAccent,
-      Colors.orangeAccent,
-      Colors.deepPurple,
-      Colors.pink,
-      Colors.redAccent
-    ];
-    final random = Random();
-    for (int i = 0; i < 12; i++) {
-      // Угол от 70° до 110° (в радианах)
-      final angle =
-          (pi / 2) + (random.nextDouble() - 0.5) * (pi / 9); // pi/2 ± pi/18
-      final distance = 80 + random.nextDouble() * 40;
-      final dx = cos(angle) * distance;
-      final dy = -sin(angle) * distance;
-      final color = colors[random.nextInt(colors.length)];
-      final size = 18.0 + random.nextDouble() * 14;
-      final opacity = 0.7 + random.nextDouble() * 0.3;
-      final rotation = (random.nextDouble() - 0.5) * 0.8;
-      Future.delayed(Duration(milliseconds: i * 30), () {
-        _addFloatingHeart(
-          dx: dx,
-          dy: dy,
-          opacity: opacity,
-          color: color,
-          rotation: rotation,
-          size: size,
-        );
-      });
-    }
-    await favoritesProvider.toggleFavorite(widget.ad);
-  }
-
-  void _addFloatingHeart({
-    double dx = 0,
-    double dy = -80,
-    double opacity = 1,
-    required Color color,
-    double rotation = 0,
-    double size = 24,
-  }) {
-    final key = UniqueKey();
-    setState(() {
-      _floatingHearts.add(_FloatingHeart(
-        key: key,
-        dx: dx,
-        dy: dy,
-        opacity: opacity,
-        color: color,
-        rotation: rotation,
-        size: size,
-        onEnd: () {
-          setState(() {
-            _floatingHearts.removeWhere((w) => w.key == key);
-          });
-        },
-      ));
+    setState(() => _showFire = true);
+    _fireAnimationController.forward(from: 0.0).then((_) {
+      setState(() => _showFire = false);
     });
+    await favoritesProvider.toggleFavorite(widget.ad);
   }
 
   Widget _buildFavoriteButton(BuildContext context, bool isFavorite,
@@ -127,7 +89,6 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        ..._floatingHearts,
         AnimatedBuilder(
           animation: _heartScaleAnimation,
           builder: (context, child) {
@@ -146,12 +107,41 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                     width: 36,
                     height: 36,
                     child: Center(
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_outline,
-                        size: 24,
-                        color: isFavorite
-                            ? Colors.red
-                            : theme.colorScheme.onSurface,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Icon(
+                            Icons.local_fire_department,
+                            size: 24,
+                            color: isFavorite
+                                ? Colors.deepOrange
+                                : theme.colorScheme.onSurface,
+                          ),
+                          if (_showFire)
+                            ScaleTransition(
+                              scale: _fireScale,
+                              child: FadeTransition(
+                                opacity: _fireFade,
+                                child: Icon(
+                                  Icons.local_fire_department,
+                                  color: Colors.deepOrange.withOpacity(0.85),
+                                  size: 36,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.orange.withOpacity(0.7),
+                                      blurRadius: 16,
+                                      offset: const Offset(0, 0),
+                                    ),
+                                    Shadow(
+                                      color: Colors.yellow.withOpacity(0.5),
+                                      blurRadius: 24,
+                                      offset: const Offset(0, 0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -195,8 +185,9 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                   context,
                   MaterialPageRoute(
                     builder: (_) => FullImageScreen(
-                      imageUrl: imageUrl,
-                      tag: tag,
+                      images: widget.ad.images,
+                      initialIndex: index,
+                      tag: 'ad-image-${widget.ad.id}-',
                     ),
                   ),
                 );
@@ -285,22 +276,12 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                 );
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.phone, color: Colors.green),
-              onPressed: () async {
-                await _playTapSound();
-                final uri = Uri.parse('tel:${widget.ad.phone}');
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri);
-                }
-              },
-            ),
           ],
         ),
         IconButton(
           icon: const Icon(Icons.share, color: Colors.blue),
           onPressed: () {
-            Share.share('${widget.ad.title}\n${widget.ad.description}');
+            Share.share('${widget.ad.category}\n${widget.ad.description}');
           },
         ),
       ],
@@ -322,7 +303,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
       elevation: 2,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(12),
         side: BorderSide(
           color: theme.colorScheme.outline.withOpacity(0.08),
         ),
@@ -367,9 +348,9 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (widget.ad.title.isNotEmpty) ...[
+                if (widget.ad.category.isNotEmpty) ...[
                   Text(
-                    widget.ad.title,
+                    widget.ad.category,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -407,6 +388,18 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                   ],
                 ),
                 const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.ad.phone,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
                 if (widget.ad.images.isEmpty) ...[
                   const SizedBox(height: 8),
                   Row(
@@ -416,7 +409,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                         icon: const Icon(Icons.share, color: Colors.blue),
                         onPressed: () {
                           Share.share(
-                              '${widget.ad.title}\n${widget.ad.description}');
+                              '${widget.ad.category}\n${widget.ad.description}');
                         },
                       ),
                     ],
@@ -449,7 +442,6 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                         await _playTapSound();
                         final phone = widget.ad.phone.replaceAll(' ', '');
                         final uri = Uri.parse('tel:$phone');
-
                         if (await canLaunchUrl(uri)) {
                           await launchUrl(uri,
                               mode: LaunchMode.externalApplication);
@@ -488,7 +480,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                         color: const Color(0xFF008B85),
                         shape: BoxShape.circle,
                         boxShadow: isDark
-                            ? [] // Без тени в тёмной теме
+                            ? []
                             : const [
                                 BoxShadow(
                                   color: Color.fromARGB(155, 0, 139, 132),
@@ -520,6 +512,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                     const SizedBox(width: 8),
                   ],
                 ),
+                const SizedBox(height: 8),
               ],
             ),
           ),

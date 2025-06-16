@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:projects/screens/full_image_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:projects/data/models/ad_model.dart';
 import 'package:projects/core/providers/favorites_provider.dart';
 import 'package:projects/core/providers/theme_provider.dart';
@@ -11,6 +10,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:projects/features/home/ad_buttons_row.dart';
 import 'dart:math';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/services.dart';
 
 class AdDetailScreen extends StatefulWidget {
   final AdModel ad;
@@ -23,16 +25,22 @@ class AdDetailScreen extends StatefulWidget {
 
 class _AdDetailScreenState extends State<AdDetailScreen>
     with TickerProviderStateMixin {
-  int _currentSlide = 0;
+  late PageController _pageController;
+  int _currentImageIndex = 0;
   late AnimationController _heartAnimationController;
   late Animation<double> _heartScaleAnimation;
   late AnimationController _imageBounceController;
   late Animation<double> _imageBounceAnimation;
   final List<Widget> _floatingHearts = [];
+  late AnimationController _fireController;
+  late Animation<double> _fireScale;
+  late Animation<double> _fireFade;
+  bool _showFire = false;
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
 
     // Heart animation controller
     _heartAnimationController = AnimationController(
@@ -55,6 +63,17 @@ class _AdDetailScreenState extends State<AdDetailScreen>
       parent: _imageBounceController,
       curve: Curves.elasticOut,
     ));
+
+    _fireController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
+    _fireScale = Tween<double>(begin: 0.7, end: 2.2).animate(
+      CurvedAnimation(parent: _fireController, curve: Curves.elasticOut),
+    );
+    _fireFade = Tween<double>(begin: 0.8, end: 0.0).animate(
+      CurvedAnimation(parent: _fireController, curve: Curves.easeOut),
+    );
   }
 
   void _onLike(FavoritesProvider favoritesProvider, AdModel ad) async {
@@ -122,10 +141,22 @@ class _AdDetailScreenState extends State<AdDetailScreen>
     });
   }
 
+  void _onFavoritePressed(bool isFavorite, AdModel ad) async {
+    if (!isFavorite) {
+      setState(() => _showFire = true);
+      _fireController.forward(from: 0.0).then((_) {
+        setState(() => _showFire = false);
+      });
+    }
+    context.read<FavoritesProvider>().toggleFavorite(ad);
+  }
+
   @override
   void dispose() {
+    _pageController.dispose();
     _heartAnimationController.dispose();
     _imageBounceController.dispose();
+    _fireController.dispose();
     super.dispose();
   }
 
@@ -199,236 +230,287 @@ ${ad.description}
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final favoritesProvider = context.watch<FavoritesProvider>();
     final ad = widget.ad;
     final dateTime = DateTime.tryParse(ad.createdAt) ?? DateTime.now();
-    final timeStr = DateFormat('HH:mm').format(dateTime);
     final dateStr = DateFormat('dd.MM.yyyy').format(dateTime);
-    final categoryName = ad.category;
-    final isFavorite = favoritesProvider.isFavorite(ad.id.toString());
+    final isFavorite = context.watch<FavoritesProvider>().isFavorite(ad.id);
+    final blue = Colors.blue;
+    final blueAccent = Colors.blueAccent;
+    final deepBlue = const Color(0xFF1565C0);
+    final grey = Colors.grey[400]!;
+    final isLight = Theme.of(context).brightness == Brightness.light;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('full_info'.tr()),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor ??
+            Theme.of(context).primaryColor,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
           onPressed: () => Navigator.of(context).pop(),
+          splashRadius: 24,
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share, color: Colors.white, size: 26),
+            onPressed: () {
+              final shareText =
+                  '${ad.category}\n${ad.description}\nТелефон: ${ad.phone}';
+              Share.share(shareText);
+            },
+            splashRadius: 24,
+          ),
+        ],
+        toolbarHeight: 56,
+        automaticallyImplyLeading: true,
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            const SizedBox(height: 10),
+            ListView(
+              padding: EdgeInsets.zero,
               children: [
-                // Images carousel
-                if (ad.images.isNotEmpty) ...[
-                  Card(
-                    clipBehavior: Clip.antiAlias,
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      children: [
-                        CarouselSlider.builder(
-                          itemCount: ad.images.length,
-                          options: CarouselOptions(
-                            height: 300,
-                            viewportFraction: 1.0,
-                            enableInfiniteScroll: ad.images.length > 1,
-                            onPageChanged: (index, _) {
-                              setState(() => _currentSlide = index);
+                // Галерея
+                Stack(
+                  children: [
+                    SizedBox(
+                      height: 270,
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: ad.images.length,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentImageIndex = index;
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FullImageScreen(
+                                    images: ad.images,
+                                    initialIndex: index,
+                                    tag: 'ad-detail-image-${ad.id}-',
+                                  ),
+                                ),
+                              );
                             },
-                          ),
-                          itemBuilder: (context, index, _) {
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => FullImageScreen(
-                                      imageUrl: ad.images[index],
-                                      tag: 'detail-image-${ad.id}-$index',
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Hero(
-                                tag: 'detail-image-${ad.id}-$index',
-                                child: CachedNetworkImage(
-                                  imageUrl: ad.images[index],
-                                  width: double.infinity,
-                                  height: 300,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Container(
-                                    color: theme.colorScheme.surfaceVariant,
-                                    child: const Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) {
-                                    // Start bounce animation when image error occurs
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                      _imageBounceController
-                                          .forward()
-                                          .then((_) {
-                                        _imageBounceController.reset();
-                                      });
-                                    });
-
-                                    return _buildBounceWidget(
-                                      Container(
-                                        color: theme.colorScheme.surfaceVariant,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.error_outline,
-                                              size: 48,
-                                              color: theme.colorScheme.error
-                                                  .withOpacity(0.8),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              'error_loading_image'.tr(),
-                                              style: theme.textTheme.bodyMedium,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
+                            child: Hero(
+                              tag: 'ad-detail-image-${ad.id}-$index',
+                              child: CachedNetworkImage(
+                                imageUrl: ad.images[index],
+                                width: double.infinity,
+                                height: 270,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color: theme.colorScheme.surfaceVariant,
+                                  child: const Center(
+                                      child: CircularProgressIndicator()),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  color: theme.colorScheme.surfaceVariant,
+                                  child:
+                                      const Icon(Icons.broken_image, size: 48),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    if (ad.images.length > 1)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 8,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: ad.images.asMap().entries.map((entry) {
+                            return Container(
+                              width: 8,
+                              height: 8,
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(
+                                  _currentImageIndex == entry.key ? 0.9 : 0.4,
                                 ),
                               ),
                             );
-                          },
+                          }).toList(),
                         ),
-                        if (ad.images.length > 1)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                ad.images.length,
-                                (index) => Container(
-                                  width: 8,
-                                  height: 8,
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 4),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: _currentSlide == index
-                                        ? theme.colorScheme.primary
-                                        : theme.colorScheme.surfaceVariant,
+                      ),
+                  ],
+                ),
+                // Описание
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ad.description,
+                        style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
+                      ),
+                      const SizedBox(height: 18),
+                      // Категория и дата внизу описания
+                      Row(
+                        children: [
+                          Icon(Icons.category, size: 18, color: blueAccent),
+                          const SizedBox(width: 6),
+                          Text(ad.category,
+                              style: theme.textTheme.titleMedium
+                                  ?.copyWith(color: blueAccent)),
+                          const SizedBox(width: 12),
+                          Text('•',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                  color: blueAccent,
+                                  fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 12),
+                          Icon(Icons.calendar_today,
+                              size: 16, color: blueAccent),
+                          const SizedBox(width: 4),
+                          Text(dateStr,
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(color: blueAccent)),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Container(
+                        height: 48,
+                        margin: const EdgeInsets.only(top: 24, bottom: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: blue, width: 1.5),
+                          borderRadius: BorderRadius.circular(0),
+                          color: Colors.grey[200],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(0),
+                                    bottomLeft: Radius.circular(0),
+                                  ),
+                                  onTap: () async {
+                                    final uri = Uri.parse(
+                                        'tel:${ad.phone.replaceAll(' ', '')}');
+                                    if (await canLaunchUrl(uri)) {
+                                      await launchUrl(uri,
+                                          mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.phone, color: blue, size: 22),
+                                      const SizedBox(width: 8),
+                                      SelectableText(
+                                        ad.phone,
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                                color: blue,
+                                                fontWeight: FontWeight.w600),
+                                        toolbarOptions: const ToolbarOptions(
+                                            copy: true, selectAll: true),
+                                        showCursor: false,
+                                        cursorWidth: 0,
+                                        cursorColor: Colors.transparent,
+                                        enableInteractiveSelection: true,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-
-                // Content card
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Title
-                        Text(
-                          ad.title,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Description
-                        Text(
-                          ad.description,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Meta info
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceVariant
-                                .withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.category,
-                                      size: 20, color: theme.primaryColor),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    categoryName,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                            Container(
+                              width: 1,
+                              height: 32,
+                              color: blue.withOpacity(0.18),
+                            ),
+                            Expanded(
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(0),
+                                    bottomRight: Radius.circular(0),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(Icons.access_time,
-                                      size: 20, color: theme.primaryColor),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '$dateStr в $timeStr',
-                                    style: theme.textTheme.bodyMedium,
+                                  onTap: () =>
+                                      _onFavoritePressed(isFavorite, ad),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.local_fire_department,
+                                          color: isFavorite
+                                              ? Colors.deepOrange
+                                              : blue,
+                                          size: 22),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                          isFavorite
+                                              ? 'В избранном'
+                                              : 'В избранное',
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                  color: isFavorite
+                                                      ? Colors.deepOrange
+                                                      : blue,
+                                                  fontWeight: FontWeight.w600)),
+                                      if (_showFire)
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 4),
+                                          child: ScaleTransition(
+                                            scale: _fireScale,
+                                            child: FadeTransition(
+                                              opacity: _fireFade,
+                                              child: Icon(
+                                                Icons.local_fire_department,
+                                                color: Colors.deepOrange
+                                                    .withOpacity(0.85),
+                                                size: 36,
+                                                shadows: [
+                                                  Shadow(
+                                                    color: Colors.orange
+                                                        .withOpacity(0.7),
+                                                    blurRadius: 16,
+                                                    offset: const Offset(0, 0),
+                                                  ),
+                                                  Shadow(
+                                                    color: Colors.yellow
+                                                        .withOpacity(0.5),
+                                                    blurRadius: 24,
+                                                    offset: const Offset(0, 0),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 24),
-
-                        // Contact buttons
-                        AdButtonsRow(phone: ad.phone),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-
-                const SizedBox(height: 100), // Space for floating buttons
+                const SizedBox(height: 80),
               ],
             ),
-          ),
-
-          // Floating action buttons
-          Positioned(
-            right: 16,
-            bottom: 16,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildFavoriteButton(isFavorite, favoritesProvider, ad),
-                const SizedBox(height: 12),
-                _buildShareButton(ad),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -26,7 +26,12 @@ class ScrollToTopButton extends StatelessWidget {
             child: Container(
               width: 70,
               height: 70,
-              margin: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 16,
+                bottom: 8,
+              ),
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor.withOpacity(0.8),
                 shape: BoxShape.circle,

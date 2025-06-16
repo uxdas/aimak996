@@ -164,8 +164,8 @@ class _HomeScreenState extends State<HomeScreen>
     final themeProvider = Provider.of<ThemeProvider>(context);
     final searchProvider = Provider.of<SearchProvider>(context);
     final pinnedProvider = Provider.of<PinnedMessageProvider>(context);
-    final bool showPinned = pinnedProvider.message != null;
-    final double pinnedBoxHeight = showPinned ? 84.0 : 0.0;
+    final showPinned = pinnedProvider.message != null;
+    final pinnedBoxHeight = showPinned ? 48.0 : 0.0;
 
     if (_isInitializing) {
       return Scaffold(
@@ -236,7 +236,11 @@ class _HomeScreenState extends State<HomeScreen>
         onSearchToggle: _toggleSearch,
         searchController: _searchController,
         onSearchChanged: _onSearchChanged,
-        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onMenuPressed: () {
+          if (_scaffoldKey.currentState != null) {
+            _scaffoldKey.currentState!.openDrawer();
+          }
+        },
         onCategoryScrollNeeded: _onPageChanged,
       ),
       body: Stack(
@@ -278,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen>
           if (_showScrollToTop)
             Positioned(
               right: 16,
-              bottom: 100, // Подняли выше, чтобы не перекрывалась с кнопкой
+              bottom: 13,
               child: Container(
                 width: 70,
                 height: 54,
@@ -327,8 +331,8 @@ class _HomeScreenState extends State<HomeScreen>
           decoration: const BoxDecoration(
             color: Color(0xFF104391),
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+              topLeft: Radius.circular(0),
+              topRight: Radius.circular(0),
             ),
           ),
           child: Row(
@@ -345,11 +349,11 @@ class _HomeScreenState extends State<HomeScreen>
                     height: 36,
                     decoration: const BoxDecoration(
                       color: Colors.white,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.all(Radius.circular(18)),
                     ),
                     child: const Center(
                       child:
-                          Icon(Icons.share, color: Color(0xFF104391), size: 20),
+                          Icon(Icons.share, color: Color(0xFF104391), size: 24),
                     ),
                   ),
                 ),
@@ -361,70 +365,69 @@ class _HomeScreenState extends State<HomeScreen>
                   height: 36,
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.all(Radius.circular(18)),
                   ),
                   child: Center(
-                    child: Icon(Icons.add, color: Color(0xFF104391), size: 20),
+                    child: Icon(Icons.add, color: Color(0xFF104391), size: 24),
                   ),
                 ),
               ),
               Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        'ЖАРЫЯ БЕРҮҮ',
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                          letterSpacing: 0.2,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'ЖАРЫЯ БЕРҮҮ',
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: Color(0xFF104391),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            letterSpacing: 0.2,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        '0999 109 190',
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                          letterSpacing: 0.2,
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          '0999 109 190',
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: Color(0xFF104391),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            letterSpacing: 0.2,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(right: 12, left: 12),
+                padding: const EdgeInsets.only(right: 12),
                 child: GestureDetector(
-                  onTap: () async {
-                    final uri = Uri.parse('https://wa.me/996999109190');
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri,
-                          mode: LaunchMode.externalApplication);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('whatsapp_error'.tr())),
-                      );
-                    }
-                  },
+                  onTap: _launchWhatsApp,
                   child: Container(
                     width: 36,
                     height: 36,
                     decoration: const BoxDecoration(
                       color: Colors.white,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.all(Radius.circular(18)),
                     ),
                     child: Center(
                       child: FaIcon(FontAwesomeIcons.whatsapp,
-                          color: Color(0xFF25D366), size: 20),
+                          color: Color(0xFF25D366), size: 24),
                     ),
                   ),
                 ),

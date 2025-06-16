@@ -12,7 +12,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:projects/core/widgets/theme_toggle_button.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
-import '../../utils/sound_helper.dart';
+import 'package:provider/provider.dart';
+import 'package:projects/core/providers/theme_provider.dart';
+import 'package:projects/utils/sound_helper.dart';
+import 'package:projects/utils/theme_prefs.dart';
 
 class AppDrawer extends StatefulWidget {
   static const String _whatsappNumber = '996999109190';
@@ -30,41 +33,69 @@ class AppDrawer extends StatefulWidget {
   State<AppDrawer> createState() => _AppDrawerState();
 }
 
-class _AppDrawerState extends State<AppDrawer> {
-  bool _soundEnabled = true;
+class _AppDrawerState extends State<AppDrawer>
+    with SingleTickerProviderStateMixin {
+  bool _isSoundEnabled = true;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
-    _loadSoundSetting();
-    _playDrawerSound();
+    _loadSoundState();
   }
 
-  Future<void> _loadSoundSetting() async {
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadSoundState() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _soundEnabled = prefs.getBool('sound_enabled') ?? true;
+      _isSoundEnabled = prefs.getBool('sound_enabled') ?? true;
     });
   }
 
-  Future<void> _toggleSound() async {
-    final prefs = await SharedPreferences.getInstance();
+  void _toggleSound() {
     setState(() {
-      _soundEnabled = !_soundEnabled;
+      _isSoundEnabled = !_isSoundEnabled;
     });
-    await prefs.setBool('sound_enabled', _soundEnabled);
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setBool('sound_enabled', _isSoundEnabled);
+    });
   }
 
   Future<void> _playDrawerSound() async {
-    await SoundHelper.playIfEnabled('sounds/drawer_open.wav');
+    if (!_isSoundEnabled) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastPlayTime = prefs.getInt('last_sound_play_time') ?? 0;
+      final currentTime = DateTime.now().millisecondsSinceEpoch;
+
+      if (currentTime - lastPlayTime >= 300) {
+        await _audioPlayer.play(AssetSource('sounds/drawer_click.mp3'));
+        await prefs.setInt('last_sound_play_time', currentTime);
+      }
+    } catch (e) {
+      debugPrint('Ошибка воспроизведения звука: $e');
+    }
+  }
+
+  Future<void> _playTestSound() async {
+    if (!_isSoundEnabled) return;
+    final player = AudioPlayer();
+    await player.play(AssetSource('sounds/like.wav'), volume: 1.0);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Drawer(
+      width: 320,
       backgroundColor: isDarkMode ? theme.colorScheme.surface : Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -236,23 +267,29 @@ class _AppDrawerState extends State<AppDrawer> {
               ),
             ),
             padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: Column(
               children: [
-                ThemeToggleButton(
-                    isDark: widget.isDark, toggleTheme: widget.toggleTheme),
-                SoundToggleButton(
-                  soundEnabled: _soundEnabled,
-                  onToggle: _toggleSound,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 60),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildThemeButton(),
+                      _buildShareButton(),
+                    ],
+                  ),
                 ),
-                _buildCircleButton(
-                  context,
-                  Icons.share,
-                  () {
-                    Share.share('share_text'.tr());
-                  },
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 60),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSoundButton(),
+                      _buildLanguageButton(),
+                    ],
+                  ),
                 ),
-                const LanguageToggleSwitch(),
               ],
             ),
           ),
@@ -298,15 +335,13 @@ class _AppDrawerState extends State<AppDrawer> {
           child: Container(
             height: 44,
             padding: EdgeInsets.symmetric(horizontal: isSubItem ? 8 : 12),
-            decoration: isDarkMode
-                ? BoxDecoration(
-                    border: Border.all(
-                      color: theme.colorScheme.onSurface.withOpacity(0.18),
-                      width: 1.2,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  )
-                : null,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isDarkMode ? Colors.white : const Color(0xFF1E3A8A),
+                width: 1.2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Row(
               children: [
                 if (isSubItem) const SizedBox(width: 8),
@@ -334,27 +369,272 @@ class _AppDrawerState extends State<AppDrawer> {
     );
   }
 
-  Widget _buildCircleButton(
-      BuildContext context, IconData icon, VoidCallback onTap) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildThemeButton() {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Material(
+      color: theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: widget.toggleTheme,
+        child: Container(
+          width: 90,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE3F2FD).withOpacity(0.5),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isDark ? Colors.white : theme.colorScheme.primary,
+              width: 1.2,
+            ),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned(
+                left: 6,
+                top: 8,
+                child: Icon(
+                  Icons.light_mode,
+                  size: 20,
+                  color: widget.isDark
+                      ? (isDark ? Colors.white : const Color(0xFF2563EB))
+                      : Colors.white.withOpacity(0.6),
+                ),
+              ),
+              Positioned(
+                right: 6,
+                top: 8,
+                child: Icon(
+                  Icons.dark_mode,
+                  size: 20,
+                  color: widget.isDark
+                      ? Colors.white.withOpacity(0.6)
+                      : (isDark ? Colors.white : const Color(0xFF2563EB)),
+                ),
+              ),
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeOut,
+                left: widget.isDark ? 50 : 4,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isDark ? Colors.white : theme.colorScheme.primary,
+                      width: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSoundButton() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Material(
+      color: theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () {
+          _toggleSound();
+        },
+        child: Container(
+          width: 90,
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE3F2FD).withOpacity(0.5),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isDark ? Colors.white : theme.colorScheme.primary,
+              width: 1.2,
+            ),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: _isSoundEnabled ? 0.4 : 1.0,
+                child: Positioned(
+                  left: 6,
+                  top: 8,
+                  child: Icon(
+                    Icons.volume_off,
+                    size: 20,
+                    color: isDark ? Colors.white : const Color(0xFF2563EB),
+                  ),
+                ),
+              ),
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: _isSoundEnabled ? 1.0 : 0.4,
+                child: Positioned(
+                  right: 6,
+                  top: 8,
+                  child: Icon(
+                    Icons.volume_up,
+                    size: 20,
+                    color: isDark ? Colors.white : const Color(0xFF2563EB),
+                  ),
+                ),
+              ),
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeOut,
+                left: _isSoundEnabled ? 48 : 2,
+                top: 4,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: isDark ? Colors.white : theme.colorScheme.primary,
+                      width: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageButton() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final currentLocale = context.locale;
 
     return Material(
-      color: isDarkMode
-          ? theme.colorScheme.surface.withOpacity(0.7)
-          : const Color(0xFFE8F0FE),
-      borderRadius: BorderRadius.circular(50),
+      color: theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
-        borderRadius: BorderRadius.circular(50),
-        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        onTap: () async {
+          final newLocale = currentLocale.languageCode == 'ky'
+              ? const Locale('ru')
+              : const Locale('ky');
+          await context.setLocale(newLocale);
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('locale', newLocale.languageCode);
+          setState(() {});
+        },
         child: Container(
-          padding: const EdgeInsets.all(10),
-          child: Icon(
-            icon,
-            size: 20,
-            color: isDarkMode
-                ? theme.colorScheme.primary
-                : const Color(0xFF1E3A8A),
+          width: 90,
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE3F2FD).withOpacity(0.5),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isDark ? Colors.white : theme.colorScheme.primary,
+              width: 1.2,
+            ),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned(
+                left: 8,
+                top: 8,
+                child: Image.asset(
+                  'assets/images/kg_flag.png',
+                  width: 24,
+                  height: 24,
+                  cacheWidth: 48,
+                  cacheHeight: 48,
+                ),
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Image.asset(
+                  'assets/images/ru_flag.png',
+                  width: 24,
+                  height: 24,
+                  cacheWidth: 48,
+                  cacheHeight: 48,
+                ),
+              ),
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.easeOut,
+                left: currentLocale.languageCode == 'ru' ? 4 : 50,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isDark ? Colors.white : theme.colorScheme.primary,
+                      width: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShareButton() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Material(
+      color: theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () {
+          Share.share('share_text'.tr());
+        },
+        child: Container(
+          width: 90,
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE3F2FD).withOpacity(0.5),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isDark ? Colors.white : theme.colorScheme.primary,
+              width: 1.2,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.share,
+                size: 20,
+                color: isDark ? Colors.white : const Color(0xFF1E3A8A),
+              ),
+            ],
           ),
         ),
       ),
@@ -398,6 +678,7 @@ class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
   @override
   Widget build(BuildContext context) {
     final isKyrgyz = context.locale.languageCode == 'ky';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     final bgColor = _pressed
         ? theme.colorScheme.primary.withOpacity(0.15)
@@ -426,7 +707,7 @@ class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
             color: bgColor,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: theme.dividerColor,
+              color: isDark ? Colors.white : theme.dividerColor,
               width: 1.2,
             ),
           ),
@@ -478,149 +759,6 @@ class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
                     fit: BoxFit.cover,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SoundToggleButton extends StatefulWidget {
-  final bool soundEnabled;
-  final VoidCallback onToggle;
-  const SoundToggleButton(
-      {super.key, required this.soundEnabled, required this.onToggle});
-
-  @override
-  State<SoundToggleButton> createState() => _SoundToggleButtonState();
-}
-
-class _SoundToggleButtonState extends State<SoundToggleButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _thumbPosition;
-  late bool _soundEnabled;
-
-  @override
-  void initState() {
-    super.initState();
-    _soundEnabled = widget.soundEnabled;
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-      value: _soundEnabled ? 1.0 : 0.0,
-    );
-    _thumbPosition = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOutCubic,
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant SoundToggleButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.soundEnabled != _soundEnabled) {
-      _soundEnabled = widget.soundEnabled;
-      if (_soundEnabled) {
-        _controller.animateTo(1.0,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOutCubic);
-      } else {
-        _controller.animateTo(0.0,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOutCubic);
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: widget.onToggle,
-        child: Container(
-          height: 36,
-          width: 64,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: theme.dividerColor,
-              width: 1.2,
-            ),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Иконка выключения
-              Positioned(
-                left: 12,
-                child: Icon(
-                  Icons.volume_off,
-                  size: 20,
-                  color: !_soundEnabled
-                      ? theme.colorScheme.primary
-                      : Colors.grey[400],
-                ),
-              ),
-              // Иконка включения
-              Positioned(
-                right: 10,
-                child: Icon(
-                  Icons.volume_up,
-                  size: 20,
-                  color: _soundEnabled
-                      ? theme.colorScheme.primary
-                      : Colors.grey[400],
-                ),
-              ),
-              // Бегунок
-              AnimatedBuilder(
-                animation: _thumbPosition,
-                builder: (context, child) {
-                  return Positioned(
-                    left: 4 + 28 * _thumbPosition.value,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOutCubic,
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.10),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                        border: Border.all(
-                          color: theme.dividerColor.withOpacity(0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          _soundEnabled ? Icons.volume_up : Icons.volume_off,
-                          color: theme.primaryColor,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  );
-                },
               ),
             ],
           ),

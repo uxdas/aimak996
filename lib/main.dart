@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:projects/core/providers/favorites_provider.dart';
 import 'package:projects/core/providers/search_provider.dart';
@@ -11,6 +12,7 @@ import 'package:projects/core/providers/pinned_message_provider.dart';
 import 'package:projects/core/providers/city_board_provider.dart';
 import 'package:projects/constants/app_theme.dart';
 import 'package:projects/screens/splash_screen.dart';
+import 'package:projects/cubits/navigation_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +47,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SearchProvider()),
         ChangeNotifierProvider(create: (_) => PinnedMessageProvider()),
         ChangeNotifierProvider(create: (_) => CityBoardProvider()),
+        BlocProvider(create: (_) => NavigationCubit()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) => MaterialApp(

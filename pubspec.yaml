@@ -21,6 +21,7 @@ dependencies:
   http: ^1.4.0
   shimmer: ^3.0.0
   custom_refresh_indicator: ^4.0.1
+  flutter_bloc: ^8.1.4
 
   # 🌐 Локализация
   flutter_localizations:

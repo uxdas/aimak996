@@ -85,7 +85,7 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
     currentPage = 1;
 
     try {
-      final newAds = await _adService.fetchAds(
+      final response = await _adService.fetchAds(
         categoryId: widget.categoryId,
         page: currentPage,
         pageSize: pageSize,
@@ -94,9 +94,11 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
       if (mounted) {
         setState(() {
           ads = [];
-          hasMorePages = newAds.length >= pageSize;
+          hasMorePages = response['totalPages'] > currentPage;
           isLoading = false;
         });
+
+        final newAds = response['ads'] as List<AdModel>;
         for (int i = 0; i < newAds.length; i++) {
           ads.add(newAds[i]);
           _listKey.currentState
@@ -125,20 +127,21 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
     currentPage++;
 
     try {
-      final newAds = await _adService.fetchAds(
+      final response = await _adService.fetchAds(
         categoryId: widget.categoryId,
         page: currentPage,
         pageSize: pageSize,
       );
 
-      if (newAds.isEmpty) {
-        hasMorePages = false;
-      } else {
-        if (mounted) {
+      if (mounted) {
+        final newAds = response['ads'] as List<AdModel>;
+        if (newAds.isEmpty) {
+          hasMorePages = false;
+        } else {
           final startIndex = ads.length;
           setState(() {
             ads.addAll(newAds);
-            hasMorePages = newAds.length >= pageSize;
+            hasMorePages = response['totalPages'] > currentPage;
           });
           for (int i = 0; i < newAds.length; i++) {
             _listKey.currentState?.insertItem(startIndex + i,

@@ -144,6 +144,44 @@ class _AboutScreenState extends State<AboutScreen>
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 FadeTransition(
+                  opacity: _buttonsController,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                            begin: const Offset(0, 0.1), end: Offset.zero)
+                        .animate(_buttonsController),
+                    child: Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 32),
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.apps, size: 24),
+                        label: Text(
+                          'other_regions_button'.tr(),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const CityBoardsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                FadeTransition(
                   opacity: _logoController,
                   child: SlideTransition(
                     position: Tween<Offset>(
@@ -187,24 +225,6 @@ class _AboutScreenState extends State<AboutScreen>
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                FadeTransition(
-                  opacity: _descController,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                            begin: const Offset(0, 0.15), end: Offset.zero)
-                        .animate(_descController),
-                    child: Text(
-                      'company_description'.tr(),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                        height: 1.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 28),
                 const SizedBox(height: 32),
                 FadeTransition(
                   opacity: _buttonsController,
@@ -216,13 +236,9 @@ class _AboutScreenState extends State<AboutScreen>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _AnimatedButton(
-                          text: 'feedback_button'.tr(),
-                          color: theme.primaryColor,
-                          onTap: () => _showFeedbackDialog(context),
-                        ),
-                        const SizedBox(width: 16),
-                        _AnimatedButton(
-                          text: 'whatsapp_button'.tr(),
+                          text: 'feedback_button'.tr() +
+                              ' ' +
+                              'whatsapp_button'.tr(),
                           color: const Color(0xFF25D366),
                           onTap: () => _launchWhatsApp(context),
                         ),
@@ -238,32 +254,32 @@ class _AboutScreenState extends State<AboutScreen>
                             begin: const Offset(0, 0.1), end: Offset.zero)
                         .animate(_socialController),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 16),
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(18),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'about_section_title'.tr(),
-                            style: theme.textTheme.titleLarge?.copyWith(
+                            style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : theme.primaryColor,
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 16),
                           Text(
-                            'about_section_text'.tr(),
-                            style: theme.textTheme.bodyMedium?.copyWith(
+                            'company_description'.tr(),
+                            style: theme.textTheme.bodyLarge?.copyWith(
                               color:
                                   isDarkMode ? Colors.white70 : Colors.black87,
-                              height: 1.5,
+                              height: 1.6,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -278,29 +294,31 @@ class _AboutScreenState extends State<AboutScreen>
                             begin: const Offset(0, 0.08), end: Offset.zero)
                         .animate(_ctaController),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 16),
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(18),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'about_app'.tr(),
-                            style: theme.textTheme.titleLarge?.copyWith(
+                            style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : theme.primaryColor,
                             ),
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 16),
                           Text(
                             'about_app_text'.tr(),
-                            style: theme.textTheme.bodyMedium?.copyWith(
+                            style: theme.textTheme.bodyLarge?.copyWith(
                               color:
                                   isDarkMode ? Colors.white70 : Colors.black87,
-                              height: 1.5,
+                              height: 1.6,
                             ),
                           ),
                         ],
@@ -309,168 +327,6 @@ class _AboutScreenState extends State<AboutScreen>
                   ),
                 ),
                 const SizedBox(height: 32),
-                FadeTransition(
-                  opacity: _ctaController,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                            begin: const Offset(0, 0.08), end: Offset.zero)
-                        .animate(_ctaController),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'about_feedback_title'.tr(),
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            'about_feedback_text'.tr(),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color:
-                                  isDarkMode ? Colors.white70 : Colors.black87,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                FadeTransition(
-                  opacity: _ctaController,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                            begin: const Offset(0, 0.08), end: Offset.zero)
-                        .animate(_ctaController),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'about_developer_title'.tr(),
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            'about_developer_text'.tr(),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color:
-                                  isDarkMode ? Colors.white70 : Colors.black87,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                FadeTransition(
-                  opacity: _ctaController,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                            begin: const Offset(0, 0.08), end: Offset.zero)
-                        .animate(_ctaController),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'about_next_title'.tr(),
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            'about_next_text'.tr(),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color:
-                                  isDarkMode ? Colors.white70 : Colors.black87,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _AboutListItem(
-                      icon: Icons.info_outline,
-                      title: 'about_list_about_title'.tr(),
-                      subtitle: 'about_list_about_subtitle'.tr(),
-                    ),
-                    Divider(),
-                    _AboutListItem(
-                      icon: Icons.phone_android,
-                      title: 'about_list_app_title'.tr(),
-                      subtitle: 'about_list_app_subtitle'.tr(),
-                    ),
-                    Divider(),
-                    _AboutListItem(
-                      icon: Icons.group,
-                      title: 'about_list_mission_title'.tr(),
-                      subtitle: 'about_list_mission_subtitle'.tr(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                // Минималистичный список будущих приложений
-                // Заменяю на кнопку
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.apps),
-                    label: Text('other_regions_button'.tr()),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const CityBoardsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
               ],
             ),
           ),

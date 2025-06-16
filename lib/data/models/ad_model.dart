@@ -2,19 +2,19 @@ class AdModel {
   final String id;
   final String title;
   final String description;
-  final List<String> images;
   final String phone;
-  final String createdAt;
   final String category;
+  final String createdAt;
+  final List<String> images;
 
   AdModel({
     required this.id,
     required this.title,
     required this.description,
-    required this.images,
     required this.phone,
-    required this.createdAt,
     required this.category,
+    required this.createdAt,
+    required this.images,
   });
 
   factory AdModel.fromJson(Map<String, dynamic> json) {
@@ -22,11 +22,11 @@ class AdModel {
       id: json['id']?.toString() ?? '0',
       title: json['title'] ?? '',
       description: json['description'] ?? '',
+      phone: json['phone'] ?? '',
+      category: json['category'] ?? '',
+      createdAt: json['created_at'] ?? '',
       images:
           (json['images'] as List?)?.map((e) => e.toString()).toList() ?? [],
-      phone: json['contact_phone'] ?? '',
-      createdAt: json['created_at'] ?? '',
-      category: json['category'] ?? '',
     );
   }
 
@@ -35,10 +35,10 @@ class AdModel {
       'id': id,
       'title': title,
       'description': description,
-      'images': images,
-      'contact_phone': phone,
-      'created_at': createdAt,
+      'phone': phone,
       'category': category,
+      'created_at': createdAt,
+      'images': images,
     };
   }
 }

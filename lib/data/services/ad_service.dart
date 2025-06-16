@@ -11,7 +11,7 @@ class AdService {
     'Accept': 'application/json',
   };
 
-  Future<List<AdModel>> fetchAds({
+  Future<Map<String, dynamic>> fetchAds({
     int? categoryId,
     int page = 1,
     int pageSize = 20,
@@ -20,16 +20,24 @@ class AdService {
       final cityId = 1;
       final catId = categoryId ?? 0;
       final url = Uri.parse(
-          'http://5.59.233.32:8080/ads/public-city/$cityId/category/$catId');
+          'http://5.59.233.32:8080/ads/public-city/$cityId/category/$catId?page=$page&page_size=$pageSize');
       print('[API] Fetching ads from: $url');
 
       final response = await http.get(url, headers: _headers);
-      print('[API] Response status: [32m${response.statusCode}[0m');
+      print('[API] Response status: ${response.statusCode}');
       print('[API] Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final List data = jsonDecode(response.body);
-        return data.map((e) => AdModel.fromJson(e)).toList();
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> results = data['results'] ?? [];
+        final int totalPages = data['total_pages'] ?? 1;
+        final int totalCount = data['total_count'] ?? 0;
+
+        return {
+          'ads': results.map((e) => AdModel.fromJson(e)).toList(),
+          'totalPages': totalPages,
+          'totalCount': totalCount,
+        };
       } else {
         throw Exception(
             'Ошибка загрузки: ${response.statusCode} - ${response.body}');
@@ -40,13 +48,14 @@ class AdService {
     }
   }
 
-  Future<List<AdModel>> fetchAdsByCategory(
+  Future<Map<String, dynamic>> fetchAdsByCategory(
     int categoryId, {
     int page = 1,
     int pageSize = 20,
   }) async {
     try {
-      final url = Uri.parse(ApiRoutes.adsByCategory(categoryId));
+      final url = Uri.parse(
+          '${ApiRoutes.adsByCategory(categoryId)}?page=$page&page_size=$pageSize');
       print('[API] Fetching ads by category from: $url');
       print('[API] Headers: $_headers');
 
@@ -55,12 +64,16 @@ class AdService {
       print('[API] Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final List data = jsonDecode(response.body);
-        print('[API] Decoded data length: ${data.length}');
-        if (data.isNotEmpty) {
-          print('[API] First item: ${data.first}');
-        }
-        return data.map((e) => AdModel.fromJson(e)).toList();
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> results = data['results'] ?? [];
+        final int totalPages = data['total_pages'] ?? 1;
+        final int totalCount = data['total_count'] ?? 0;
+
+        return {
+          'ads': results.map((e) => AdModel.fromJson(e)).toList(),
+          'totalPages': totalPages,
+          'totalCount': totalCount,
+        };
       } else {
         throw Exception(
             '${"error_loading".tr()}: ${response.statusCode} - ${response.body}');

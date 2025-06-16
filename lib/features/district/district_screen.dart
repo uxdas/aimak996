@@ -100,7 +100,7 @@ class DistrictScreen extends StatelessWidget {
                         'district_history_title'.tr(),
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: isDarkMode ? Colors.white : theme.primaryColor,
                         ),
                       ),
                     ],
@@ -212,7 +212,7 @@ class DistrictScreen extends StatelessWidget {
                         'district_facts_title'.tr(),
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: isDarkMode ? Colors.white : theme.primaryColor,
                         ),
                       ),
                     ],
@@ -230,14 +230,6 @@ class DistrictScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-            Text(
-              'district_facts'.tr(),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDarkMode ? Colors.white70 : Colors.black87,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
           ],
         ),
       ),
