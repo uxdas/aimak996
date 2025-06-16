@@ -1,15 +1,19 @@
 class CategoryModel {
   final int id;
-  final String title;
+  final String name;
+  final String ruName;
 
-  CategoryModel({required this.id, required this.title});
+  CategoryModel({required this.id, required this.name, required this.ruName});
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
       id: json['id'],
-      title: json['name'],
+      name: json['name'] ?? '',
+      ruName: json['ru_name'] ?? '',
     );
   }
 
-  String get name => title; // Для обратной совместимости
+  String getLocalizedName(String langCode) {
+    return langCode == 'ru' ? ruName : name;
+  }
 }

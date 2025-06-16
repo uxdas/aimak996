@@ -156,6 +156,79 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  void _shareToWhatsApp(String text) async {
+    final url = 'https://wa.me/?text=${Uri.encodeComponent(text)}';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _shareToTelegram(String text) async {
+    final url = 'https://t.me/share/url?url=${Uri.encodeComponent(text)}';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _shareToInstagram() async {
+    const url = 'instagram://app';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _shareOther(BuildContext context, String text) {
+    Share.share(text);
+  }
+
+  void showShareDialog(BuildContext context, String text) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading:
+                  const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green),
+              title: const Text('WhatsApp'),
+              onTap: () {
+                Navigator.pop(context);
+                _shareToWhatsApp(text);
+              },
+            ),
+            ListTile(
+              leading:
+                  const FaIcon(FontAwesomeIcons.telegram, color: Colors.blue),
+              title: const Text('Telegram'),
+              onTap: () {
+                Navigator.pop(context);
+                _shareToTelegram(text);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.purple),
+              title: const Text('Instagram'),
+              onTap: () {
+                Navigator.pop(context);
+                _shareToInstagram();
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.share),
+              title: const Text('Другие приложения'),
+              onTap: () {
+                Navigator.pop(context);
+                _shareOther(context, text);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -328,7 +401,7 @@ class _HomeScreenState extends State<HomeScreen>
                 padding: const EdgeInsets.only(left: 12),
                 child: GestureDetector(
                   onTap: () {
-                    Share.share('share_text'.tr());
+                    showShareDialog(context, 'share_text'.tr());
                   },
                   child: Container(
                     width: 36,

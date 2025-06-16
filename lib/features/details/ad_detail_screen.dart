@@ -245,27 +245,75 @@ class _AdDetailScreenState extends State<AdDetailScreen>
     );
   }
 
-  Widget _buildShareButton(AdModel ad) {
-    return FloatingActionButton(
-      heroTag: "share_btn",
-      mini: true,
-      backgroundColor: Colors.white,
-      onPressed: () {
-        final shareText = '''
-${ad.title}
+  void _shareToWhatsApp(String text) async {
+    final url = 'https://wa.me/?text=${Uri.encodeComponent(text)}';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    }
+  }
 
-${ad.description}
+  void _shareToTelegram(String text) async {
+    final url = 'https://t.me/share/url?url=${Uri.encodeComponent(text)}';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    }
+  }
 
-Телефон: ${ad.phone}
+  void _shareToInstagram() async {
+    const url = 'instagram://app';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    }
+  }
 
-Скачай приложение Аймак 996: https://aimak996.kg
-        ''';
-        Share.share(shareText.trim());
-      },
-      child: Icon(
-        Icons.share,
-        color: Colors.grey[600],
-        size: 20,
+  void _shareOther(BuildContext context, String text) {
+    Share.share(text);
+  }
+
+  void showShareDialog(BuildContext context, String text) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading:
+                  const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green),
+              title: const Text('WhatsApp'),
+              onTap: () {
+                Navigator.pop(context);
+                _shareToWhatsApp(text);
+              },
+            ),
+            ListTile(
+              leading:
+                  const FaIcon(FontAwesomeIcons.telegram, color: Colors.blue),
+              title: const Text('Telegram'),
+              onTap: () {
+                Navigator.pop(context);
+                _shareToTelegram(text);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.purple),
+              title: const Text('Instagram'),
+              onTap: () {
+                Navigator.pop(context);
+                _shareToInstagram();
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.share),
+              title: const Text('Другие приложения'),
+              onTap: () {
+                Navigator.pop(context);
+                _shareOther(context, text);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -545,13 +593,17 @@ ${ad.description}
                                           bottomRight: Radius.circular(24),
                                         ),
                                         onTap: () async {
-                                          final uri = Uri.parse(
-                                              'https://wa.me/${ad.phone.replaceAll(' ', '')}');
-                                          if (await canLaunchUrl(uri)) {
-                                            await launchUrl(uri,
-                                                mode: LaunchMode
-                                                    .externalApplication);
-                                          }
+                                          final shareText = '''
+${ad.title}
+
+${ad.description}
+
+Телефон: ${ad.phone}
+
+Скачай приложение Аймак 996: https://aimak996.kg
+                                          ''';
+                                          showShareDialog(
+                                              context, shareText.trim());
                                         },
                                         child: Row(
                                           mainAxisAlignment:
@@ -672,7 +724,7 @@ ${ad.description}
 
 Скачай приложение Аймак 996: https://aimak996.kg
                       ''';
-                      Share.share(shareText.trim());
+                      showShareDialog(context, shareText.trim());
                     },
                     splashRadius: 24,
                   ),

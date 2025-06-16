@@ -46,13 +46,17 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/             # ✅ ВСЯ папка с картинками
-    - assets/translations/    
-    - assets/icon/   # Переводы
-    - assets/images/splash_bg.jpg
-    - assets/animations/
+    - assets/images/logo.png
+    - assets/images/header_drawer.png
+    - assets/images/header_drawer.svg
+    - assets/images/header_pattern.svg
     - assets/images/kg_flag.png
     - assets/images/ru_flag.png
+    - assets/images/splash.png
+    # - assets/images/splash_bg.jpg
+    - assets/translations/    
+    - assets/icon/   # Переводы
+    - assets/animations/
     - assets/sounds/
   fonts:
     - family: Roboto

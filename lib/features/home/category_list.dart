@@ -15,14 +15,14 @@ class CategoryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<CategoryModel> categories = [
-      CategoryModel(id: 0, title: 'Жалпы'),
-      CategoryModel(id: 1, title: 'К. Мүлк'),
-      CategoryModel(id: 2, title: 'Авто'),
-      CategoryModel(id: 3, title: 'Мал-чарба'),
-      CategoryModel(id: 4, title: 'Алуу/сатуу'),
-      CategoryModel(id: 5, title: 'Жумуш'),
-      CategoryModel(id: 7, title: 'Каттам'),
-      CategoryModel(id: 9, title: 'Жаңылыктар'),
+      CategoryModel(id: 0, name: 'Жалпы', ruName: 'Общее'),
+      CategoryModel(id: 1, name: 'К. Мүлк', ruName: 'Недвижимость'),
+      CategoryModel(id: 2, name: 'Авто', ruName: 'Авто'),
+      CategoryModel(id: 3, name: 'Мал-чарба', ruName: 'Скот'),
+      CategoryModel(id: 4, name: 'Алуу/сатуу', ruName: 'Купить/Продать'),
+      CategoryModel(id: 5, name: 'Жумуш', ruName: 'Работа'),
+      CategoryModel(id: 7, name: 'Каттам', ruName: 'Попутка'),
+      CategoryModel(id: 9, name: 'Жаңылыктар', ruName: 'Новости района'),
     ];
 
     return SizedBox(

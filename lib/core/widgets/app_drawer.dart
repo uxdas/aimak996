@@ -17,6 +17,7 @@ import 'package:projects/core/providers/theme_provider.dart';
 import 'package:projects/utils/sound_helper.dart';
 import 'package:projects/utils/theme_prefs.dart';
 import 'package:projects/core/providers/category_provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class AppDrawer extends StatefulWidget {
   static const String _whatsappNumber = '996999109190';
@@ -97,7 +98,8 @@ class _AppDrawerState extends State<AppDrawer>
 
     return Drawer(
       width: 320,
-      backgroundColor: isDarkMode ? theme.colorScheme.surface : Colors.white,
+      backgroundColor:
+          isDarkMode ? theme.colorScheme.surface : const Color(0xFFF4F8FD),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
