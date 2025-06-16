@@ -13,11 +13,17 @@ import 'dart:math';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
+import 'package:projects/utils/sound_helper.dart';
+import 'package:projects/core/models/category.dart';
+import 'package:projects/core/widgets/category_chip.dart';
 
 class AdDetailScreen extends StatefulWidget {
   final AdModel ad;
 
-  const AdDetailScreen({super.key, required this.ad});
+  const AdDetailScreen({
+    super.key,
+    required this.ad,
+  });
 
   @override
   State<AdDetailScreen> createState() => _AdDetailScreenState();
@@ -76,7 +82,42 @@ class _AdDetailScreenState extends State<AdDetailScreen>
     );
   }
 
+  int _getCategoryId(String category) {
+    print('[AdDetail] Getting category ID for: $category');
+
+    if (category.isEmpty) {
+      print('[AdDetail] Empty category name');
+      return 0;
+    }
+
+    final normalizedCategory = category.toLowerCase().trim();
+    print('[AdDetail] Normalized category: $normalizedCategory');
+
+    // Используем точно такие же ID категорий, как в бэкенде
+    final categoryId = switch (normalizedCategory) {
+      'все' => 0,
+      'недвижимость' => 1,
+      'к. мулк' => 1,
+      'авто' => 2,
+      'мал-чарба' => 3,
+      'скот' => 3,
+      'алуу/сатуу' => 4,
+      'купить/продать' => 4,
+      'жумуш' => 5,
+      'работа' => 5,
+      'каттам' => 7,
+      'попутка' => 7,
+      'район жаңылыктары' => 9,
+      'новости района' => 9,
+      _ => 0,
+    };
+
+    print('[AdDetail] Category ID: $categoryId');
+    return categoryId;
+  }
+
   void _onLike(FavoritesProvider favoritesProvider, AdModel ad) async {
+    await SoundHelper.playIfEnabled('sounds/like.wav');
     _heartAnimationController.forward(from: 0.0);
     final colors = [
       Colors.red,
@@ -250,267 +291,392 @@ ${ad.description}
           onPressed: () => Navigator.of(context).pop(),
           splashRadius: 24,
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share, color: Colors.white, size: 26),
-            onPressed: () {
-              final shareText =
-                  '${ad.category}\n${ad.description}\nТелефон: ${ad.phone}';
-              Share.share(shareText);
-            },
-            splashRadius: 24,
-          ),
-        ],
         toolbarHeight: 56,
         automaticallyImplyLeading: true,
       ),
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            const SizedBox(height: 10),
-            ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                // Галерея
-                Stack(
-                  children: [
-                    SizedBox(
-                      height: 270,
-                      child: PageView.builder(
-                        controller: _pageController,
-                        itemCount: ad.images.length,
-                        onPageChanged: (index) {
-                          setState(() {
-                            _currentImageIndex = index;
-                          });
-                        },
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => FullImageScreen(
-                                    images: ad.images,
-                                    initialIndex: index,
-                                    tag: 'ad-detail-image-${ad.id}-',
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Hero(
-                              tag: 'ad-detail-image-${ad.id}-$index',
-                              child: CachedNetworkImage(
-                                imageUrl: ad.images[index],
-                                width: double.infinity,
-                                height: 270,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Container(
-                                  color: theme.colorScheme.surfaceVariant,
-                                  child: const Center(
-                                      child: CircularProgressIndicator()),
-                                ),
-                                errorWidget: (context, url, error) => Container(
-                                  color: theme.colorScheme.surfaceVariant,
-                                  child:
-                                      const Icon(Icons.broken_image, size: 48),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    if (ad.images.length > 1)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 8,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: ad.images.asMap().entries.map((entry) {
-                            return Container(
-                              width: 8,
-                              height: 8,
-                              margin: const EdgeInsets.symmetric(horizontal: 3),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(
-                                  _currentImageIndex == entry.key ? 0.9 : 0.4,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                  ],
-                ),
-                // Описание
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        ad.description,
-                        style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
-                      ),
-                      const SizedBox(height: 18),
-                      // Категория и дата внизу описания
-                      Row(
+                      // Галерея
+                      Stack(
                         children: [
-                          Icon(Icons.category, size: 18, color: blueAccent),
-                          const SizedBox(width: 6),
-                          Text(ad.category,
-                              style: theme.textTheme.titleMedium
-                                  ?.copyWith(color: blueAccent)),
-                          const SizedBox(width: 12),
-                          Text('•',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                  color: blueAccent,
-                                  fontWeight: FontWeight.bold)),
-                          const SizedBox(width: 12),
-                          Icon(Icons.calendar_today,
-                              size: 16, color: blueAccent),
-                          const SizedBox(width: 4),
-                          Text(dateStr,
-                              style: theme.textTheme.bodyMedium
-                                  ?.copyWith(color: blueAccent)),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        height: 48,
-                        margin: const EdgeInsets.only(top: 24, bottom: 8),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: blue, width: 1.5),
-                          borderRadius: BorderRadius.circular(0),
-                          color: Colors.grey[200],
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(0),
-                                    bottomLeft: Radius.circular(0),
-                                  ),
-                                  onTap: () async {
-                                    final uri = Uri.parse(
-                                        'tel:${ad.phone.replaceAll(' ', '')}');
-                                    if (await canLaunchUrl(uri)) {
-                                      await launchUrl(uri,
-                                          mode: LaunchMode.externalApplication);
-                                    }
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.phone, color: blue, size: 22),
-                                      const SizedBox(width: 8),
-                                      SelectableText(
-                                        ad.phone,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                                color: blue,
-                                                fontWeight: FontWeight.w600),
-                                        toolbarOptions: const ToolbarOptions(
-                                            copy: true, selectAll: true),
-                                        showCursor: false,
-                                        cursorWidth: 0,
-                                        cursorColor: Colors.transparent,
-                                        enableInteractiveSelection: true,
+                          SizedBox(
+                            height: 270,
+                            child: PageView.builder(
+                              controller: _pageController,
+                              itemCount: ad.images.length,
+                              onPageChanged: (index) {
+                                setState(() {
+                                  _currentImageIndex = index;
+                                });
+                              },
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => FullImageScreen(
+                                          images: ad.images,
+                                          initialIndex: index,
+                                          tag: 'ad-detail-image-${ad.id}-',
+                                        ),
                                       ),
-                                    ],
+                                    );
+                                  },
+                                  child: Hero(
+                                    tag: 'ad-detail-image-${ad.id}-$index',
+                                    child: CachedNetworkImage(
+                                      imageUrl: ad.images[index],
+                                      width: double.infinity,
+                                      height: 270,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        color: theme.colorScheme.surfaceVariant,
+                                        child: const Center(
+                                            child: CircularProgressIndicator()),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Container(
+                                        color: theme.colorScheme.surfaceVariant,
+                                        child: const Icon(Icons.broken_image,
+                                            size: 48),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                );
+                              },
+                            ),
+                          ),
+                          if (ad.images.length > 1)
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 8,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children:
+                                    ad.images.asMap().entries.map((entry) {
+                                  return Container(
+                                    width: 8,
+                                    height: 8,
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 3),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withOpacity(
+                                        _currentImageIndex == entry.key
+                                            ? 0.9
+                                            : 0.4,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
                               ),
                             ),
-                            Container(
-                              width: 1,
-                              height: 32,
-                              color: blue.withOpacity(0.18),
+                        ],
+                      ),
+                      // Описание
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ad.description,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
                             ),
-                            Expanded(
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: const BorderRadius.only(
-                                    topRight: Radius.circular(0),
-                                    bottomRight: Radius.circular(0),
-                                  ),
-                                  onTap: () =>
-                                      _onFavoritePressed(isFavorite, ad),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.local_fire_department,
-                                          color: isFavorite
-                                              ? Colors.deepOrange
-                                              : blue,
-                                          size: 22),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                          isFavorite
-                                              ? 'В избранном'
-                                              : 'В избранное',
-                                          style: theme.textTheme.titleMedium
-                                              ?.copyWith(
-                                                  color: isFavorite
-                                                      ? Colors.deepOrange
-                                                      : blue,
-                                                  fontWeight: FontWeight.w600)),
-                                      if (_showFire)
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 4),
-                                          child: ScaleTransition(
-                                            scale: _fireScale,
-                                            child: FadeTransition(
-                                              opacity: _fireFade,
-                                              child: Icon(
-                                                Icons.local_fire_department,
-                                                color: Colors.deepOrange
-                                                    .withOpacity(0.85),
-                                                size: 36,
-                                                shadows: [
-                                                  Shadow(
-                                                    color: Colors.orange
-                                                        .withOpacity(0.7),
-                                                    blurRadius: 16,
-                                                    offset: const Offset(0, 0),
-                                                  ),
-                                                  Shadow(
-                                                    color: Colors.yellow
-                                                        .withOpacity(0.5),
-                                                    blurRadius: 24,
-                                                    offset: const Offset(0, 0),
-                                                  ),
-                                                ],
-                                              ),
+                            const SizedBox(height: 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF1E3A8A)
+                                            .withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          FaIcon(
+                                            CategoryChip.categoryIcons[
+                                                    _getCategoryId(
+                                                        ad.category)] ??
+                                                FontAwesomeIcons.circle,
+                                            size: 16,
+                                            color: const Color(0xFF1E3A8A),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            ad.category,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xFF1E3A8A),
                                             ),
                                           ),
-                                        ),
-                                    ],
-                                  ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      '•',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1E3A8A),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF1E3A8A)
+                                            .withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today,
+                                            size: 16,
+                                            color: const Color(0xFF1E3A8A),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            DateFormat('dd.MM.yyyy').format(
+                                                DateTime.parse(ad.createdAt)),
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xFF1E3A8A),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            Container(
+                              height: 48,
+                              margin: const EdgeInsets.only(top: 24, bottom: 8),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: blue, width: 1.5),
+                                borderRadius: BorderRadius.circular(24),
+                                color: Colors.grey[200],
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(24),
+                                          bottomLeft: Radius.circular(24),
+                                        ),
+                                        onTap: () async {
+                                          print(
+                                              '[AdDetail] Phone number: ${ad.phone}');
+                                          final phone =
+                                              ad.phone.replaceAll(' ', '');
+                                          if (phone.isNotEmpty) {
+                                            final uri = Uri.parse('tel:$phone');
+                                            if (await canLaunchUrl(uri)) {
+                                              await launchUrl(uri,
+                                                  mode: LaunchMode
+                                                      .externalApplication);
+                                            }
+                                          }
+                                        },
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.phone,
+                                                color: blue, size: 22),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              ad.phone.isNotEmpty
+                                                  ? ad.phone
+                                                  : 'Нет номера',
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                      color: blue,
+                                                      fontWeight:
+                                                          FontWeight.w600),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 32,
+                                    color: blue.withOpacity(0.18),
+                                  ),
+                                  Expanded(
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: const BorderRadius.only(
+                                          topRight: Radius.circular(24),
+                                          bottomRight: Radius.circular(24),
+                                        ),
+                                        onTap: () async {
+                                          final uri = Uri.parse(
+                                              'https://wa.me/${ad.phone.replaceAll(' ', '')}');
+                                          if (await canLaunchUrl(uri)) {
+                                            await launchUrl(uri,
+                                                mode: LaunchMode
+                                                    .externalApplication);
+                                          }
+                                        },
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            FaIcon(FontAwesomeIcons.whatsapp,
+                                                color: const Color(0xFF25D366),
+                                                size: 22),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'WhatsApp',
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                color: const Color(0xFF25D366),
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),
-                const SizedBox(height: 80),
+              ),
+            ],
+          ),
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Consumer<FavoritesProvider>(
+                  builder: (context, favoritesProvider, _) {
+                    final isFavorite = favoritesProvider.isFavorite(ad.id);
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isFavorite
+                              ? Colors.deepOrange
+                              : Colors.grey[300]!,
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          isFavorite
+                              ? Icons.local_fire_department
+                              : Icons.local_fire_department_outlined,
+                          color:
+                              isFavorite ? Colors.deepOrange : Colors.grey[600],
+                          size: 24,
+                        ),
+                        onPressed: () {
+                          if (!isFavorite) {
+                            setState(() => _showFire = true);
+                            _fireController.forward(from: 0.0).then((_) {
+                              setState(() => _showFire = false);
+                            });
+                          }
+                          favoritesProvider.toggleFavorite(ad);
+                        },
+                        splashRadius: 24,
+                      ),
+                    );
+                  },
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.grey[300]!,
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.share,
+                      color: Colors.grey[600],
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      final shareText = '''
+${ad.title}
+
+${ad.description}
+
+Телефон: ${ad.phone}
+
+Скачай приложение Аймак 996: https://aimak996.kg
+                      ''';
+                      Share.share(shareText.trim());
+                    },
+                    splashRadius: 24,
+                  ),
+                ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

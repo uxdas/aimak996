@@ -187,11 +187,7 @@ class _AboutScreenState extends State<AboutScreen>
                     position: Tween<Offset>(
                             begin: const Offset(0, 0.2), end: Offset.zero)
                         .animate(_logoController),
-                    child: Image.asset(
-                      'assets/images/nookat996logo.png',
-                      width: 96,
-                      height: 96,
-                    ),
+                    child: const SizedBox(height: 20),
                   ),
                 ),
                 const SizedBox(height: 20),

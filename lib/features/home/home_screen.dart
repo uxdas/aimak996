@@ -249,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(top: pinnedBoxHeight),
+                  padding: EdgeInsets.only(top: pinnedBoxHeight + 10),
                   child: _isSearching
                       ? AdFeed(
                           externalAds: searchProvider.results,

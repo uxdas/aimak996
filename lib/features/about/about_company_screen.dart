@@ -33,14 +33,6 @@ class AboutCompanyScreen extends StatelessWidget {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          theme.primaryColor,
-                          theme.primaryColor.withOpacity(0.7),
-                        ],
-                      ),
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
@@ -50,16 +42,9 @@ class AboutCompanyScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Center(
-                      child: Text(
-                        'A996',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
-                        ),
-                      ),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      fit: BoxFit.contain,
                     ),
                   ),
                   const SizedBox(height: 16),

@@ -43,18 +43,52 @@ class _CityBoardsScreenState extends State<CityBoardsScreen> {
           }
           return Padding(
             padding: const EdgeInsets.all(12),
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.85,
-              ),
-              itemCount: cities.length,
-              itemBuilder: (context, i) {
-                final city = cities[i];
-                return _CityBoardTile(city: city);
-              },
+            child: Column(
+              children: [
+                Container(
+                  width: 120,
+                  height: 120,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        theme.primaryColor.withOpacity(0.1),
+                        theme.primaryColor.withOpacity(0.05),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.primaryColor.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Expanded(
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.85,
+                    ),
+                    itemCount: cities.length,
+                    itemBuilder: (context, i) {
+                      final city = cities[i];
+                      return _CityBoardTile(city: city);
+                    },
+                  ),
+                ),
+              ],
             ),
           );
         },

@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:projects/core/providers/theme_provider.dart';
 import 'package:projects/utils/sound_helper.dart';
 import 'package:projects/utils/theme_prefs.dart';
+import 'package:projects/core/providers/category_provider.dart';
 
 class AppDrawer extends StatefulWidget {
   static const String _whatsappNumber = '996999109190';
@@ -202,7 +203,7 @@ class _AppDrawerState extends State<AppDrawer>
           _buildDrawerItem(
             context: context,
             icon: Icons.add_circle_outline,
-            title: 'add_ad'.tr(),
+            title: 'Жарыя берүү',
             onTap: () async {
               Navigator.pop(context);
               await _playDrawerSound();
@@ -274,7 +275,7 @@ class _AppDrawerState extends State<AppDrawer>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildThemeButton(),
+                      _buildThemeToggleButton(),
                       _buildShareButton(),
                     ],
                   ),
@@ -369,20 +370,25 @@ class _AppDrawerState extends State<AppDrawer>
     );
   }
 
-  Widget _buildThemeButton() {
+  Widget _buildThemeToggleButton() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
     return Material(
       color: theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
-        onTap: widget.toggleTheme,
+        onTap: () {
+          widget.toggleTheme();
+        },
         child: Container(
           width: 90,
           height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFFE3F2FD).withOpacity(0.5),
+            color: isDark
+                ? Colors.white.withOpacity(0.1)
+                : const Color(0xFFE3F2FD).withOpacity(0.5),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: isDark ? Colors.white : theme.colorScheme.primary,
@@ -398,7 +404,7 @@ class _AppDrawerState extends State<AppDrawer>
                 child: Icon(
                   Icons.light_mode,
                   size: 20,
-                  color: widget.isDark
+                  color: isDark
                       ? (isDark ? Colors.white : const Color(0xFF2563EB))
                       : Colors.white.withOpacity(0.6),
                 ),
@@ -409,7 +415,7 @@ class _AppDrawerState extends State<AppDrawer>
                 child: Icon(
                   Icons.dark_mode,
                   size: 20,
-                  color: widget.isDark
+                  color: isDark
                       ? Colors.white.withOpacity(0.6)
                       : (isDark ? Colors.white : const Color(0xFF2563EB)),
                 ),
@@ -417,12 +423,12 @@ class _AppDrawerState extends State<AppDrawer>
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
-                left: widget.isDark ? 50 : 4,
+                left: isDark ? 50 : 4,
                 child: Container(
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? Colors.white : Colors.white,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isDark ? Colors.white : theme.colorScheme.primary,
@@ -441,6 +447,7 @@ class _AppDrawerState extends State<AppDrawer>
   Widget _buildSoundButton() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
     return Material(
       color: theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(18),
@@ -452,9 +459,10 @@ class _AppDrawerState extends State<AppDrawer>
         child: Container(
           width: 90,
           height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFFE3F2FD).withOpacity(0.5),
+            color: isDark
+                ? Colors.white.withOpacity(0.1)
+                : const Color(0xFFE3F2FD).withOpacity(0.5),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: isDark ? Colors.white : theme.colorScheme.primary,
@@ -464,50 +472,38 @@ class _AppDrawerState extends State<AppDrawer>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: _isSoundEnabled ? 0.4 : 1.0,
-                child: Positioned(
-                  left: 6,
-                  top: 8,
-                  child: Icon(
-                    Icons.volume_off,
-                    size: 20,
-                    color: isDark ? Colors.white : const Color(0xFF2563EB),
-                  ),
+              Positioned(
+                left: 6,
+                top: 8,
+                child: Icon(
+                  Icons.volume_off,
+                  size: 20,
+                  color: _isSoundEnabled
+                      ? (isDark ? Colors.white : const Color(0xFF2563EB))
+                      : Colors.white.withOpacity(0.6),
                 ),
               ),
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: _isSoundEnabled ? 1.0 : 0.4,
-                child: Positioned(
-                  right: 6,
-                  top: 8,
-                  child: Icon(
-                    Icons.volume_up,
-                    size: 20,
-                    color: isDark ? Colors.white : const Color(0xFF2563EB),
-                  ),
+              Positioned(
+                right: 6,
+                top: 8,
+                child: Icon(
+                  Icons.volume_up,
+                  size: 20,
+                  color: _isSoundEnabled
+                      ? Colors.white.withOpacity(0.6)
+                      : (isDark ? Colors.white : const Color(0xFF2563EB)),
                 ),
               ),
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
-                left: _isSoundEnabled ? 48 : 2,
-                top: 4,
+                left: _isSoundEnabled ? 50 : 4,
                 child: Container(
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? Colors.white : Colors.white,
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
                     border: Border.all(
                       color: isDark ? Colors.white : theme.colorScheme.primary,
                       width: 1.2,
@@ -526,6 +522,7 @@ class _AppDrawerState extends State<AppDrawer>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final currentLocale = context.locale;
+    final isKyrgyz = currentLocale.languageCode == 'ky';
 
     return Material(
       color: theme.colorScheme.surface,
@@ -533,20 +530,19 @@ class _AppDrawerState extends State<AppDrawer>
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
         onTap: () async {
-          final newLocale = currentLocale.languageCode == 'ky'
-              ? const Locale('ru')
-              : const Locale('ky');
+          final newLocale = isKyrgyz ? const Locale('ru') : const Locale('ky');
           await context.setLocale(newLocale);
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('locale', newLocale.languageCode);
-          setState(() {});
+          if (mounted) setState(() {});
         },
         child: Container(
           width: 90,
           height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFE3F2FD).withOpacity(0.5),
+            color: isDark
+                ? Colors.white.withOpacity(0.1)
+                : const Color(0xFFE3F2FD).withOpacity(0.5),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: isDark ? Colors.white : theme.colorScheme.primary,
@@ -557,36 +553,42 @@ class _AppDrawerState extends State<AppDrawer>
             alignment: Alignment.center,
             children: [
               Positioned(
-                left: 8,
+                left: 6,
                 top: 8,
-                child: Image.asset(
-                  'assets/images/kg_flag.png',
-                  width: 24,
-                  height: 24,
-                  cacheWidth: 48,
-                  cacheHeight: 48,
+                child: Opacity(
+                  opacity: isKyrgyz ? 1.0 : 0.6,
+                  child: Image.asset(
+                    'assets/images/kg_flag.png',
+                    width: 20,
+                    height: 20,
+                    cacheWidth: 40,
+                    cacheHeight: 40,
+                  ),
                 ),
               ),
               Positioned(
-                right: 8,
+                right: 6,
                 top: 8,
-                child: Image.asset(
-                  'assets/images/ru_flag.png',
-                  width: 24,
-                  height: 24,
-                  cacheWidth: 48,
-                  cacheHeight: 48,
+                child: Opacity(
+                  opacity: isKyrgyz ? 0.6 : 1.0,
+                  child: Image.asset(
+                    'assets/images/ru_flag.png',
+                    width: 20,
+                    height: 20,
+                    cacheWidth: 40,
+                    cacheHeight: 40,
+                  ),
                 ),
               ),
               AnimatedPositioned(
-                duration: const Duration(milliseconds: 100),
+                duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
-                left: currentLocale.languageCode == 'ru' ? 4 : 50,
+                left: isKyrgyz ? 50 : 4,
                 child: Container(
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? Colors.white : Colors.white,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isDark ? Colors.white : theme.colorScheme.primary,
@@ -605,36 +607,35 @@ class _AppDrawerState extends State<AppDrawer>
   Widget _buildShareButton() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
     return Material(
       color: theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
         onTap: () {
-          Share.share('share_text'.tr());
+          Share.share(
+              'https://play.google.com/store/apps/details?id=com.aimak996.aimak');
         },
         child: Container(
           width: 90,
           height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFE3F2FD).withOpacity(0.5),
+            color: isDark
+                ? Colors.white.withOpacity(0.1)
+                : const Color(0xFFE3F2FD).withOpacity(0.5),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: isDark ? Colors.white : theme.colorScheme.primary,
               width: 1.2,
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.share,
-                size: 20,
-                color: isDark ? Colors.white : const Color(0xFF1E3A8A),
-              ),
-            ],
+          child: Center(
+            child: Icon(
+              Icons.share,
+              size: 20,
+              color: isDark ? Colors.white : const Color(0xFF2563EB),
+            ),
           ),
         ),
       ),

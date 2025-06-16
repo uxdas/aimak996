@@ -86,39 +86,42 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               ),
             )
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(5),
               itemCount: favoriteAds.length,
               itemBuilder: (_, i) {
                 final ad = favoriteAds[i];
-                return Dismissible(
-                  key: ValueKey(ad.id),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    padding: const EdgeInsets.only(right: 20),
-                    alignment: Alignment.centerRight,
-                    color: theme.colorScheme.error,
-                    child: Icon(
-                      Icons.delete,
-                      color: theme.colorScheme.onError,
-                    ),
-                  ),
-                  onDismissed: (_) {
-                    favoritesProvider.toggleFavorite(ad);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('removed_from_favorites'.tr()),
-                        action: SnackBarAction(
-                          label: 'undo'.tr(),
-                          onPressed: () {
-                            favoritesProvider.toggleFavorite(ad);
-                          },
-                        ),
-                        duration: const Duration(seconds: 3),
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Dismissible(
+                    key: ValueKey(ad.id),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      padding: const EdgeInsets.only(right: 20),
+                      alignment: Alignment.centerRight,
+                      color: theme.colorScheme.error,
+                      child: Icon(
+                        Icons.delete,
+                        color: theme.colorScheme.onError,
                       ),
-                    );
-                  },
-                  child: AdCard(ad: ad),
+                    ),
+                    onDismissed: (_) {
+                      favoritesProvider.toggleFavorite(ad);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('removed_from_favorites'.tr()),
+                          action: SnackBarAction(
+                            label: 'undo'.tr(),
+                            onPressed: () {
+                              favoritesProvider.toggleFavorite(ad);
+                            },
+                          ),
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                    },
+                    child: AdCard(ad: ad),
+                  ),
                 );
               },
             ),
