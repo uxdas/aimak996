@@ -18,7 +18,6 @@ import 'package:projects/core/providers/search_provider.dart';
 import 'package:projects/core/providers/theme_provider.dart';
 import 'package:projects/features/favorites/favorites_screen.dart';
 import 'package:projects/core/providers/category_provider.dart';
-import 'package:projects/core/providers/search_provider.dart';
 import 'package:projects/core/providers/pinned_message_provider.dart';
 import 'package:projects/core/widgets/pinned_message_box.dart';
 
@@ -247,38 +246,25 @@ class _HomeScreenState extends State<HomeScreen>
         children: [
           Column(
             children: [
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(top: pinnedBoxHeight + 10),
-                  child: _isSearching
-                      ? AdFeed(
-                          externalAds: searchProvider.results,
-                          scrollController: _scrollController,
-                        )
-                      : CategoryPagesView(
-                          scrollController: _scrollController,
-                          onPageChanged: _onPageChanged,
-                        ),
+              if (pinnedProvider.message != null)
+                PinnedMessageBox(
+                  text: pinnedProvider.message!.text,
+                  onClose: () => pinnedProvider.hide(),
                 ),
+              if (pinnedProvider.message != null) const SizedBox(height: 5),
+              Expanded(
+                child: _isSearching
+                    ? AdFeed(
+                        externalAds: searchProvider.results,
+                        scrollController: _scrollController,
+                      )
+                    : CategoryPagesView(
+                        scrollController: _scrollController,
+                        onPageChanged: _onPageChanged,
+                      ),
               ),
             ],
           ),
-          if (showPinned)
-            Consumer<PinnedMessageProvider>(
-              builder: (context, pinnedProvider, _) {
-                final msg = pinnedProvider.message;
-                if (msg == null) return const SizedBox.shrink();
-                return Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: PinnedMessageBox(
-                    text: msg.text,
-                    onClose: () => pinnedProvider.hide(),
-                  ),
-                );
-              },
-            ),
           if (_showScrollToTop)
             Positioned(
               right: 16,

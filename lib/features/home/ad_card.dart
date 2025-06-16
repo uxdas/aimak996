@@ -15,6 +15,8 @@ import '../../widgets/telegram_refresh_indicator.dart';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import '../../utils/sound_helper.dart';
+import 'package:flutter/rendering.dart';
+import 'dart:ui';
 
 class AdCard extends StatefulWidget {
   final AdModel ad;
@@ -97,51 +99,65 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
               child: Material(
                 type: MaterialType.circle,
                 elevation: 2,
-                color: theme.colorScheme.surface.withOpacity(0.9),
+                color: Colors.white.withOpacity(0.9),
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   onTap: favoritesProvider.isLoading
                       ? null
                       : () => _onLike(favoritesProvider),
                   child: SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: Center(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Icon(
-                            Icons.local_fire_department,
-                            size: 24,
-                            color: isFavorite
-                                ? Colors.deepOrange
-                                : theme.colorScheme.onSurface,
-                          ),
-                          if (_showFire)
-                            ScaleTransition(
-                              scale: _fireScale,
-                              child: FadeTransition(
-                                opacity: _fireFade,
-                                child: Icon(
-                                  Icons.local_fire_department,
-                                  color: Colors.deepOrange.withOpacity(0.85),
-                                  size: 36,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.orange.withOpacity(0.7),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 0),
-                                    ),
-                                    Shadow(
-                                      color: Colors.yellow.withOpacity(0.5),
-                                      blurRadius: 24,
-                                      offset: const Offset(0, 0),
-                                    ),
-                                  ],
-                                ),
+                    width: 48,
+                    height: 48,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                        child: Center(
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                child: isFavorite
+                                    ? Icon(
+                                        Icons.local_fire_department_rounded,
+                                        color: Colors.red,
+                                        size: 32,
+                                      )
+                                    : Icon(
+                                        Icons.local_fire_department_outlined,
+                                        color: Colors.grey,
+                                        size: 32,
+                                      ),
                               ),
-                            ),
-                        ],
+                              if (_showFire)
+                                ScaleTransition(
+                                  scale: _fireScale,
+                                  child: FadeTransition(
+                                    opacity: _fireFade,
+                                    child: Icon(
+                                      Icons.local_fire_department,
+                                      color:
+                                          Colors.deepOrange.withOpacity(0.85),
+                                      size: 60,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.orange.withOpacity(0.7),
+                                          blurRadius: 16,
+                                          offset: const Offset(0, 0),
+                                        ),
+                                        Shadow(
+                                          color: Colors.yellow.withOpacity(0.5),
+                                          blurRadius: 24,
+                                          offset: const Offset(0, 0),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -388,18 +404,6 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      widget.ad.phone,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
                 if (widget.ad.images.isEmpty) ...[
                   const SizedBox(height: 8),
                   Row(
@@ -470,8 +474,11 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                       ),
                       icon: const Icon(Icons.phone, size: 20),
                       label: Text(
-                        widget.ad.phone,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        widget.ad.phone.replaceAll(' ', ''),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),

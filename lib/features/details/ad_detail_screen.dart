@@ -16,6 +16,8 @@ import 'package:flutter/services.dart';
 import 'package:projects/utils/sound_helper.dart';
 import 'package:projects/core/models/category.dart';
 import 'package:projects/core/widgets/category_chip.dart';
+import 'package:flutter/rendering.dart';
+import 'dart:ui';
 
 class AdDetailScreen extends StatefulWidget {
   final AdModel ad;
@@ -596,42 +598,44 @@ ${ad.description}
                     final isFavorite = favoritesProvider.isFavorite(ad.id);
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
+                      width: 48,
+                      height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Colors.white.withOpacity(0.9),
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isFavorite
-                              ? Colors.deepOrange
-                              : Colors.grey[300]!,
-                          width: 1.5,
-                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
                             blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            spreadRadius: 1,
                           ),
                         ],
                       ),
-                      child: IconButton(
-                        icon: Icon(
-                          isFavorite
-                              ? Icons.local_fire_department
-                              : Icons.local_fire_department_outlined,
-                          color:
-                              isFavorite ? Colors.deepOrange : Colors.grey[600],
-                          size: 24,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => _onLike(favoritesProvider, ad),
+                              child: Center(
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 300),
+                                  child: Icon(
+                                    isFavorite
+                                        ? Icons.local_fire_department_rounded
+                                        : Icons.local_fire_department_outlined,
+                                    color:
+                                        isFavorite ? Colors.red : Colors.grey,
+                                    size: 32,
+                                    key: ValueKey<bool>(isFavorite),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                        onPressed: () {
-                          if (!isFavorite) {
-                            setState(() => _showFire = true);
-                            _fireController.forward(from: 0.0).then((_) {
-                              setState(() => _showFire = false);
-                            });
-                          }
-                          favoritesProvider.toggleFavorite(ad);
-                        },
-                        splashRadius: 24,
                       ),
                     );
                   },
