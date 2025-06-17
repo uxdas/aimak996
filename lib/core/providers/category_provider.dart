@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 import '../models/category.dart';
-import '../services/category_service.dart';
+import 'package:projects/data/models/category_model.dart';
+import 'package:projects/data/services/category_service.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoryProvider extends ChangeNotifier {
   final CategoryService _categoryService = CategoryService();
 
-  List<Category> _categories = [];
+  List<CategoryModel> _categories = [];
   bool _isLoading = false;
   String? _error;
   int _selectedCategoryId = 0;
 
-  List<Category> get categories => _categories;
+  List<CategoryModel> get categories => _categories;
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get selectedCategoryId => _selectedCategoryId;
@@ -24,25 +27,16 @@ class CategoryProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      developer.log('CategoryProvider: Starting to load categories');
-      final categories = await _categoryService.getCategories();
-
+      final categories = await _categoryService.fetchCategories();
       if (!categories.any((c) => c.id == 0)) {
-        categories.insert(0, Categories.all);
+        categories.insert(
+            0, CategoryModel(id: 0, name: 'Жалпы', ruName: 'Общее'));
       }
-
       _categories = categories;
       _error = null;
-      developer.log('CategoryProvider: Categories loaded successfully');
-      developer.log('CategoryProvider: Number of categories: ${_categories.length}');
-      for (var category in _categories) {
-        developer.log('CategoryProvider: Category: ${category.toString()}');
-      }
-    } catch (e, stackTrace) {
-      developer.log('CategoryProvider: Error loading categories',
-          error: e, stackTrace: stackTrace);
+    } catch (e) {
       _error = e.toString();
-      _categories = [Categories.all];
+      _categories = [CategoryModel(id: 0, name: 'Жалпы', ruName: 'Общее')];
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -54,13 +48,15 @@ class CategoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Category? getCategoryById(int id) {
+  CategoryModel? getCategoryById(int id) {
     try {
       return _categories.firstWhere((category) => category.id == id);
     } catch (e) {
-      developer.log('CategoryProvider: Error getting category by id: $id',
-          error: e);
       return null;
     }
+  }
+
+  void notifyLanguageChanged() {
+    notifyListeners();
   }
 }

@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:projects/data/models/ad_model.dart';
 import 'package:projects/core/providers/favorites_provider.dart';
 import 'package:projects/core/providers/theme_provider.dart';
+import 'package:projects/core/providers/category_provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:projects/features/home/ad_buttons_row.dart';
@@ -82,40 +83,6 @@ class _AdDetailScreenState extends State<AdDetailScreen>
     _fireFade = Tween<double>(begin: 0.8, end: 0.0).animate(
       CurvedAnimation(parent: _fireController, curve: Curves.easeOut),
     );
-  }
-
-  int _getCategoryId(String category) {
-    print('[AdDetail] Getting category ID for: $category');
-
-    if (category.isEmpty) {
-      print('[AdDetail] Empty category name');
-      return 0;
-    }
-
-    final normalizedCategory = category.toLowerCase().trim();
-    print('[AdDetail] Normalized category: $normalizedCategory');
-
-    // Используем точно такие же ID категорий, как в бэкенде
-    final categoryId = switch (normalizedCategory) {
-      'все' => 0,
-      'недвижимость' => 1,
-      'к. мулк' => 1,
-      'авто' => 2,
-      'мал-чарба' => 3,
-      'скот' => 3,
-      'алуу/сатуу' => 4,
-      'купить/продать' => 4,
-      'жумуш' => 5,
-      'работа' => 5,
-      'каттам' => 7,
-      'попутка' => 7,
-      'район жаңылыктары' => 9,
-      'новости района' => 9,
-      _ => 0,
-    };
-
-    print('[AdDetail] Category ID: $categoryId');
-    return categoryId;
   }
 
   void _onLike(FavoritesProvider favoritesProvider, AdModel ad) async {
@@ -464,20 +431,33 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                                         children: [
                                           FaIcon(
                                             CategoryChip.categoryIcons[
-                                                    _getCategoryId(
-                                                        ad.category)] ??
+                                                    ad.categoryId] ??
                                                 FontAwesomeIcons.circle,
                                             size: 16,
                                             color: const Color(0xFF1E3A8A),
                                           ),
                                           const SizedBox(width: 8),
-                                          Text(
-                                            ad.category,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: Color(0xFF1E3A8A),
-                                            ),
+                                          Consumer<CategoryProvider>(
+                                            builder:
+                                                (context, categoryProvider, _) {
+                                              final category = categoryProvider
+                                                  .getCategoryById(
+                                                      ad.categoryId);
+                                              final categoryName =
+                                                  category?.getLocalizedName(
+                                                          Localizations
+                                                              .localeOf(
+                                                                  context)) ??
+                                                      ad.category;
+                                              return Text(
+                                                categoryName,
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Color(0xFF1E3A8A),
+                                                ),
+                                              );
+                                            },
                                           ),
                                         ],
                                       ),

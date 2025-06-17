@@ -4,6 +4,7 @@ class AdModel {
   final String description;
   final String phone;
   final String category;
+  final int categoryId;
   final String createdAt;
   final List<String> images;
 
@@ -13,6 +14,7 @@ class AdModel {
     required this.description,
     required this.phone,
     required this.category,
+    required this.categoryId,
     required this.createdAt,
     required this.images,
   });
@@ -24,6 +26,9 @@ class AdModel {
       description: json['description'] ?? '',
       phone: json['contact_phone'] ?? '',
       category: json['category'] ?? '',
+      categoryId: json['category_id'] is int
+          ? json['category_id']
+          : int.tryParse(json['category_id']?.toString() ?? '') ?? 0,
       createdAt: json['created_at'] ?? '',
       images:
           (json['images'] as List?)?.map((e) => e.toString()).toList() ?? [],
@@ -37,6 +42,7 @@ class AdModel {
       'description': description,
       'contact_phone': phone,
       'category': category,
+      'category_id': categoryId,
       'created_at': createdAt,
       'images': images,
     };

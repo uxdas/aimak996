@@ -17,6 +17,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../utils/sound_helper.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui';
+import '../../core/providers/category_provider.dart';
 
 class AdCard extends StatefulWidget {
   final AdModel ad;
@@ -364,14 +365,23 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (widget.ad.category.isNotEmpty) ...[
-                  Text(
-                    widget.ad.category,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
+                if (widget.ad.categoryId != 0) ...[
+                  Consumer<CategoryProvider>(
+                    builder: (context, categoryProvider, _) {
+                      final category = categoryProvider
+                          .getCategoryById(widget.ad.categoryId);
+                      final categoryName = category?.getLocalizedName(
+                              Localizations.localeOf(context)) ??
+                          '';
+                      return Text(
+                        categoryName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 8),
                 ],

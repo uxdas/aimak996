@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:projects/core/providers/category_provider.dart';
 
 class LanguageScreen extends StatelessWidget {
   const LanguageScreen({super.key});
@@ -35,6 +37,8 @@ class LanguageScreen extends StatelessWidget {
                 await context.setLocale(newLocale);
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('locale', newLocale.languageCode);
+                Provider.of<CategoryProvider>(context, listen: false)
+                    .notifyLanguageChanged();
               },
             ),
             const SizedBox(height: 16),
@@ -47,6 +51,8 @@ class LanguageScreen extends StatelessWidget {
                 await context.setLocale(newLocale);
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('locale', newLocale.languageCode);
+                Provider.of<CategoryProvider>(context, listen: false)
+                    .notifyLanguageChanged();
               },
             ),
           ],

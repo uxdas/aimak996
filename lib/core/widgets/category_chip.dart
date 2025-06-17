@@ -50,8 +50,7 @@ class CategoryChip extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                category.getLocalizedName(
-                    Localizations.localeOf(context).languageCode),
+                category.getLocalizedName(Localizations.localeOf(context)),
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
