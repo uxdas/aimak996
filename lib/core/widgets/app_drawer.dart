@@ -204,7 +204,7 @@ class _AppDrawerState extends State<AppDrawer>
           _buildDrawerItem(
             context: context,
             icon: Icons.add_circle_outline,
-            title: 'Жарыя берүү',
+            title: 'drawer_add_ad'.tr(),
             onTap: () async {
               Navigator.pop(context);
               await _playDrawerSound();
@@ -563,7 +563,7 @@ class _AppDrawerState extends State<AppDrawer>
                 left: 6,
                 top: 8,
                 child: Opacity(
-                  opacity: isKyrgyz ? 1.0 : 0.6,
+                  opacity: isKyrgyz ? 0.6 : 1.0,
                   child: Image.asset(
                     'assets/images/kg_flag.png',
                     width: 20,
@@ -577,7 +577,7 @@ class _AppDrawerState extends State<AppDrawer>
                 right: 6,
                 top: 8,
                 child: Opacity(
-                  opacity: isKyrgyz ? 0.6 : 1.0,
+                  opacity: isKyrgyz ? 1.0 : 0.6,
                   child: Image.asset(
                     'assets/images/ru_flag.png',
                     width: 20,
@@ -590,7 +590,7 @@ class _AppDrawerState extends State<AppDrawer>
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
-                left: isKyrgyz ? 50 : 4,
+                left: isKyrgyz ? 4 : 50,
                 child: Container(
                   width: 32,
                   height: 32,
@@ -728,11 +728,11 @@ class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
                   child: child,
                 ),
                 child: ClipOval(
-                  key: ValueKey(isKyrgyz ? 'kg' : 'ru'),
+                  key: ValueKey(isKyrgyz ? 'ru' : 'kg'),
                   child: Image.asset(
                     isKyrgyz
-                        ? 'assets/images/kg_flag.png'
-                        : 'assets/images/ru_flag.png',
+                        ? 'assets/images/ru_flag.png'
+                        : 'assets/images/kg_flag.png',
                     width: 22,
                     height: 22,
                     fit: BoxFit.cover,
@@ -756,11 +756,11 @@ class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
                   child: child,
                 ),
                 child: ClipOval(
-                  key: ValueKey(isKyrgyz ? 'ru' : 'kg'),
+                  key: ValueKey(isKyrgyz ? 'kg' : 'ru'),
                   child: Image.asset(
                     isKyrgyz
-                        ? 'assets/images/ru_flag.png'
-                        : 'assets/images/kg_flag.png',
+                        ? 'assets/images/kg_flag.png'
+                        : 'assets/images/ru_flag.png',
                     width: 22,
                     height: 22,
                     fit: BoxFit.cover,

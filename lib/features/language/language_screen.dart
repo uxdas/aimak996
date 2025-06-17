@@ -31,7 +31,7 @@ class LanguageScreen extends StatelessWidget {
             _buildLanguageButton(
               context,
               'Русский',
-              isKyrgyz ? false : true,
+              isKyrgyz ? true : false,
               () async {
                 final newLocale = const Locale('ru');
                 await context.setLocale(newLocale);
@@ -45,7 +45,7 @@ class LanguageScreen extends StatelessWidget {
             _buildLanguageButton(
               context,
               'Кыргызча',
-              isKyrgyz ? true : false,
+              isKyrgyz ? false : true,
               () async {
                 final newLocale = const Locale('ky');
                 await context.setLocale(newLocale);

@@ -170,7 +170,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(top: 2, right: 12),
-                        child: Icon(Icons.apps,
+                        child: Icon(Icons.phone_android,
                             color:
                                 isDarkMode ? Colors.white : theme.primaryColor,
                             size: 28),
@@ -215,7 +215,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(top: 2, right: 12),
-                        child: Icon(Icons.apps,
+                        child: Icon(Icons.message,
                             color:
                                 isDarkMode ? Colors.white : theme.primaryColor,
                             size: 28),
@@ -236,6 +236,7 @@ class _AboutScreenState extends State<AboutScreen> {
                             ),
                             const SizedBox(height: 8),
                             Container(
+                              margin: const EdgeInsets.only(top: 20),
                               width: double.infinity,
                               height: 56,
                               decoration: BoxDecoration(
@@ -252,7 +253,6 @@ class _AboutScreenState extends State<AboutScreen> {
                               ),
                               child: Material(
                                 color: Colors.transparent,
-
                                 borderRadius: BorderRadius.circular(12),
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(12),
@@ -262,7 +262,6 @@ class _AboutScreenState extends State<AboutScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        
                                         FaIcon(
                                           FontAwesomeIcons.whatsapp,
                                           color: Colors.white,
