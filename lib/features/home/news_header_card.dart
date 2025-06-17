@@ -37,12 +37,12 @@ class NewsHeaderCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: theme.primaryColor.withOpacity(0.1),
+                    color: isDark ? Colors.white.withOpacity(0.1) : theme.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.newspaper_outlined,
-                    color: theme.primaryColor,
+                    color: isDark ? Colors.white : theme.primaryColor,
                     size: 20,
                   ),
                 ),
@@ -55,14 +55,14 @@ class NewsHeaderCard extends StatelessWidget {
                         'district_news_title'.tr(),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: theme.primaryColor,
+                          color: isDark ? Colors.white : theme.primaryColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'district_news_subtitle'.tr(),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.textTheme.bodySmall?.color,
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
                         ),
                       ),
                     ],
@@ -97,10 +97,10 @@ class NewsHeaderCard extends StatelessWidget {
                     'district_news_content'.tr(),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       height: 1.4,
+                      color: isDark ? Colors.grey[200] : Colors.grey[800],
                     ),
                   ),
                   const SizedBox(height: 12),
-                  
                 ],
               ),
             ),
