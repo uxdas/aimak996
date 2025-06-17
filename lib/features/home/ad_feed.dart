@@ -4,6 +4,7 @@ import 'package:nookat996/data/models/ad_model.dart';
 import 'package:nookat996/data/services/ad_service.dart';
 import 'package:nookat996/features/home/ad_card.dart';
 import 'package:nookat996/features/home/ad_card_shimmer.dart';
+import 'package:nookat996/features/home/news_header_card.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../utils/sound_helper.dart';
 
@@ -99,10 +100,13 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
         });
 
         final newAds = response['ads'] as List<AdModel>;
+        final bool isNewsCategory = widget.categoryId == 9;
+
         for (int i = 0; i < newAds.length; i++) {
           ads.add(newAds[i]);
-          _listKey.currentState
-              ?.insertItem(i, duration: const Duration(milliseconds: 350));
+          final animationIndex = isNewsCategory ? i + 1 : i;
+          _listKey.currentState?.insertItem(animationIndex,
+              duration: const Duration(milliseconds: 350));
         }
       }
     } catch (e) {
@@ -168,6 +172,7 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final List<AdModel> displayAds = widget.externalAds ?? ads;
+    final bool isNewsCategory = widget.categoryId == 9;
 
     if (isLoading && widget.externalAds == null) {
       return ListView.builder(
@@ -176,7 +181,7 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
       );
     }
 
-    if (displayAds.isEmpty) {
+    if (displayAds.isEmpty && !isNewsCategory) {
       return Center(child: Text('no_ads_found'.tr()));
     }
 
@@ -186,9 +191,17 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
         key: _listKey,
         padding: const EdgeInsets.only(left: 12, right: 12, top: 10),
         controller: widget.scrollController ?? _scrollController,
-        initialItemCount: displayAds.length + (hasMorePages ? 1 : 0),
+        initialItemCount: displayAds.length +
+            (hasMorePages ? 1 : 0) +
+            (isNewsCategory ? 1 : 0),
         itemBuilder: (context, index, animation) {
-          if (index == displayAds.length) {
+          if (isNewsCategory && index == 0) {
+            return const NewsHeaderCard();
+          }
+
+          final adjustedIndex = isNewsCategory ? index - 1 : index;
+
+          if (adjustedIndex == displayAds.length) {
             if (isLoadingMore) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24),
@@ -222,12 +235,13 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
               return const SizedBox(height: 32);
             }
           }
+
           return SizeTransition(
             sizeFactor: animation,
             axisAlignment: 0.0,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: AdCard(ad: displayAds[index]),
+              child: AdCard(ad: displayAds[adjustedIndex]),
             ),
           );
         },
