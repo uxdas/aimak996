@@ -17,10 +17,10 @@ class CategoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = context.locale; // Гарантирует пересборку при смене языка
     return Consumer<CategoryProvider>(
-      builder: (context, provider, _) {
-        final categories = provider.categories;
+      builder: (context, categoryProvider, _) {
+        final locale = context.locale;
+        final categories = categoryProvider.categories;
         return SizedBox(
           height: 64,
           child: ListView.builder(

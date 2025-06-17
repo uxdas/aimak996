@@ -448,9 +448,9 @@ class _HomeScreenState extends State<HomeScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                           Padding(
-                            padding: const EdgeInsets.only(left: 0),
+                            padding: const EdgeInsets.only(bottom: 5),
                             child: Center(
-                              child: Icon(Icons.add,
+                              child: Icon(FontAwesomeIcons.whatsapp,
                                   color: Color(0xFF104391), size: 28),
                         ),
                       ),

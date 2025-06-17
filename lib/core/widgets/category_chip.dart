@@ -28,6 +28,8 @@ class CategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF1E3A8A);
+    final locale = Localizations.localeOf(context);
+    final localizedName = category.getLocalizedName(locale);
 
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -50,7 +52,7 @@ class CategoryChip extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                category.getLocalizedName(Localizations.localeOf(context)),
+                localizedName,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,

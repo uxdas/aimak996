@@ -538,6 +538,9 @@ class _AppDrawerState extends State<AppDrawer>
           await context.setLocale(newLocale);
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('locale', newLocale.languageCode);
+          // Уведомляем CategoryProvider о смене языка
+          Provider.of<CategoryProvider>(context, listen: false)
+              .notifyLanguageChanged();
           if (mounted) setState(() {});
         },
         child: Container(
@@ -693,15 +696,14 @@ class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
         onTap: () async {
-          setState(() => _pressed = true);
-          _iconController.forward(from: 0);
-          _swapController.forward(from: 0);
           final newLocale = isKyrgyz ? const Locale('ru') : const Locale('ky');
           await context.setLocale(newLocale);
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('locale', newLocale.languageCode);
-          await Future.delayed(const Duration(milliseconds: 200));
-          setState(() => _pressed = false);
+          // Уведомляем CategoryProvider о смене языка
+          Provider.of<CategoryProvider>(context, listen: false)
+              .notifyLanguageChanged();
+          if (mounted) setState(() {});
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 450),

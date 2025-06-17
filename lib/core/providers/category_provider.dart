@@ -28,6 +28,7 @@ class CategoryProvider extends ChangeNotifier {
       notifyListeners();
 
       final categories = await _categoryService.fetchCategories();
+
       if (!categories.any((c) => c.id == 0)) {
         categories.insert(
             0, CategoryModel(id: 0, name: 'Жалпы', ruName: 'Общее'));

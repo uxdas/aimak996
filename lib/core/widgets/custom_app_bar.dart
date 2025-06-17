@@ -109,27 +109,27 @@ class _CustomAppBarState extends State<CustomAppBar>
         child: Stack(
           children: [
             // Абсолютно позиционированный узор
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: FractionallySizedBox(
-                  widthFactor: 1,
-                  alignment: Alignment.topCenter,
-                  child: SizedBox(
-                    child: SvgPicture.asset(
-                      'assets/images/header_pattern.svg',
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      height: 20,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.topCenter,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Positioned(
+            //   top: 0,
+            //   left: 0,
+            //   right: 0,
+            //   child: Align(
+            //     alignment: Alignment.topCenter,
+            //     child: FractionallySizedBox(
+            //       widthFactor: 1,
+            //       alignment: Alignment.topCenter,
+            //       child: SizedBox(
+            //         child: SvgPicture.asset(
+            //           'assets/images/header_pattern.svg',
+            //           width: MediaQuery.of(context).size.width * 0.8,
+            //           height: 20,
+            //           fit: BoxFit.cover,
+            //           alignment: Alignment.topCenter,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
             // Основной контент хедера
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -244,6 +244,7 @@ class _CustomAppBarState extends State<CustomAppBar>
                   height: 48,
                   child: Consumer<CategoryProvider>(
                     builder: (context, categoryProvider, _) {
+                      final locale = context.locale; // Получаем текущую локаль
                       if (categoryProvider.isLoading) {
                         return const Center(
                           child: SizedBox(
@@ -326,7 +327,7 @@ class _CustomAppBarState extends State<CustomAppBar>
                                   ),
                                   child: CategoryButton(
                                     icon: category.iconData,
-                                    label: category.name,
+                                    label: category.getLocalizedName(locale),
                                     isActive: isActive,
                                     onTap: () {
                                       HapticFeedback.lightImpact();

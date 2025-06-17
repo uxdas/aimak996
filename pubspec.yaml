@@ -47,9 +47,9 @@ flutter:
 
   assets:
     - assets/images/logo.png
-    - assets/images/header_drawer.png
-    - assets/images/header_drawer.svg
-    - assets/images/header_pattern.svg
+    # - assets/images/header_drawer.png
+    # - assets/images/header_drawer.svg
+    # - assets/images/header_pattern.svg
     - assets/images/kg_flag.png
     - assets/images/ru_flag.png
     - assets/images/splash.png
