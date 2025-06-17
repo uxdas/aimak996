@@ -147,8 +147,12 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
             ads.addAll(newAds);
             hasMorePages = response['totalPages'] > currentPage;
           });
+
+          final bool isNewsCategory = widget.categoryId == 9;
           for (int i = 0; i < newAds.length; i++) {
-            _listKey.currentState?.insertItem(startIndex + i,
+            final animationIndex =
+                isNewsCategory ? startIndex + i + 1 : startIndex + i;
+            _listKey.currentState?.insertItem(animationIndex,
                 duration: const Duration(milliseconds: 350));
           }
         }

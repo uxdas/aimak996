@@ -100,22 +100,7 @@ class NewsHeaderCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.access_time_outlined,
-                        size: 16,
-                        color: theme.textTheme.bodySmall?.color,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'district_news_date'.tr(),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.textTheme.bodySmall?.color,
-                        ),
-                      ),
-                    ],
-                  ),
+                  
                 ],
               ),
             ),
