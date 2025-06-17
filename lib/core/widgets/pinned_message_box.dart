@@ -47,7 +47,7 @@ class _PinnedMessageBoxState extends State<PinnedMessageBox>
       opacity: _fadeAnim,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         decoration: BoxDecoration(
           color: const Color(0xFFE3ECFA), // светло-синий фон
           border: Border.all(
@@ -55,11 +55,13 @@ class _PinnedMessageBoxState extends State<PinnedMessageBox>
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Text(
                 widget.text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: const Color(0xFF1E3A8A),
                   fontWeight: FontWeight.w600,

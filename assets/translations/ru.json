@@ -111,7 +111,7 @@
   "district_facts_title": "Интересные факты",
   "load_more": "Еще",
   "collapse": "Свернуть",
-  "feedback_button": "Оставить отзыв",
+  "feedback_button": "Для предложений и жалоб",
   "whatsapp_button": "WhatsApp",
   "other_regions_button": "Мы в других районах",
   "about_section_title": "О нас (Аймак996)",
@@ -138,5 +138,9 @@
   "about_app_content": "Ноокат 996 — это районное приложение для жителей Ноокатского района. Здесь вы можете размещать и находить объявления, предлагать услуги, искать работу, продавать товары и быть в курсе всего, что происходит в вашем районе.",
   "feedback_button": "Для предложений и жалоб",
   "feedback_whatsapp_message": "Салам! Мен Аймак 996 колдонмосу жөнүндө пикир билдиргим келет.",
-  "whatsapp_feedback_button": "Есть идеи или замечания? Напишите нам в WhatsApp!"
+  "whatsapp_feedback_button": "Есть идеи или замечания? Напишите нам в WhatsApp!",
+  "bottom_ad_button": "ОБЪЯВЛЕНИЕ  0 (999) 109 190",
+  "about_contact_title": "Для отзывов и предложений",
+  "about_contact_text": "Бизге жазыңыз, бул жерде бизге жазыңыз.",
+  "about_contact_button": "Написать в WhatsApp"
 }

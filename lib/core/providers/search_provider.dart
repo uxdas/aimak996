@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:easy_localization/easy_localization.dart';
-import 'package:projects/data/models/ad_model.dart'; // путь к твоей модели
+import 'package:nookat996/data/models/ad_model.dart'; // путь к твоей модели
 
 class SearchProvider extends ChangeNotifier {
   bool isLoading = false;

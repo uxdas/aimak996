@@ -3,23 +3,24 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:projects/features/home/ad_card.dart';
+import 'package:nookat996/features/home/ad_card.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
-import 'package:projects/core/widgets/app_drawer.dart';
-import 'package:projects/core/widgets/custom_app_bar.dart';
-import 'package:projects/features/home/ad_feed.dart';
-import 'package:projects/features/home/category_list.dart';
-import 'package:projects/features/home/category_pages_view.dart';
-import 'package:projects/core/providers/search_provider.dart';
-import 'package:projects/core/providers/theme_provider.dart';
-import 'package:projects/features/favorites/favorites_screen.dart';
-import 'package:projects/core/providers/category_provider.dart';
-import 'package:projects/core/providers/pinned_message_provider.dart';
-import 'package:projects/core/widgets/pinned_message_box.dart';
+import 'package:nookat996/core/widgets/app_drawer.dart';
+import 'package:nookat996/core/widgets/custom_app_bar.dart';
+import 'package:nookat996/features/home/ad_feed.dart';
+import 'package:nookat996/features/home/category_list.dart';
+import 'package:nookat996/features/home/category_pages_view.dart';
+import 'package:nookat996/core/providers/search_provider.dart';
+import 'package:nookat996/core/providers/theme_provider.dart';
+import 'package:nookat996/features/favorites/favorites_screen.dart';
+import 'package:nookat996/core/providers/category_provider.dart';
+import 'package:nookat996/core/providers/pinned_message_provider.dart';
+import 'package:nookat996/core/providers/contact_info_provider.dart';
+import 'package:nookat996/core/widgets/pinned_message_box.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isDark;
@@ -64,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _initializeData() async {
     try {
       await context.read<CategoryProvider>().loadCategories();
+      await context.read<ContactInfoProvider>().loadContactInfo(1);
       if (mounted) {
         setState(() {
           _isInitializing = false;
@@ -87,7 +89,9 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _launchWhatsApp() async {
-    final uri = Uri.parse('https://wa.me/996999109190');
+    final contactProvider = context.read<ContactInfoProvider>();
+    final phone = contactProvider.moderatorPhone.replaceAll(' ', '');
+    final uri = Uri.parse('https://wa.me/$phone');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -319,25 +323,34 @@ class _HomeScreenState extends State<HomeScreen>
         children: [
           Column(
             children: [
-              if (pinnedProvider.message != null)
-                PinnedMessageBox(
-                  text: pinnedProvider.message!.text,
-                  onClose: () => pinnedProvider.hide(),
-                ),
-              if (pinnedProvider.message != null) const SizedBox(height: 5),
               Expanded(
-                child: _isSearching
-                    ? AdFeed(
-                        externalAds: searchProvider.results,
-                        scrollController: _scrollController,
-                      )
-                    : CategoryPagesView(
-                        scrollController: _scrollController,
-                        onPageChanged: _onPageChanged,
-                      ),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: pinnedProvider.message != null ? 60.0 : 0.0,
+                  ),
+                  child: _isSearching
+                      ? AdFeed(
+                          externalAds: searchProvider.results,
+                          scrollController: _scrollController,
+                        )
+                      : CategoryPagesView(
+                          scrollController: _scrollController,
+                          onPageChanged: _onPageChanged,
+                        ),
+                ),
               ),
             ],
           ),
+          if (pinnedProvider.message != null)
+            Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: PinnedMessageBox(
+                text: pinnedProvider.message!.text,
+                    onClose: () => pinnedProvider.hide(),
+                  ),
+            ),
           if (_showScrollToTop)
             Positioned(
               right: 16,
@@ -385,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen>
         top: false,
         bottom: false,
         child: Container(
-          height: 52,
+          height: 62,
           width: double.infinity,
           decoration: const BoxDecoration(
             color: Color(0xFF104391),
@@ -404,8 +417,8 @@ class _HomeScreenState extends State<HomeScreen>
                     showShareDialog(context, 'share_text'.tr());
                   },
                   child: Container(
-                    width: 36,
-                    height: 36,
+                    width: 56,
+                    height: 46,
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.all(Radius.circular(18)),
@@ -417,49 +430,37 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(18)),
-                  ),
-                  child: Center(
-                    child: Icon(Icons.add, color: Color(0xFF104391), size: 24),
-                  ),
-                ),
-              ),
+              const SizedBox(width: 12),
               Expanded(
+                child: Center(
+                  child: GestureDetector(
+                    onTap: _launchWhatsApp,
                 child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  height: 36,
+                      padding: const EdgeInsets.symmetric(horizontal: 0),
+                      height: 46,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: Colors.white, width: 1),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Flexible(
-                        child: Text(
-                          'ЖАРЫЯ БЕРҮҮ',
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: Color(0xFF104391),
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            letterSpacing: 0.2,
-                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 0),
+                            child: Center(
+                              child: Icon(Icons.add,
+                                  color: Color(0xFF104391), size: 28),
                         ),
                       ),
-                      const SizedBox(width: 8),
                       Flexible(
-                        child: Text(
-                          '0999 109 190',
+                            child: Consumer<ContactInfoProvider>(
+                              builder: (context, contactProvider, _) {
+                                return Text(
+                                  'bottom_ad_button'.tr().replaceAll(
+                                      '0 (999) 109 190',
+                                      contactProvider.moderatorPhone),
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: Color(0xFF104391),
@@ -467,30 +468,17 @@ class _HomeScreenState extends State<HomeScreen>
                             fontSize: 15,
                             letterSpacing: 0.2,
                           ),
+                                );
+                              },
                         ),
                       ),
                     ],
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: GestureDetector(
-                  onTap: _launchWhatsApp,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(18)),
-                    ),
-                    child: Center(
-                      child: FaIcon(FontAwesomeIcons.whatsapp,
-                          color: Color(0xFF25D366), size: 24),
                     ),
                   ),
                 ),
               ),
+              const SizedBox(width: 12),
             ],
           ),
         ),

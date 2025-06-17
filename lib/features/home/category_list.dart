@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:projects/data/models/category_model.dart';
-import 'package:projects/core/widgets/category_chip.dart';
+import 'package:nookat996/data/models/category_model.dart';
+import 'package:nookat996/core/widgets/category_chip.dart';
 import 'package:provider/provider.dart';
-import 'package:projects/core/providers/category_provider.dart';
+import 'package:nookat996/core/providers/category_provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class CategoryList extends StatelessWidget {

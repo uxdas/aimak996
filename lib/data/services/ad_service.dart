@@ -1,8 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:projects/data/models/ad_model.dart';
+import 'package:nookat996/data/models/ad_model.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:projects/data/api_routes.dart';
+import 'package:nookat996/data/api_routes.dart';
 
 class AdService {
   static const String baseUrl = 'http://5.59.233.32:8080';

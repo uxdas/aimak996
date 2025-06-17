@@ -1,5 +1,5 @@
-name: projects
-description: "A new Flutter project."
+name: nookat996
+description: "Ноокат 996 - приложение для объявлений"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -53,6 +53,8 @@ flutter:
     - assets/images/kg_flag.png
     - assets/images/ru_flag.png
     - assets/images/splash.png
+    - assets/images/drawe.png
+    - assets/images/logo_123.png
     # - assets/images/splash_bg.jpg
     - assets/translations/    
     - assets/icon/   # Переводы
@@ -73,6 +75,6 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/images/nookat996logo.png"
+  image_path: "assets/images/logo_123.png"
   adaptive_icon_background: "#1E3A8A"
-  adaptive_icon_foreground: "assets/images/nookat996logo.png"
+  adaptive_icon_foreground: "assets/images/logo_123.png"

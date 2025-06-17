@@ -4,15 +4,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:projects/core/providers/favorites_provider.dart';
-import 'package:projects/core/providers/search_provider.dart';
-import 'package:projects/core/providers/theme_provider.dart';
-import 'package:projects/core/providers/category_provider.dart';
-import 'package:projects/core/providers/pinned_message_provider.dart';
-import 'package:projects/core/providers/city_board_provider.dart';
-import 'package:projects/constants/app_theme.dart';
-import 'package:projects/screens/splash_screen.dart';
-import 'package:projects/cubits/navigation_cubit.dart';
+import 'package:nookat996/core/providers/favorites_provider.dart';
+import 'package:nookat996/core/providers/theme_provider.dart';
+import 'package:nookat996/core/providers/category_provider.dart';
+import 'package:nookat996/core/providers/pinned_message_provider.dart';
+import 'package:nookat996/core/providers/city_board_provider.dart';
+import 'package:nookat996/core/providers/contact_info_provider.dart';
+import 'package:nookat996/core/providers/search_provider.dart';
+import 'package:nookat996/constants/app_theme.dart';
+import 'package:nookat996/screens/splash_screen.dart';
+import 'package:nookat996/cubits/navigation_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,17 +42,23 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => CategoryProvider()),
-        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
-        ChangeNotifierProvider(create: (_) => SearchProvider()),
-        ChangeNotifierProvider(create: (_) => PinnedMessageProvider()),
-        ChangeNotifierProvider(create: (_) => CityBoardProvider()),
-        BlocProvider(create: (_) => NavigationCubit()),
+        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider<CategoryProvider>(
+            create: (_) => CategoryProvider()),
+        ChangeNotifierProvider<FavoritesProvider>(
+            create: (_) => FavoritesProvider()),
+        ChangeNotifierProvider<SearchProvider>(create: (_) => SearchProvider()),
+        ChangeNotifierProvider<PinnedMessageProvider>(
+            create: (_) => PinnedMessageProvider()),
+        ChangeNotifierProvider<CityBoardProvider>(
+            create: (_) => CityBoardProvider()),
+        ChangeNotifierProvider<ContactInfoProvider>(
+            create: (_) => ContactInfoProvider()),
+        BlocProvider<NavigationCubit>(create: (_) => NavigationCubit()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) => MaterialApp(
-          title: 'Аймак 996',
+          title: 'Ноокат 996',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,

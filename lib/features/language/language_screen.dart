@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
-import 'package:projects/core/providers/category_provider.dart';
+import 'package:nookat996/core/providers/category_provider.dart';
 
 class LanguageScreen extends StatelessWidget {
   const LanguageScreen({super.key});

@@ -181,11 +181,23 @@ class DistrictScreen extends StatelessWidget {
                     children: [
                       Icon(Icons.height, color: theme.primaryColor),
                       const SizedBox(width: 10),
-                      Text('${'district_elevation'.tr()}: ',
-                          style: theme.textTheme.bodyMedium
-                              ?.copyWith(fontWeight: FontWeight.w600)),
-                      Text('district_elevation_value'.tr(),
-                          style: theme.textTheme.bodyMedium),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: theme.textTheme.bodyMedium,
+                            children: [
+                              TextSpan(
+                                text: '${'district_elevation'.tr()}: ',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              TextSpan(
+                                text: 'district_elevation_value'.tr(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],

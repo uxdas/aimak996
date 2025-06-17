@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:projects/data/models/ad_model.dart';
+import 'package:nookat996/data/models/ad_model.dart';
 
 class FavoritesProvider with ChangeNotifier {
   final Map<String, AdModel> _favorites = {};

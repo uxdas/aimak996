@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:projects/core/providers/favorites_provider.dart';
-import 'package:projects/core/providers/theme_provider.dart';
-import 'package:projects/core/widgets/app_drawer.dart';
-import 'package:projects/data/services/ad_service.dart';
-import 'package:projects/features/home/ad_card.dart';
-import 'package:projects/data/models/ad_model.dart';
+import 'package:nookat996/core/providers/favorites_provider.dart';
+import 'package:nookat996/core/providers/theme_provider.dart';
+import 'package:nookat996/core/widgets/app_drawer.dart';
+import 'package:nookat996/data/services/ad_service.dart';
+import 'package:nookat996/features/home/ad_card.dart';
+import 'package:nookat996/data/models/ad_model.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});

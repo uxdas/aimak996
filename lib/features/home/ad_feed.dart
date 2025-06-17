@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:projects/data/models/ad_model.dart';
-import 'package:projects/data/services/ad_service.dart';
-import 'package:projects/features/home/ad_card.dart';
-import 'package:projects/features/home/ad_card_shimmer.dart';
+import 'package:nookat996/data/models/ad_model.dart';
+import 'package:nookat996/data/services/ad_service.dart';
+import 'package:nookat996/features/home/ad_card.dart';
+import 'package:nookat996/features/home/ad_card_shimmer.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../utils/sound_helper.dart';
 

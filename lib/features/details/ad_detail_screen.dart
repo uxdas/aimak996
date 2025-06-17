@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:projects/screens/full_image_screen.dart';
+import 'package:nookat996/screens/full_image_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:projects/data/models/ad_model.dart';
-import 'package:projects/core/providers/favorites_provider.dart';
-import 'package:projects/core/providers/theme_provider.dart';
-import 'package:projects/core/providers/category_provider.dart';
+import 'package:nookat996/data/models/ad_model.dart';
+import 'package:nookat996/core/providers/favorites_provider.dart';
+import 'package:nookat996/core/providers/theme_provider.dart';
+import 'package:nookat996/core/providers/category_provider.dart';
+import 'package:nookat996/core/providers/contact_info_provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:projects/features/home/ad_buttons_row.dart';
+import 'package:nookat996/features/home/ad_buttons_row.dart';
 import 'dart:math';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
-import 'package:projects/utils/sound_helper.dart';
-import 'package:projects/core/models/category.dart';
-import 'package:projects/core/widgets/category_chip.dart';
+import 'package:nookat996/utils/sound_helper.dart';
+import 'package:nookat996/core/models/category.dart';
+import 'package:nookat996/core/widgets/category_chip.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui';
 
@@ -419,59 +420,7 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                               children: [
                                 Row(
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF1E3A8A)
-                                            .withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          FaIcon(
-                                            CategoryChip.categoryIcons[
-                                                    ad.categoryId] ??
-                                                FontAwesomeIcons.circle,
-                                            size: 16,
-                                            color: const Color(0xFF1E3A8A),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Consumer<CategoryProvider>(
-                                            builder:
-                                                (context, categoryProvider, _) {
-                                              final category = categoryProvider
-                                                  .getCategoryById(
-                                                      ad.categoryId);
-                                              final categoryName =
-                                                  category?.getLocalizedName(
-                                                          Localizations
-                                                              .localeOf(
-                                                                  context)) ??
-                                                      ad.category;
-                                              return Text(
-                                                categoryName,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Color(0xFF1E3A8A),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      '•',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF1E3A8A),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
+
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 8, vertical: 4),
@@ -573,17 +522,23 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                                           bottomRight: Radius.circular(24),
                                         ),
                                         onTap: () async {
-                                          final shareText = '''
-${ad.title}
-
-${ad.description}
-
-Телефон: ${ad.phone}
-
-Скачай приложение Аймак 996: https://aimak996.kg
-                                          ''';
-                                          showShareDialog(
-                                              context, shareText.trim());
+                                          final phone =
+                                              ad.phone.replaceAll(' ', '');
+                                          final uri =
+                                              Uri.parse('https://wa.me/$phone');
+                                          if (await canLaunchUrl(uri)) {
+                                            await launchUrl(uri,
+                                                mode: LaunchMode
+                                                    .externalApplication);
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'Не удалось открыть WhatsApp'),
+                                              ),
+                                            );
+                                          }
                                         },
                                         child: Row(
                                           mainAxisAlignment:

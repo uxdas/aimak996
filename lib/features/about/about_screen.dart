@@ -93,34 +93,32 @@ class _AboutScreenState extends State<AboutScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isDarkMode
-                            ? const Color(0xFF22336B)
-                            : theme.primaryColor.computeLuminance() > 0.7
-                                ? const Color(0xFF1565C0)
-                                : theme.primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 14),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDarkMode
+                          ? const Color(0xFF22336B)
+                          : theme.primaryColor.computeLuminance() > 0.7
+                              ? const Color(0xFF1565C0)
+                              : theme.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                      icon: Icon(Icons.location_city, color: Colors.white),
-                      label: Text(
-                        'other_regions_button'.tr(),
-                        style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => CityBoardsScreen()),
-                        );
-                      },
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 14),
                     ),
+                    icon: Icon(Icons.location_city, color: Colors.white),
+                    label: Text(
+                      'other_regions_button'.tr(),
+                      style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => CityBoardsScreen()),
+                      );
+                    },
                   ),
                   const SizedBox(height: 32),
                   Row(
@@ -201,32 +199,97 @@ class _AboutScreenState extends State<AboutScreen> {
                                     : Colors.black87,
                               ),
                             ),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Divider(
+                      thickness: 1.2,
+                      color: isDarkMode ? Colors.white12 : Colors.black12),
+                  const SizedBox(height: 18),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2, right: 12),
+                        child: Icon(Icons.apps,
+                            color:
+                                isDarkMode ? Colors.white : theme.primaryColor,
+                            size: 28),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'about_contact_title'.tr(),
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode
+                                    ? Colors.white
+                                    : theme.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF25D366),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF25D366)
+                                        .withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+
+                                borderRadius: BorderRadius.circular(12),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(12),
+                                  onTap: () => _launchWhatsApp(context),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        
+                                        FaIcon(
+                                          FontAwesomeIcons.whatsapp,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                        SizedBox(width: 12),
+                                        Text(
+                                          'about_contact_button'.tr(),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
                           ],
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 32),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF25D366),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                    ),
-                    icon: const FaIcon(FontAwesomeIcons.whatsapp,
-                        color: Colors.white),
-                    label: Text(
-                      'whatsapp_feedback_button'.tr(),
-                      style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600),
-                    ),
-                    onPressed: () => _launchWhatsApp(context),
-                  ),
                 ],
               ),
             ],

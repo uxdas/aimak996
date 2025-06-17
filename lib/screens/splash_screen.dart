@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:projects/features/home/home_screen.dart';
+import 'package:nookat996/features/home/home_screen.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../utils/sound_helper.dart';
 
@@ -27,8 +27,6 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-
-    _playOpenAppSound();
 
     _controller = AnimationController(
       vsync: this,
@@ -74,10 +72,6 @@ class _SplashScreenState extends State<SplashScreen>
     } finally {
       _isNavigating = false;
     }
-  }
-
-  Future<void> _playOpenAppSound() async {
-    await SoundHelper.playIfEnabled('sounds/open_app.wav');
   }
 
   @override

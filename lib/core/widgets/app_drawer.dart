@@ -1,27 +1,26 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:projects/features/favorites/favorites_screen.dart';
-import 'package:projects/features/about/about_screen.dart';
-import 'package:projects/features/about/feedback_screen.dart';
-import 'package:projects/features/about/developer_screen.dart';
-import 'package:projects/features/district/district_screen.dart';
+import 'package:nookat996/features/favorites/favorites_screen.dart';
+import 'package:nookat996/features/about/about_screen.dart';
+import 'package:nookat996/features/about/feedback_screen.dart';
+import 'package:nookat996/features/about/developer_screen.dart';
+import 'package:nookat996/features/district/district_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:projects/core/widgets/theme_toggle_button.dart';
+import 'package:nookat996/core/widgets/theme_toggle_button.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
-import 'package:projects/core/providers/theme_provider.dart';
-import 'package:projects/utils/sound_helper.dart';
-import 'package:projects/utils/theme_prefs.dart';
-import 'package:projects/core/providers/category_provider.dart';
+import 'package:nookat996/core/providers/theme_provider.dart';
+import 'package:nookat996/utils/sound_helper.dart';
+import 'package:nookat996/utils/theme_prefs.dart';
+import 'package:nookat996/core/providers/category_provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:nookat996/core/providers/contact_info_provider.dart';
 
 class AppDrawer extends StatefulWidget {
-  static const String _whatsappNumber = '996999109190';
-
   final bool isDark;
   final VoidCallback toggleTheme;
 
@@ -108,7 +107,7 @@ class _AppDrawerState extends State<AppDrawer>
             child: Stack(
               children: [
                 Image.asset(
-                  "assets/images/header_drawer.jpg",
+                  "assets/images/drawe.png",
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: 286,
@@ -210,7 +209,10 @@ class _AppDrawerState extends State<AppDrawer>
               Navigator.pop(context);
               await _playDrawerSound();
               try {
-                await _launchWhatsApp(context, AppDrawer._whatsappNumber);
+                final contactProvider = context.read<ContactInfoProvider>();
+                final phone =
+                    contactProvider.moderatorPhone.replaceAll(' ', '');
+                await _launchWhatsApp(context, phone);
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Ошибка открытия WhatsApp: $e')),

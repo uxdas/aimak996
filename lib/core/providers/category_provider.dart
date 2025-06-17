@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 import '../models/category.dart';
-import 'package:projects/data/models/category_model.dart';
-import 'package:projects/data/services/category_service.dart';
+import 'package:nookat996/data/models/category_model.dart';
+import 'package:nookat996/data/services/category_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

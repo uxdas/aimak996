@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:projects/core/providers/category_provider.dart';
-import 'package:projects/features/home/ad_feed.dart';
+import 'package:nookat996/core/providers/category_provider.dart';
+import 'package:nookat996/features/home/ad_feed.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:audioplayers/audioplayers.dart';
+// import 'package:audioplayers/audioplayers.dart';
 import '../../utils/sound_helper.dart';
 
 // Custom scroll physics for Telegram-like smooth swiping

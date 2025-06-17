@@ -100,63 +100,33 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
               child: Material(
                 type: MaterialType.circle,
                 elevation: 2,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withOpacity(0.2),
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   onTap: favoritesProvider.isLoading
                       ? null
                       : () => _onLike(favoritesProvider),
                   child: SizedBox(
-                    width: 48,
-                    height: 48,
+                    width: 56,
+                    height: 56,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(24),
                       child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                        filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
                         child: Center(
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 300),
-                                child: isFavorite
-                                    ? Icon(
-                                        Icons.local_fire_department_rounded,
-                                        color: Colors.red,
-                                        size: 32,
-                                      )
-                                    : Icon(
-                                        Icons.local_fire_department_outlined,
-                                        color: Colors.grey,
-                                        size: 32,
-                                      ),
-                              ),
-                              if (_showFire)
-                                ScaleTransition(
-                                  scale: _fireScale,
-                                  child: FadeTransition(
-                                    opacity: _fireFade,
-                                    child: Icon(
-                                      Icons.local_fire_department,
-                                      color:
-                                          Colors.deepOrange.withOpacity(0.85),
-                                      size: 60,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.orange.withOpacity(0.7),
-                                          blurRadius: 16,
-                                          offset: const Offset(0, 0),
-                                        ),
-                                        Shadow(
-                                          color: Colors.yellow.withOpacity(0.5),
-                                          blurRadius: 24,
-                                          offset: const Offset(0, 0),
-                                        ),
-                                      ],
-                                    ),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: isFavorite
+                                ? Icon(
+                                    Icons.local_fire_department_rounded,
+                                    color: Colors.red,
+                                    size: 32,
+                                  )
+                                : Icon(
+                                    Icons.local_fire_department_outlined,
+                                    color: Colors.white,
+                                    size: 32,
                                   ),
-                                ),
-                            ],
                           ),
                         ),
                       ),
@@ -167,6 +137,38 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
             );
           },
         ),
+        if (_showFire)
+          Positioned(
+            left: -20,
+            top: -20,
+            right: -20,
+            bottom: -20,
+            child: Center(
+              child: ScaleTransition(
+                scale: _fireScale,
+                child: FadeTransition(
+                  opacity: _fireFade,
+                  child: Icon(
+                    Icons.local_fire_department,
+                    color: Colors.deepOrange.withOpacity(0.85),
+                    size: 60,
+                    shadows: [
+                      Shadow(
+                        color: Colors.orange.withOpacity(0.7),
+                        blurRadius: 16,
+                        offset: const Offset(0, 0),
+                      ),
+                      Shadow(
+                        color: Colors.yellow.withOpacity(0.5),
+                        blurRadius: 24,
+                        offset: const Offset(0, 0),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -320,7 +322,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
       elevation: 2,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(6),
         side: BorderSide(
           color: theme.colorScheme.outline.withOpacity(0.08),
         ),
@@ -529,7 +531,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                     const SizedBox(width: 8),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 0),
               ],
             ),
           ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:projects/data/models/category_model.dart';
+import 'package:nookat996/data/models/category_model.dart';
 
 class CategoryChip extends StatelessWidget {
   final CategoryModel category;

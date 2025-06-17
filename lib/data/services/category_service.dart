@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:easy_localization/easy_localization.dart';
-import 'package:projects/data/models/category_model.dart';
+import 'package:nookat996/data/models/category_model.dart';
 
 class CategoryService {
   final String baseUrl = 'http://5.59.233.32:8080';
