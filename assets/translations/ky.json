@@ -62,6 +62,8 @@
   "server_error": "Сервер катасы",
   "network_error": "Тармак катасы",
   "nothing_found": "Эч нерсе табылган жок",
+  "open_link_error": "Шилтемени ачууга болбоду",
+  "soon": "Жакында",
   "error_loading": "Жүктөөдө ката",
   "no_categories_available": "Жеткиликтүү категориялар жок",
   "favorites_title": "Жаккандар",  

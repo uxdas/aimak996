@@ -23,11 +23,14 @@ class CategoryProvider extends ChangeNotifier {
     if (_isLoading) return;
 
     try {
+      print('[CAT][Provider] loadCategories() started');
       _isLoading = true;
       _error = null;
       notifyListeners();
 
+      print('[CAT][Provider] Calling CategoryService.fetchCategories()');
       final categories = await _categoryService.fetchCategories();
+      print('[CAT][Provider] Service returned ${categories.length} items');
 
       if (!categories.any((c) => c.id == 0)) {
         categories.insert(
@@ -35,12 +38,15 @@ class CategoryProvider extends ChangeNotifier {
       }
       _categories = categories;
       _error = null;
+      print('[CAT][Provider] Categories set. Total: ${_categories.length}');
     } catch (e) {
       _error = e.toString();
       _categories = [CategoryModel(id: 0, name: 'Жалпы', ruName: 'Общее')];
+      print('[CAT][Provider] Error: $_error');
     } finally {
       _isLoading = false;
       notifyListeners();
+      print('[CAT][Provider] loadCategories() finished. isLoading=$_isLoading');
     }
   }
 

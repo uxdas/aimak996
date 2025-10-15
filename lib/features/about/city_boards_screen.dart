@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/providers/city_board_provider.dart';
@@ -25,7 +26,7 @@ class _CityBoardsScreenState extends State<CityBoardsScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Мы в других районах'),
+        title: Text('other_regions_button'.tr()),
         backgroundColor: theme.primaryColor,
         foregroundColor: Colors.white,
       ),
@@ -35,11 +36,16 @@ class _CityBoardsScreenState extends State<CityBoardsScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (provider.error != null) {
-            return Center(child: Text('Ошибка: ${provider.error}'));
+            return Center(
+              child: Text(
+                '${'error_occurred'.tr()}: ${provider.error}',
+                textAlign: TextAlign.center,
+              ),
+            );
           }
           final cities = provider.cities;
           if (cities.isEmpty) {
-            return const Center(child: Text('Нет данных'));
+            return Center(child: Text('error_no_data'.tr()));
           }
           return Padding(
             padding: const EdgeInsets.all(12),
@@ -107,7 +113,7 @@ class _CityBoardTile extends StatelessWidget {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть ссылку')),
+        SnackBar(content: Text('open_link_error'.tr())),
       );
     }
   }
@@ -177,9 +183,9 @@ class _CityBoardTile extends StatelessWidget {
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Text(
-                            'Скоро',
-                            style: TextStyle(fontSize: 10, color: Colors.grey),
+                          child: Text(
+                            'soon'.tr(),
+                            style: const TextStyle(fontSize: 10, color: Colors.grey),
                           ),
                         ),
                       ),

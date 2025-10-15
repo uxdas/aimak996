@@ -16,6 +16,9 @@ class ContactInfoProvider extends ChangeNotifier {
   String get moderatorPhone =>
       _contactInfo?.city.moderatorPhone ?? '0999109190';
   String get adminPhone => _contactInfo?.adminPhone ?? '0550707808';
+  String get shareText => _contactInfo?.city.textForShare ?? '';
+  String get uploadText => _contactInfo?.city.textForUpload ?? '';
+  UpdateInfo? get updateInfo => _contactInfo?.update;
 
   Future<void> loadContactInfo(int cityId) async {
     if (_isLoading) return;
@@ -37,6 +40,8 @@ class ContactInfoProvider extends ChangeNotifier {
           id: 1,
           name: 'Ноокат',
           moderatorPhone: '0999109190',
+          textForShare: '',
+          textForUpload: '',
         ),
       );
     } finally {

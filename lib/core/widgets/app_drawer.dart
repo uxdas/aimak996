@@ -19,6 +19,7 @@ import 'package:nookat996/utils/theme_prefs.dart';
 import 'package:nookat996/core/providers/category_provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nookat996/core/providers/contact_info_provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AppDrawer extends StatefulWidget {
   final bool isDark;
@@ -94,12 +95,16 @@ class _AppDrawerState extends State<AppDrawer>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Drawer(
       width: 320,
       backgroundColor:
           isDarkMode ? theme.colorScheme.surface : const Color(0xFFF4F8FD),
-      child: Column(
+      child: SafeArea(
+        top: false,
+        bottom: true,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(
@@ -212,7 +217,11 @@ class _AppDrawerState extends State<AppDrawer>
                 final contactProvider = context.read<ContactInfoProvider>();
                 final phone =
                     contactProvider.moderatorPhone.replaceAll(' ', '');
-                await _launchWhatsApp(context, phone);
+                await _launchWhatsApp(
+                  context,
+                  phone,
+                  contactProvider.uploadText,
+                );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Ошибка открытия WhatsApp: $e')),
@@ -271,7 +280,10 @@ class _AppDrawerState extends State<AppDrawer>
                 ),
               ),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.only(
+              top: 16,
+              bottom: 16 + bottomInset,
+            ),
             child: Column(
               children: [
                 Padding(
@@ -300,14 +312,59 @@ class _AppDrawerState extends State<AppDrawer>
           ),
         ],
       ),
+      ),
     );
   }
 
-  Future<void> _launchWhatsApp(BuildContext context, String number) async {
-    final uri = Uri.parse('https://wa.me/$number');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
+  Future<void> _launchWhatsApp(
+    BuildContext context,
+    String number,
+    String message,
+  ) async {
+    try {
+      // Normalize: keep digits and '+', drop '+', convert leading 0 -> 996
+      final cleaned = number.replaceAll(RegExp(r'[^0-9+]'), '');
+      String phone = cleaned;
+      if (phone.startsWith('+')) phone = phone.substring(1);
+      if (phone.startsWith('0')) phone = '996${phone.substring(1)}';
+
+      final schemeUri = Uri.parse(
+          'whatsapp://send?phone=$phone&text=${Uri.encodeComponent(message)}');
+      final hasScheme = await canLaunchUrl(schemeUri);
+      if (hasScheme) {
+        final launched = await launchUrl(
+          schemeUri,
+          mode: LaunchMode.externalApplication,
+        );
+        if (!launched) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('whatsapp_error'.tr())),
+          );
+        }
+        return;
+      }
+
+      // Fallback to web
+      final webUri = Uri.parse(
+          'https://wa.me/$phone?text=${Uri.encodeComponent(message)}');
+      final hasWeb = await canLaunchUrl(webUri);
+      if (hasWeb) {
+        final launched = await launchUrl(
+          webUri,
+          mode: LaunchMode.externalApplication,
+        );
+        if (!launched) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('whatsapp_error'.tr())),
+          );
+        }
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('whatsapp_error'.tr())),
+      );
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('whatsapp_error'.tr())),
       );
@@ -542,6 +599,22 @@ class _AppDrawerState extends State<AppDrawer>
           Provider.of<CategoryProvider>(context, listen: false)
               .notifyLanguageChanged();
           if (mounted) setState(() {});
+
+          // Log current app version using package_info_plus
+          try {
+            final info = await PackageInfo.fromPlatform();
+            debugPrint('[App Version] version: ${info.version}, build: ${info.buildNumber}');
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Версия приложения: ${info.version} (build ${info.buildNumber})'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          } catch (e) {
+            debugPrint('[App Version] failed to read version: $e');
+          }
         },
         child: Container(
           width: 90,

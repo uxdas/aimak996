@@ -5,8 +5,9 @@ import 'package:nookat996/data/services/ad_service.dart';
 import 'package:nookat996/features/home/ad_card.dart';
 import 'package:nookat996/features/home/ad_card_shimmer.dart';
 import 'package:nookat996/features/home/news_header_card.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../../utils/sound_helper.dart';
+import 'package:provider/provider.dart';
+import 'package:nookat996/core/providers/category_provider.dart';
 
 class AdFeed extends StatefulWidget {
   final int? categoryId;
@@ -93,6 +94,19 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
       );
 
       if (mounted) {
+        final category = context
+            .read<CategoryProvider>()
+            .getCategoryById(widget.categoryId ?? -1);
+        bool isNewsCategory = false;
+        if (category != null) {
+          String norm(String s) => s.trim().toLowerCase();
+          final keys = [category.ruName, category.name]
+              .where((e) => e.trim().isNotEmpty)
+              .map(norm)
+              .toList();
+          isNewsCategory = keys.contains('новости района') ||
+              keys.contains('район жаңылыктары');
+        }
         setState(() {
           ads = [];
           hasMorePages = response['totalPages'] > currentPage;
@@ -100,7 +114,6 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
         });
 
         final newAds = response['ads'] as List<AdModel>;
-        final bool isNewsCategory = widget.categoryId == 9;
 
         for (int i = 0; i < newAds.length; i++) {
           ads.add(newAds[i]);
@@ -148,7 +161,19 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
             hasMorePages = response['totalPages'] > currentPage;
           });
 
-          final bool isNewsCategory = widget.categoryId == 9;
+          final category = context
+              .read<CategoryProvider>()
+              .getCategoryById(widget.categoryId ?? -1);
+          bool isNewsCategory = false;
+          if (category != null) {
+            String norm(String s) => s.trim().toLowerCase();
+            final keys = [category.ruName, category.name]
+                .where((e) => e.trim().isNotEmpty)
+                .map(norm)
+                .toList();
+            isNewsCategory = keys.contains('новости района') ||
+                keys.contains('район жаңылыктары');
+          }
           for (int i = 0; i < newAds.length; i++) {
             final animationIndex =
                 isNewsCategory ? startIndex + i + 1 : startIndex + i;
@@ -176,7 +201,19 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final List<AdModel> displayAds = widget.externalAds ?? ads;
-    final bool isNewsCategory = widget.categoryId == 9;
+    final category = context
+        .read<CategoryProvider>()
+        .getCategoryById(widget.categoryId ?? -1);
+    bool isNewsCategory = false;
+    if (category != null) {
+      String norm(String s) => s.trim().toLowerCase();
+      final keys = [category.ruName, category.name]
+          .where((e) => e.trim().isNotEmpty)
+          .map(norm)
+          .toList();
+      isNewsCategory =
+          keys.contains('новости района') || keys.contains('район жаңылыктары');
+    }
 
     if (isLoading && widget.externalAds == null) {
       return ListView.builder(
@@ -197,7 +234,8 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
         controller: widget.scrollController ?? _scrollController,
         initialItemCount: displayAds.length +
             (hasMorePages ? 1 : 0) +
-            (isNewsCategory ? 1 : 0),
+            (isNewsCategory ? 1 : 0) +
+            1,
         itemBuilder: (context, index, animation) {
           if (isNewsCategory && index == 0) {
             return const NewsHeaderCard();
@@ -205,7 +243,14 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
 
           final adjustedIndex = isNewsCategory ? index - 1 : index;
 
-          if (adjustedIndex == displayAds.length) {
+          // Determine special row indices relative to the ads list
+          final int totalAds = displayAds.length;
+          final bool hasLoader = hasMorePages;
+          final int loaderIndex = totalAds; // right after last ad
+          final int spacerIndex = totalAds + (hasLoader ? 1 : 0); // last item
+
+          // Load-more row logic (only when there are more pages)
+          if (hasLoader && adjustedIndex == loaderIndex) {
             if (isLoadingMore) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24),
@@ -218,7 +263,7 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
                   ),
                 ),
               );
-            } else if (hasMorePages) {
+            } else {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Center(
@@ -235,9 +280,12 @@ class _AdFeedState extends State<AdFeed> with SingleTickerProviderStateMixin {
                   ),
                 ),
               );
-            } else {
-              return const SizedBox(height: 32);
             }
+          }
+
+          // Persistent bottom spacer (200px) as the last list item
+          if (adjustedIndex == spacerIndex) {
+            return const SizedBox(height: 140);
           }
 
           return SizeTransition(

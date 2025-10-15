@@ -298,12 +298,14 @@ class _AdDetailScreenState extends State<AdDetailScreen>
     final deepBlue = const Color(0xFF1565C0);
     final grey = Colors.grey[400]!;
     final isLight = Theme.of(context).brightness == Brightness.light;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor ??
             Theme.of(context).primaryColor,
         elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
           onPressed: () => Navigator.of(context).pop(),
@@ -360,8 +362,7 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                                         child: const Center(
                                             child: CircularProgressIndicator()),
                                       ),
-                                      errorWidget: (context, url, error) =>
-                                          Container(
+                                      errorWidget: (context, url, error) => Container(
                                         color: theme.colorScheme.surfaceVariant,
                                         child: const Icon(Icons.broken_image,
                                             size: 48),
@@ -370,34 +371,33 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                                   ),
                                 );
                               },
-                            ),
-                          ),
-                          if (ad.images.length > 1)
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              bottom: 8,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children:
-                                    ad.images.asMap().entries.map((entry) {
-                                  return Container(
-                                    width: 8,
-                                    height: 8,
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 3),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white.withOpacity(
-                                        _currentImageIndex == entry.key
-                                            ? 0.9
-                                            : 0.4,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
+                            )),
+                          ad.images.length > 1
+                              ? Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  bottom: 8,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: ad.images
+                                        .asMap()
+                                        .entries
+                                        .map((entry) {
+                                      return Container(
+                                        width: 8,
+                                        height: 8,
+                                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white.withOpacity(
+                                            _currentImageIndex == entry.key ? 0.9 : 0.4,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
                         ],
                       ),
                       // Описание
@@ -473,16 +473,54 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                                           bottomLeft: Radius.circular(24),
                                         ),
                                         onTap: () async {
-                                          print(
-                                              '[AdDetail] Phone number: ${ad.phone}');
-                                          final phone =
-                                              ad.phone.replaceAll(' ', '');
-                                          if (phone.isNotEmpty) {
-                                            final uri = Uri.parse('tel:$phone');
-                                            if (await canLaunchUrl(uri)) {
-                                              await launchUrl(uri,
-                                                  mode: LaunchMode
-                                                      .externalApplication);
+                                          try {
+                                            final rawPhone = ad.phone;
+                                            // Keep digits and '+'; trim spaces
+                                            final cleaned = rawPhone
+                                                .replaceAll(RegExp(r"[^0-9+]"), "");
+                                            // Prefer keeping '+' for tel scheme
+                                            final tel = cleaned;
+                                            final uri = Uri.parse('tel:$tel');
+
+                                            debugPrint('[Dialer] Attempting to dial');
+                                            debugPrint('[Dialer] rawPhone: "$rawPhone"');
+                                            debugPrint('[Dialer] cleaned: "$cleaned"');
+                                            debugPrint('[Dialer] uri: $uri');
+
+                                            if (tel.isEmpty) {
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Номер телефона отсутствует')),
+                                                );
+                                              }
+                                              return;
+                                            }
+
+                                            final canDial = await canLaunchUrl(uri);
+                                            debugPrint('[Dialer] canLaunchUrl: $canDial');
+                                            if (canDial) {
+                                              final launched = await launchUrl(
+                                                uri,
+                                                mode: LaunchMode.externalApplication,
+                                              );
+                                              debugPrint('[Dialer] launchUrl result: $launched');
+                                              if (!launched && mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Не удалось открыть телефон')),
+                                                );
+                                              }
+                                            } else if (mounted) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(content: Text('Приложение телефона недоступно')),
+                                              );
+                                            }
+                                          } catch (e, st) {
+                                            debugPrint('[Dialer] Exception: $e');
+                                            debugPrint('[Dialer] StackTrace: $st');
+                                            if (mounted) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('Ошибка при попытке звонка: $e')),
+                                              );
                                             }
                                           }
                                         },
@@ -525,7 +563,7 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                                           final phone =
                                               ad.phone.replaceAll(' ', '');
                                           final uri =
-                                              Uri.parse('https://wa.me/$phone');
+                                              Uri.parse('whatsapp://send?phone=$phone');
                                           if (await canLaunchUrl(uri)) {
                                             await launchUrl(uri,
                                                 mode: LaunchMode
@@ -576,7 +614,7 @@ class _AdDetailScreenState extends State<AdDetailScreen>
           ),
           Positioned(
             right: 16,
-            bottom: 16,
+            bottom: 16 + bottomInset,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -650,6 +688,7 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                       size: 24,
                     ),
                     onPressed: () {
+                      final sharePromo = context.read<ContactInfoProvider>().shareText;
                       final shareText = '''
 ${ad.title}
 
@@ -657,7 +696,7 @@ ${ad.description}
 
 Телефон: ${ad.phone}
 
-Скачай приложение Аймак 996: https://aimak996.kg
+$sharePromo
                       ''';
                       showShareDialog(context, shareText.trim());
                     },

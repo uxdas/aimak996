@@ -5,7 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:nookat996/data/api_routes.dart';
 
 class AdService {
-  static const String baseUrl = 'http://5.59.233.32:8080';
+  static const String baseUrl = 'http://176.126.164.86:8000';
   final Map<String, String> _headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -20,7 +20,7 @@ class AdService {
       final cityId = 1;
       final catId = categoryId ?? 0;
       final url = Uri.parse(
-          'http://5.59.233.32:8080/ads/public-city/$cityId/category/$catId?page=$page&page_size=$pageSize');
+          'http://176.126.164.86:8000/ads/public-city/$cityId/category/$catId?page=$page&page_size=$pageSize');
       print('[API] Fetching ads from: $url');
 
       final response = await http.get(url, headers: _headers);

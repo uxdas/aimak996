@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:nookat996/core/providers/contact_info_provider.dart';
 import 'feedback_screen.dart';
 import 'dart:async';
 import 'city_boards_screen.dart';
@@ -16,24 +18,56 @@ class AboutScreen extends StatefulWidget {
 
 class _AboutScreenState extends State<AboutScreen> {
   Future<void> _launchWhatsApp(BuildContext context) async {
-    const phone = '996999109190';
-    final message = 'feedback_whatsapp_message'.tr();
-    final whatsappUrl =
-        'https://wa.me/$phone?text=${Uri.encodeComponent(message)}';
-
     try {
-      final uri = Uri.parse(whatsappUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
+      final contactProvider = context.read<ContactInfoProvider>();
+      final rawPhone = contactProvider.adminPhone; // take admin_phone
+      final message = 'feedback_whatsapp_message'.tr();
+
+      // Normalize: keep digits and '+', drop '+', convert leading 0 -> 996
+      final cleaned = rawPhone.replaceAll(RegExp(r'[^0-9+]'), '');
+      String phone = cleaned;
+      if (phone.startsWith('+')) phone = phone.substring(1);
+      if (phone.startsWith('0')) phone = '996${phone.substring(1)}';
+
+      // Try scheme first with optional text
+      final schemeUri = Uri.parse(
+          'whatsapp://send?phone=$phone&text=${Uri.encodeComponent(message)}');
+      if (await canLaunchUrl(schemeUri)) {
+        final launched = await launchUrl(
+          schemeUri,
+          mode: LaunchMode.externalApplication,
+        );
+        if (!launched && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('whatsapp_error'.tr())),
           );
         }
+        return;
+      }
+
+      // Fallback to wa.me
+      final webUri = Uri.parse(
+          'https://wa.me/$phone?text=${Uri.encodeComponent(message)}');
+      if (await canLaunchUrl(webUri)) {
+        final launched = await launchUrl(
+          webUri,
+          mode: LaunchMode.externalApplication,
+        );
+        if (!launched && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('whatsapp_error'.tr())),
+          );
+        }
+        return;
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('whatsapp_error'.tr())),
+        );
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('whatsapp_error'.tr())),
         );

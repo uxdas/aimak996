@@ -93,6 +93,8 @@
   "server_error": "Ошибка сервера",
   "network_error": "Ошибка сети",
   "nothing_found": "Ничего не найдено",
+  "open_link_error": "Не удалось открыть ссылку",
+  "soon": "Скоро",
   "error_loading": "Ошибка загрузки",
   "no_categories_available": "Нет доступных категорий",
   "favorites_title": "Избранное",

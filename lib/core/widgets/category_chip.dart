@@ -14,16 +14,54 @@ class CategoryChip extends StatelessWidget {
     required this.onTap,
   });
 
-  static const Map<int, IconData> categoryIcons = {
-    0: FontAwesomeIcons.layerGroup,
-    1: FontAwesomeIcons.building,
-    2: FontAwesomeIcons.truckPickup,
-    3: FontAwesomeIcons.kiwiBird,
-    4: FontAwesomeIcons.arrowsRotate,
-    5: FontAwesomeIcons.briefcase,
-    7: FontAwesomeIcons.route,
-    9: FontAwesomeIcons.newspaper,
+  // Name-based icon mapping (both Kyrgyz and Russian variants)
+  static const Map<String, IconData> _categoryIconsByName = {
+    // Общее / Жалпы
+    'общее': FontAwesomeIcons.grip,
+    'жалпы': FontAwesomeIcons.grip,
+
+    // Попутка / Каттам
+    'попутка': FontAwesomeIcons.route,
+    'каттам': FontAwesomeIcons.route,
+
+    // Недвижимость / К. Мүлк
+    'недвижимость': FontAwesomeIcons.building,
+    'к. мүлк': FontAwesomeIcons.building,
+
+    // Авто
+    'авто': FontAwesomeIcons.car,
+
+    // Скот / Мал Чарба
+    'скот': FontAwesomeIcons.kiwiBird,
+    'мал чарба': FontAwesomeIcons.kiwiBird,
+
+    // Купить/Продать / Алуу/Сатуу
+    'купить/продать': FontAwesomeIcons.arrowsRotate,
+    'алуу/сатуу': FontAwesomeIcons.arrowsRotate,
+
+    // Работа / Жумуш
+    'работа': FontAwesomeIcons.briefcase,
+    'жумуш': FontAwesomeIcons.briefcase,
+
+    // Новости района / Район жаңылыктары
+    'новости района': FontAwesomeIcons.newspaper,
+    'район жаңылыктары': FontAwesomeIcons.newspaper,
   };
+
+  IconData _resolveIcon() {
+    String normalize(String s) => s.trim().toLowerCase();
+    final candidates = <String>[
+      category.name,
+      category.ruName,
+    ].where((e) => e.trim().isNotEmpty).map(normalize);
+
+    for (final key in candidates) {
+      final icon = _categoryIconsByName[key];
+      if (icon != null) return icon;
+    }
+    // Fallback generic icon
+    return FontAwesomeIcons.layerGroup;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +84,7 @@ class CategoryChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               FaIcon(
-                categoryIcons[category.id] ?? FontAwesomeIcons.circle,
+                _resolveIcon(),
                 size: 16,
                 color: isSelected ? primaryColor : Colors.white,
               ),

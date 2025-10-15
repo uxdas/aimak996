@@ -455,17 +455,57 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                     const Spacer(),
                     FilledButton.icon(
                       onPressed: () async {
-                        await _playTapSound();
-                        final phone = widget.ad.phone.replaceAll(' ', '');
-                        final uri = Uri.parse('tel:$phone');
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri,
-                              mode: LaunchMode.externalApplication);
-                        } else {
+                        try {
+                          await _playTapSound();
+                          final rawPhone = widget.ad.phone;
+                          // Keep digits and '+'; remove other chars
+                          final cleaned =
+                              rawPhone.replaceAll(RegExp(r"[^0-9+]"), "");
+                          final tel = cleaned; // keep '+' allowed by tel:
+                          final uri = Uri.parse('tel:$tel');
+
+                          debugPrint('[Dialer] Attempting to dial');
+                          debugPrint('[Dialer] rawPhone: "$rawPhone"');
+                          debugPrint('[Dialer] cleaned: "$cleaned"');
+                          debugPrint('[Dialer] uri: $uri');
+
+                          if (tel.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Номер телефона отсутствует')),
+                            );
+                            return;
+                          }
+
+                          final canDial = await canLaunchUrl(uri);
+                          debugPrint('[Dialer] canLaunchUrl: $canDial');
+                          if (canDial) {
+                            final launched = await launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            );
+                            debugPrint('[Dialer] launchUrl result: $launched');
+                            if (!launched) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Не удалось открыть телефон')),
+                              );
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Приложение телефона недоступно')),
+                            );
+                          }
+                        } catch (e, st) {
+                          debugPrint('[Dialer] Exception: $e');
+                          debugPrint('[Dialer] StackTrace: $st');
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Не удалось открыть приложение телефона')),
+                            SnackBar(
+                                content:
+                                    Text('Ошибка при попытке звонка: $e')),
                           );
                         }
                       },
@@ -513,7 +553,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                         onPressed: () async {
                           await _playTapSound();
                           final uri =
-                              Uri.parse('https://wa.me/${widget.ad.phone}');
+                              Uri.parse('whatsapp://send?phone=${widget.ad.phone}');
                           if (await canLaunchUrl(uri)) {
                             await launchUrl(uri);
                           }

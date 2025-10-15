@@ -18,7 +18,7 @@ class SearchProvider extends ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse('http://5.59.233.32:8080/ads/search/1?q=$query'),
+        Uri.parse('http://176.126.164.86:8000/ads/search/1?q=$query'),
       );
 
       if (response.statusCode == 200) {
