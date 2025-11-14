@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "411702475759",
+    "project_id": "nookat-996-bfc91",
+    "storage_bucket": "nookat-996-bfc91.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:411702475759:android:bb4c01646aabe6ebe1941a",
+        "android_client_info": {
+          "package_name": "kg.aimak996.nookat996"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIyNEF6lFYLHRsbtIx1Z93l6vbB1GL08I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
