@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/contact_info.dart';
+import 'package:nookat996/core/models/contact_info.dart';
 
 class ContactInfoService {
   static const String _baseUrl = 'http://176.126.164.86:8000';

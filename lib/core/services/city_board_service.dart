@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/city_board.dart';
+import 'package:nookat996/core/models/city_board.dart';
 
 class CityBoardService {
   static const String _url =

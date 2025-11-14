@@ -7,17 +7,17 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../data/models/ad_model.dart';
-import '../../core/providers/favorites_provider.dart';
-import '../../screens/full_image_screen.dart';
-import '../details/ad_detail_screen.dart';
-import '../../widgets/telegram_refresh_indicator.dart';
+import 'package:nookat996/data/models/ad_model.dart';
+import 'package:nookat996/core/providers/favorites_provider.dart';
+import 'package:nookat996/screens/full_image_screen.dart';
+import 'package:nookat996/features/details/ad_detail_screen.dart';
+import 'package:nookat996/widgets/telegram_refresh_indicator.dart';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
-import '../../utils/sound_helper.dart';
+import 'package:nookat996/utils/sound_helper.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui';
-import '../../core/providers/category_provider.dart';
+import 'package:nookat996/core/providers/category_provider.dart';
 
 class AdCard extends StatefulWidget {
   final AdModel ad;
@@ -117,12 +117,12 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                           child: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
                             child: isFavorite
-                                ? Icon(
+                                ? const Icon(
                                     Icons.local_fire_department_rounded,
                                     color: Colors.red,
                                     size: 32,
                                   )
-                                : Icon(
+                                : const Icon(
                                     Icons.local_fire_department_outlined,
                                     color: Colors.white,
                                     size: 32,
@@ -220,7 +220,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                   fit: BoxFit.cover,
                   fadeInDuration: const Duration(milliseconds: 300),
                   placeholder: (context, url) => Container(
-                    color: theme.colorScheme.surfaceVariant,
+                    color: theme.colorScheme.surfaceContainerHighest,
                     child: Center(
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
@@ -229,7 +229,7 @@ class _AdCardState extends State<AdCard> with TickerProviderStateMixin {
                     ),
                   ),
                   errorWidget: (context, url, error) => Container(
-                    color: theme.colorScheme.surfaceVariant,
+                    color: theme.colorScheme.surfaceContainerHighest,
                     child: Center(
                       child: Icon(
                         Icons.broken_image,

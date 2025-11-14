@@ -732,7 +732,7 @@ class LanguageToggleSwitch extends StatefulWidget {
 
 class _LanguageToggleSwitchState extends State<LanguageToggleSwitch>
     with TickerProviderStateMixin {
-  bool _pressed = false;
+  final bool _pressed = false;
   late AnimationController _iconController;
   late AnimationController _swapController;
 

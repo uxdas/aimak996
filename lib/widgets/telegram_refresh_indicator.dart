@@ -7,10 +7,10 @@ class TelegramRefreshIndicator extends StatefulWidget {
   final Future<void> Function() onRefresh;
 
   const TelegramRefreshIndicator({
-    Key? key,
+    super.key,
     required this.child,
     required this.onRefresh,
-  }) : super(key: key);
+  });
 
   @override
   State<TelegramRefreshIndicator> createState() =>

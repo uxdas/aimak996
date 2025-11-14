@@ -673,8 +673,8 @@ class _HomeScreenState extends State<HomeScreen>
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
                           child: Icon(
                             FontAwesomeIcons.whatsapp,
                             color: Color(0xFF104391),
@@ -699,7 +699,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.titleMedium?.copyWith(
-                                    color: Color(0xFF104391),
+                                    color: const Color(0xFF104391),
                                     fontWeight: FontWeight.w700,
                                     fontSize: 13,
                                     letterSpacing: 0.2,

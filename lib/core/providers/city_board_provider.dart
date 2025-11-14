@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/city_board.dart';
-import '../services/city_board_service.dart';
+import 'package:nookat996/core/models/city_board.dart';
+import 'package:nookat996/core/services/city_board_service.dart';
 
 class CityBoardProvider extends ChangeNotifier {
   final CityBoardService _service = CityBoardService();

@@ -17,7 +17,7 @@ class AdService {
     int pageSize = 20,
   }) async {
     try {
-      final cityId = 1;
+      const cityId = 1;
       final catId = categoryId ?? 0;
       final url = Uri.parse(
           'http://176.126.164.86:8000/ads/public-city/$cityId/category/$catId?page=$page&page_size=$pageSize');

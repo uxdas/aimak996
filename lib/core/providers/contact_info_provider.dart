@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/contact_info.dart';
-import '../services/contact_info_service.dart';
+import 'package:nookat996/core/models/contact_info.dart';
+import 'package:nookat996/core/services/contact_info_service.dart';
 
 class ContactInfoProvider extends ChangeNotifier {
   final ContactInfoService _service = ContactInfoService();

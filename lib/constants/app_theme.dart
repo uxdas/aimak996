@@ -177,12 +177,10 @@ class AppTheme {
         primary: darkPrimary,
         secondary: darkSecondary,
         surface: darkSurface,
-        background: darkBackground,
         error: darkError,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: darkTextPrimary,
-        onBackground: darkTextPrimary,
       ),
       scaffoldBackgroundColor: darkBackground,
       cardColor: darkCard,
@@ -227,11 +225,11 @@ class AppTheme {
         fillColor: darkCard,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: darkBorder),
+          borderSide: const BorderSide(color: darkBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: darkBorder),
+          borderSide: const BorderSide(color: darkBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),

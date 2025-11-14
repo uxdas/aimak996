@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
-import '../models/category.dart';
+import 'package:nookat996/core/models/category.dart';
 import 'package:nookat996/data/models/category_model.dart';
 import 'package:nookat996/data/services/category_service.dart';
 import 'package:provider/provider.dart';

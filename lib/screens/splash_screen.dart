@@ -5,7 +5,7 @@ import 'dart:async';
   import 'package:flutter_svg/flutter_svg.dart';
   import 'package:nookat996/features/home/home_screen.dart';
   import 'package:audioplayers/audioplayers.dart';
-  import '../utils/sound_helper.dart';
+  import 'package:nookat996/utils/sound_helper.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool isDark;

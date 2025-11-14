@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/pinned_message.dart';
-import '../services/pinned_message_service.dart';
+import 'package:nookat996/core/models/pinned_message.dart';
+import 'package:nookat996/core/services/pinned_message_service.dart';
 
 class PinnedMessageProvider extends ChangeNotifier {
   final PinnedMessageService _service = PinnedMessageService();

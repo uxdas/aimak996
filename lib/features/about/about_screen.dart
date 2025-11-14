@@ -4,10 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:nookat996/core/providers/contact_info_provider.dart';
-import 'feedback_screen.dart';
+import 'package:nookat996/features/about/feedback_screen.dart';
 import 'dart:async';
-import 'city_boards_screen.dart';
-import '../../constants/app_theme.dart';
+import 'package:nookat996/features/about/city_boards_screen.dart';
+import 'package:nookat996/constants/app_theme.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -140,7 +140,7 @@ class _AboutScreenState extends State<AboutScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 14),
                     ),
-                    icon: Icon(Icons.location_city, color: Colors.white),
+                    icon: const Icon(Icons.location_city, color: Colors.white),
                     label: Text(
                       'other_regions_button'.tr(),
                       style: const TextStyle(
@@ -150,7 +150,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     ),
                     onPressed: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => CityBoardsScreen()),
+                        MaterialPageRoute(builder: (_) => const CityBoardsScreen()),
                       );
                     },
                   ),
@@ -296,15 +296,15 @@ class _AboutScreenState extends State<AboutScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        FaIcon(
+                                        const FaIcon(
                                           FontAwesomeIcons.whatsapp,
                                           color: Colors.white,
                                           size: 24,
                                         ),
-                                        SizedBox(width: 12),
+                                        const SizedBox(width: 12),
                                         Text(
                                           'about_contact_button'.tr(),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,

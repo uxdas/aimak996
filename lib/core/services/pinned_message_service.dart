@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/pinned_message.dart';
+import 'package:nookat996/core/models/pinned_message.dart';
 
 class PinnedMessageService {
   static const String _baseUrl = 'http://176.126.164.86:8000';

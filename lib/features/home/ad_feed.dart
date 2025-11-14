@@ -5,7 +5,7 @@ import 'package:nookat996/data/services/ad_service.dart';
 import 'package:nookat996/features/home/ad_card.dart';
 import 'package:nookat996/features/home/ad_card_shimmer.dart';
 import 'package:nookat996/features/home/news_header_card.dart';
-import '../../utils/sound_helper.dart';
+import 'package:nookat996/utils/sound_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:nookat996/core/providers/category_provider.dart';
 
@@ -15,11 +15,11 @@ class AdFeed extends StatefulWidget {
   final List<AdModel>? externalAds;
 
   const AdFeed({
-    Key? key,
+    super.key,
     this.categoryId,
     this.scrollController,
     this.externalAds,
-  }) : super(key: key);
+  });
 
   @override
   State<AdFeed> createState() => _AdFeedState();

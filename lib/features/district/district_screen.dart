@@ -63,9 +63,9 @@ class DistrictScreen extends StatelessWidget {
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? theme.colorScheme.background : Colors.white,
+      backgroundColor: isDarkMode ? theme.colorScheme.surface : Colors.white,
       appBar: AppBar(
-        title: Text('about'.tr() + ' 🏞️'),
+        title: Text('${'about'.tr()} 🏞️'),
         centerTitle: true,
         backgroundColor: theme.primaryColor,
         foregroundColor: Colors.white,

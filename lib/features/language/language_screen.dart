@@ -33,7 +33,7 @@ class LanguageScreen extends StatelessWidget {
               'Русский',
               isKyrgyz ? true : false,
               () async {
-                final newLocale = const Locale('ru');
+                const newLocale = Locale('ru');
                 await context.setLocale(newLocale);
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('locale', newLocale.languageCode);
@@ -47,7 +47,7 @@ class LanguageScreen extends StatelessWidget {
               'Кыргызча',
               isKyrgyz ? false : true,
               () async {
-                final newLocale = const Locale('ky');
+                const newLocale = Locale('ky');
                 await context.setLocale(newLocale);
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('locale', newLocale.languageCode);

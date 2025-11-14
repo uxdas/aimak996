@@ -22,9 +22,9 @@ class _CategoryButtonState extends State<CategoryButton>
     with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    final Color activeColor = const Color(0xFF1E3A8A);
-    final Color inactiveColor = Colors.white;
-    final Color activeTextColor = Colors.white;
+    const Color activeColor = Color(0xFF1E3A8A);
+    const Color inactiveColor = Colors.white;
+    const Color activeTextColor = Colors.white;
     final Color inactiveTextColor = activeColor.withOpacity(0.7);
 
     return GestureDetector(

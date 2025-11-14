@@ -80,25 +80,25 @@ class _ThemeToggleButtonState extends State<ThemeToggleButton>
             alignment: Alignment.center,
             children: [
               // Солнце (3 лучика)
-              Positioned(
+              const Positioned(
                 left: 12,
                 child: Row(
                   children: [
                     _SunDot(offset: 0),
-                    const SizedBox(width: 2),
+                    SizedBox(width: 2),
                     _SunDot(offset: 1),
-                    const SizedBox(width: 2),
+                    SizedBox(width: 2),
                     _SunDot(offset: 2),
                   ],
                 ),
               ),
               // Луна
-              Positioned(
+              const Positioned(
                 right: 10,
                 child: Icon(
                   Icons.nightlight_round,
                   size: 20,
-                  color: const Color(0xFF1E3A8A),
+                  color: Color(0xFF1E3A8A),
                 ),
               ),
               // Бегунок

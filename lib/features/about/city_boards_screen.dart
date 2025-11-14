@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../core/providers/city_board_provider.dart';
-import '../../core/models/city_board.dart';
+import 'package:nookat996/core/providers/city_board_provider.dart';
+import 'package:nookat996/core/models/city_board.dart';
 
 class CityBoardsScreen extends StatefulWidget {
   const CityBoardsScreen({super.key});

@@ -293,9 +293,9 @@ class _AdDetailScreenState extends State<AdDetailScreen>
     final dateTime = DateTime.tryParse(ad.createdAt) ?? DateTime.now();
     final dateStr = DateFormat('dd.MM.yyyy').format(dateTime);
     final isFavorite = context.watch<FavoritesProvider>().isFavorite(ad.id);
-    final blue = Colors.blue;
-    final blueAccent = Colors.blueAccent;
-    final deepBlue = const Color(0xFF1565C0);
+    const blue = Colors.blue;
+    const blueAccent = Colors.blueAccent;
+    const deepBlue = Color(0xFF1565C0);
     final grey = Colors.grey[400]!;
     final isLight = Theme.of(context).brightness == Brightness.light;
     final bottomInset = MediaQuery.of(context).padding.bottom;
@@ -358,12 +358,12 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                                       height: 270,
                                       fit: BoxFit.cover,
                                       placeholder: (context, url) => Container(
-                                        color: theme.colorScheme.surfaceVariant,
+                                        color: theme.colorScheme.surfaceContainerHighest,
                                         child: const Center(
                                             child: CircularProgressIndicator()),
                                       ),
                                       errorWidget: (context, url, error) => Container(
-                                        color: theme.colorScheme.surfaceVariant,
+                                        color: theme.colorScheme.surfaceContainerHighest,
                                         child: const Icon(Icons.broken_image,
                                             size: 48),
                                       ),
@@ -431,10 +431,10 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                                       ),
                                       child: Row(
                                         children: [
-                                          Icon(
+                                          const Icon(
                                             Icons.calendar_today,
                                             size: 16,
-                                            color: const Color(0xFF1E3A8A),
+                                            color: Color(0xFF1E3A8A),
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
@@ -582,8 +582,8 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            FaIcon(FontAwesomeIcons.whatsapp,
-                                                color: const Color(0xFF25D366),
+                                            const FaIcon(FontAwesomeIcons.whatsapp,
+                                                color: Color(0xFF25D366),
                                                 size: 22),
                                             const SizedBox(width: 8),
                                             Text(

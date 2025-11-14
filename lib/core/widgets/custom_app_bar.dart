@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../providers/category_provider.dart';
-import 'category_button.dart';
+import 'package:nookat996/core/providers/category_provider.dart';
+import 'package:nookat996/core/widgets/category_button.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool isSearching;
@@ -240,7 +240,7 @@ class _CustomAppBarState extends State<CustomAppBar>
                 ),
 
                 // Нижняя часть с кнопками навигации
-                Container(
+                SizedBox(
                   height: 48,
                   child: Consumer<CategoryProvider>(
                     builder: (context, categoryProvider, _) {
@@ -291,7 +291,7 @@ class _CustomAppBarState extends State<CustomAppBar>
                         return Center(
                           child: Text(
                             'no_categories_available'.tr(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -336,7 +336,7 @@ class _CustomAppBarState extends State<CustomAppBar>
                                     },
                                   ),
                                 );
-                              }).toList(),
+                              }),
                             ],
                           ),
                         ),
